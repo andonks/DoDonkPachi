@@ -8,6 +8,11 @@ let musicRunning = false;
 let schedulerTimer = null;
 let nextNoteTime = 0;
 let currentStep = 0;
+let activeTrack = 0;
+let STEP_DUR = 0;
+
+const LOOK_AHEAD = 0.15;
+const TICK_MS    = 30;
 
 export function initAudio() {
   if (ac) { ac.resume(); return; }
@@ -22,7 +27,7 @@ export function initAudio() {
   sfxOut.connect(master);
 
   musicOut = ac.createGain();
-  musicOut.gain.value = 0.38;
+  musicOut.gain.value = 0.45;
   musicOut.connect(master);
 }
 
@@ -136,123 +141,260 @@ export function sfxBossWarning() {
   synth('sawtooth', 440, 0.5, 0.6,  sfxOut, t + 0.9);
 }
 
-// ─── Music sequencer (chiptune tracker style) ─────────────────────────────────
-// A minor, 168 BPM, 16th-note steps, 64-step loop (2 bars × 32 steps each)
+// ─── Music tracks ─────────────────────────────────────────────────────────────
+// All tracks: bass=32 steps (loops 2×), lead+arp=64 steps, 16th-note resolution
 
-const BPM        = 168;
-const STEP_DUR   = 60 / BPM / 4;   // duration of a 16th note
-const LOOK_AHEAD = 0.15;            // schedule this many seconds ahead
-const TICK_MS    = 30;              // scheduler poll interval
+const TRACKS = [
 
-// Bass — 32 steps, loops twice per 64-step cycle (A2=45 E2=40 D2=38 G2=43)
-const BASS = [
-  45,null,null,null, 45,null,null,null,
-  40,null,null,null, 40,null,null,null,
-  38,null,null,null, 38,null,null,null,
-  43,null,null,null, 45,null,null,null,
+  // ── Track 0: SECTOR-1 ─ 168 BPM, A minor (original) ─────────────────────
+  {
+    name: 'SECTOR-1',
+    bpm: 168,
+    bass: [
+      45,null,null,null, 45,null,null,null,
+      40,null,null,null, 40,null,null,null,
+      38,null,null,null, 38,null,null,null,
+      43,null,null,null, 45,null,null,null,
+    ],
+    lead: [
+      69,null,72,null, 76,null,72,null,
+      69,null,67,null, 64,null,67,null,
+      69,null,72,null, 76,null,79,null,
+      76,null,72,null, 69,null,65,null,
+
+      67,null,71,null, 74,null,71,null,
+      67,null,65,null, 62,null,65,null,
+      64,null,67,null, 71,null,74,null,
+      72,null,69,null, 67,null,64,null,
+    ],
+    arp: [
+      81,null,null,null, 84,null,null,null,
+      81,null,null,null, 79,null,null,null,
+      76,null,null,null, 79,null,null,null,
+      81,null,null,null, 76,null,null,null,
+
+      79,null,null,null, 83,null,null,null,
+      79,null,null,null, 76,null,null,null,
+      74,null,null,null, 76,null,null,null,
+      79,null,null,null, 74,null,null,null,
+    ],
+    kicks:  new Set([0, 8, 16, 24]),
+    snares: new Set([8, 24]),
+    hihats: new Set([0, 4, 8, 12, 16, 20, 24, 28]),
+    loop: 64,
+  },
+
+  // ── Track 1: ASSAULT ─ 200 BPM, D minor ──────────────────────────────────
+  // Four-on-the-floor kick, 16th-note hihats, supersaw lead
+  // Progression: Dm | C | Gm | F
+  {
+    name: 'ASSAULT',
+    bpm: 200,
+    bass: [
+      38,null,38,null, 45,null,null,45,    // Dm: D D A A
+      38,null,null,38, 36,null,38,null,    // C:  D..D C D
+      43,null,43,null, 50,null,null,43,    // Gm: G G D3 G
+      41,null,null,41, 45,null,null,null,  // F:  F..F A...
+    ],
+    lead: [
+      // Bar 1 — Dm: aggressive ascending
+      62,null,65,null, 67,null,69,null,   // D4 F4 G4 A4
+      72,null,70,null, 69,null,67,null,   // C5 Bb4 A4 G4
+      // Bar 2 — C: flowing run
+      65,null,67,null, 69,null,72,null,   // F4 G4 A4 C5
+      74,null,72,null, 69,null,65,null,   // D5 C5 A4 F4
+      // Bar 3 — Gm: climbs high
+      67,null,70,null, 72,null,74,null,   // G4 Bb4 C5 D5
+      75,null,74,null, 72,null,70,null,   // Eb5 D5 C5 Bb4
+      // Bar 4 — F/Dm: resolution
+      69,null,72,null, 74,null,72,null,   // A4 C5 D5 C5
+      69,null,67,null, 65,null,62,null,   // A4 G4 F4 D4
+    ],
+    arp: [
+      62,null,null,null, 65,null,null,null,   // Dm asc: D4 F4
+      69,null,null,null, 74,null,null,null,   // A4 D5
+      74,null,null,null, 69,null,null,null,   // Dm desc: D5 A4
+      65,null,null,null, 62,null,null,null,   // F4 D4
+      67,null,null,null, 70,null,null,null,   // Gm asc: G4 Bb4
+      74,null,null,null, 79,null,null,null,   // D5 G5
+      69,null,null,null, 72,null,null,null,   // cadence: A4 C5
+      65,null,null,null, 62,null,null,null,   // F4 D4
+    ],
+    kicks:  new Set([0, 4, 8, 12, 16, 20, 24, 28]),
+    snares: new Set([8, 24]),
+    hihats: new Set([0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]),
+    loop: 64,
+  },
+
+  // ── Track 2: IRON PHOENIX ─ 175 BPM, F minor ─────────────────────────────
+  // Syncopated kick, menacing low register, half-time power
+  // Progression: Fm | Db | Ab | Eb
+  {
+    name: 'IRON PHOENIX',
+    bpm: 175,
+    bass: [
+      41,null,null,41, 48,null,null,null,   // Fm: F2..F2, C3
+      41,null,null,null, 37,null,null,37,   // Db: F2..., Db2..Db2
+      44,null,null,44, 51,null,null,null,   // Ab: Ab2..Ab2, Eb3
+      39,null,null,39, 41,null,null,null,   // Eb: Eb2..Eb2, F2
+    ],
+    lead: [
+      // Bar 1 — Fm: dark opening
+      65,null,68,null, 70,null,72,null,   // F4 Ab4 Bb4 C5
+      73,null,72,null, 70,null,68,null,   // Db5 C5 Bb4 Ab4
+      // Bar 2 — Db: rising drama
+      73,null,75,null, 77,null,75,null,   // Db5 Eb5 F5 Eb5
+      73,null,72,null, 70,null,68,null,   // Db5 C5 Bb4 Ab4
+      // Bar 3 — Ab: full power
+      68,null,72,null, 75,null,77,null,   // Ab4 C5 Eb5 F5
+      80,null,77,null, 75,null,72,null,   // Ab5 F5 Eb5 C5
+      // Bar 4 — Eb: resolution
+      75,null,72,null, 70,null,68,null,   // Eb5 C5 Bb4 Ab4
+      65,null,68,null, 70,null,65,null,   // F4 Ab4 Bb4 F4
+    ],
+    arp: [
+      65,null,null,null, 68,null,null,null,   // Fm: F4 Ab4
+      72,null,null,null, 77,null,null,null,   // C5 F5
+      72,null,null,null, 68,null,null,null,   // desc: C5 Ab4
+      65,null,null,null, 63,null,null,null,   // F4 Eb4
+      61,null,null,null, 65,null,null,null,   // Db: Db4 F4
+      68,null,null,null, 73,null,null,null,   // Ab4 Db5
+      63,null,null,null, 67,null,null,null,   // Eb: Eb4 G4
+      70,null,null,null, 75,null,null,null,   // Bb4 Eb5
+    ],
+    kicks:  new Set([0, 8, 12, 16, 24, 28]),
+    snares: new Set([8, 24]),
+    hihats: new Set([0, 4, 8, 12, 16, 20, 24, 28]),
+    loop: 64,
+  },
+
+  // ── Track 3: THUNDER ZERO ─ 215 BPM, A minor ─────────────────────────────
+  // Maximum tempo — 8th-note arpeggios, blazing runs, relentless 16th hihats
+  // Progression: Am | F | C | G
+  {
+    name: 'THUNDER ZERO',
+    bpm: 215,
+    bass: [
+      45,null,45,null, 40,null,null,45,    // Am: A2 A2 E2 A2
+      45,null,null,45, 43,null,null,null,  // A2..A2, G2
+      41,null,41,null, 45,null,null,41,    // F:  F2 F2 A2 F2
+      43,null,null,43, 47,null,null,null,  // G:  G2..G2, B2
+    ],
+    lead: [
+      // Bar 1 — Am: blazing run
+      69,null,72,null, 74,null,76,null,   // A4 C5 D5 E5
+      79,null,76,null, 74,null,72,null,   // G5 E5 D5 C5
+      // Bar 2 — Am/F: climbs to A5
+      72,null,74,null, 76,null,79,null,   // C5 D5 E5 G5
+      81,null,79,null, 76,null,74,null,   // A5 G5 E5 D5
+      // Bar 3 — F: dramatic sweep
+      77,null,79,null, 81,null,79,null,   // F5 G5 A5 G5
+      77,null,76,null, 74,null,72,null,   // F5 E5 D5 C5
+      // Bar 4 — G/Em: rush back to root
+      79,null,81,null, 83,null,81,null,   // G5 A5 B5 A5
+      79,null,77,null, 76,null,69,null,   // G5 F5 E5 A4
+    ],
+    arp: [
+      // Am — 8th-note arp (note every 2 steps)
+      69,null,72,null, 76,null,72,null,   // A C E C
+      69,null,72,null, 76,null,81,null,   // A C E A5
+      81,null,76,null, 72,null,69,null,   // A5 E C A (desc)
+      72,null,76,null, 81,null,76,null,   // C E A5 E
+      // F (F5=77 A5=81 C6=84)
+      77,null,81,null, 84,null,81,null,   // F A C A
+      77,null,81,null, 84,null,77,null,   // F A C F
+      // G/Em (G5=79 B5=83 D6=86 / E5=76 G5=79 B5=83)
+      79,null,83,null, 86,null,83,null,   // G B D B
+      76,null,79,null, 83,null,79,null,   // E G B G
+    ],
+    kicks:  new Set([0, 8, 16, 24]),
+    snares: new Set([8, 24]),
+    hihats: new Set([0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]),
+    loop: 64,
+  },
 ];
 
-// Lead melody — 64 steps, does NOT loop mid-cycle
-const LEAD = [
-  69,null,72,null, 76,null,72,null,   // bar 1
-  69,null,67,null, 64,null,67,null,
-  69,null,72,null, 76,null,79,null,
-  76,null,72,null, 69,null,65,null,
+export const TRACK_NAMES = TRACKS.map(t => t.name);
 
-  67,null,71,null, 74,null,71,null,   // bar 2
-  67,null,65,null, 62,null,65,null,
-  64,null,67,null, 71,null,74,null,
-  72,null,69,null, 67,null,64,null,
-];
-
-// High arpeggio — 64 steps
-const ARP = [
-  81,null,null,null, 84,null,null,null,
-  81,null,null,null, 79,null,null,null,
-  76,null,null,null, 79,null,null,null,
-  81,null,null,null, 76,null,null,null,
-
-  79,null,null,null, 83,null,null,null,
-  79,null,null,null, 76,null,null,null,
-  74,null,null,null, 76,null,null,null,
-  79,null,null,null, 74,null,null,null,
-];
-
-const KICKS  = new Set([0, 8, 16, 24]);
-const SNARES = new Set([8, 24]);
-const HIHATS = new Set([0, 4, 8, 12, 16, 20, 24, 28]);
-const LOOP   = 64;
+// ─── Sequencer ────────────────────────────────────────────────────────────────
 
 function scheduleStep(step, t) {
+  const track = TRACKS[activeTrack];
   const s32 = step % 32;
-  const s64 = step % LOOP;
+  const s64 = step % track.loop;
 
   // Bass (low-pass filtered square)
-  const bn = BASS[s32];
+  const bn = track.bass[s32];
   if (bn !== null) {
-    const o = ac.createOscillator();
+    const o  = ac.createOscillator();
     const lp = ac.createBiquadFilter();
     const g  = ac.createGain();
-    lp.type = 'lowpass'; lp.frequency.value = 700;
+    lp.type = 'lowpass'; lp.frequency.value = 820;
     o.connect(lp); lp.connect(g); g.connect(musicOut);
     o.type = 'square'; o.frequency.value = hz(bn);
-    g.gain.setValueAtTime(0.38, t);
+    g.gain.setValueAtTime(0.42, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + STEP_DUR * 3.6);
     o.start(t); o.stop(t + STEP_DUR * 4);
   }
 
-  // Lead (sawtooth)
-  const ln = LEAD[s64];
+  // Lead — supersaw (two slightly detuned sawtooths)
+  const ln = track.lead[s64];
   if (ln !== null) {
-    const o = ac.createOscillator();
-    const g = ac.createGain();
-    o.connect(g); g.connect(musicOut);
-    o.type = 'sawtooth'; o.frequency.value = hz(ln);
-    g.gain.setValueAtTime(0.14, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + STEP_DUR * 1.8);
-    o.start(t); o.stop(t + STEP_DUR * 2);
+    const freq = hz(ln);
+    const dur  = STEP_DUR * 1.8;
+    const stop = STEP_DUR * 2;
+    for (const detune of [1, 1.004]) {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.connect(g); g.connect(musicOut);
+      o.type = 'sawtooth'; o.frequency.value = freq * detune;
+      g.gain.setValueAtTime(detune === 1 ? 0.1 : 0.07, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t); o.stop(t + stop);
+    }
   }
 
   // Arp (triangle)
-  const an = ARP[s64];
+  const an = track.arp[s64];
   if (an !== null) {
     const o = ac.createOscillator();
     const g = ac.createGain();
     o.connect(g); g.connect(musicOut);
     o.type = 'triangle'; o.frequency.value = hz(an);
-    g.gain.setValueAtTime(0.1, t);
+    g.gain.setValueAtTime(0.11, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + STEP_DUR * 0.85);
     o.start(t); o.stop(t + STEP_DUR * 1.1);
   }
 
-  // Kick (pitched sine with pitch drop)
-  if (KICKS.has(s32)) {
+  // Kick — punchy sine with click transient
+  if (track.kicks.has(s32)) {
     const o = ac.createOscillator();
     const g = ac.createGain();
     o.connect(g); g.connect(musicOut);
     o.type = 'sine';
-    o.frequency.setValueAtTime(180, t);
-    o.frequency.exponentialRampToValueAtTime(38, t + 0.13);
-    g.gain.setValueAtTime(0.55, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
-    o.start(t); o.stop(t + 0.2);
+    o.frequency.setValueAtTime(200, t);
+    o.frequency.exponentialRampToValueAtTime(35, t + 0.15);
+    g.gain.setValueAtTime(0.7, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    o.start(t); o.stop(t + 0.22);
+    noise(0.22, 0.018, 3500, null, musicOut, t);
   }
 
   // Snare (noise + tone)
-  if (SNARES.has(s32)) {
-    noise(0.22, 0.1, 2000, null, musicOut, t);
+  if (track.snares.has(s32)) {
+    noise(0.28, 0.12, 1800, null, musicOut, t);
     const o = ac.createOscillator();
     const g = ac.createGain();
     o.connect(g); g.connect(musicOut);
-    o.type = 'sine'; o.frequency.value = 190;
-    g.gain.setValueAtTime(0.2, t);
+    o.type = 'sine'; o.frequency.value = 200;
+    g.gain.setValueAtTime(0.22, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
     o.start(t); o.stop(t + 0.12);
   }
 
-  // Hi-hat (short noise burst)
-  if (HIHATS.has(s32)) {
-    noise(0.07, 0.07, 9000, null, musicOut, t);
+  // Hi-hat
+  if (track.hihats.has(s32)) {
+    noise(0.06, 0.055, 10000, null, musicOut, t);
   }
 }
 
@@ -265,8 +407,10 @@ function tick() {
   }
 }
 
-export function startMusic() {
+export function startMusic(trackIndex = 0) {
   if (!ac || musicRunning) return;
+  activeTrack = trackIndex;
+  STEP_DUR = 60 / TRACKS[trackIndex].bpm / 4;
   musicRunning = true;
   nextNoteTime = ac.currentTime + 0.05;
   currentStep  = 0;

@@ -753,6 +753,8 @@ export default function Game() {
   const [initialsDisplay, setInitialsDisplay] = useState('');
   const [leaderboard, setLeaderboard]     = useState(() => loadScores());
   const [isWin, setIsWin]                 = useState(false);
+  const selectedTrackRef                  = useRef(0);
+  const [selectedTrack, setSelectedTrack] = useState(0);
 
   useEffect(() => {
     if (screen !== 'playing') return;
@@ -760,7 +762,7 @@ export default function Game() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     stateRef.current = initState();
-    Audio.startMusic();
+    Audio.startMusic(selectedTrackRef.current);
 
     const onKeyDown = e => {
       keysRef.current[e.code] = true;
@@ -1173,6 +1175,30 @@ export default function Game() {
     return () => window.removeEventListener('keydown', onKey);
   }, [screen, finalScore]);
 
+  useEffect(() => {
+    if (screen !== 'title') return;
+    const handler = e => {
+      const count = Audio.TRACK_NAMES.length;
+      if (e.code === 'ArrowLeft') {
+        const t = ((selectedTrackRef.current - 1) + count) % count;
+        selectedTrackRef.current = t;
+        setSelectedTrack(t);
+      } else if (e.code === 'ArrowRight') {
+        const t = (selectedTrackRef.current + 1) % count;
+        selectedTrackRef.current = t;
+        setSelectedTrack(t);
+      } else {
+        const n = parseInt(e.key);
+        if (n >= 1 && n <= count) {
+          selectedTrackRef.current = n - 1;
+          setSelectedTrack(n - 1);
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [screen]);
+
   const startGame = () => {
     keysRef.current = {};
     Audio.initAudio();
@@ -1197,6 +1223,30 @@ export default function Game() {
             <div>Z / SPACE — SHOOT</div>
             <div>X — BOMB (clears bullets)</div>
             <div>SHIFT — FOCUS (slow + precise)</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#445566', letterSpacing: 2, marginBottom: 8 }}>
+              ◄► SELECT TRACK  •  KEYS 1–{Audio.TRACK_NAMES.length}
+            </div>
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+              {Audio.TRACK_NAMES.map((name, i) => (
+                <div
+                  key={i}
+                  onClick={() => { selectedTrackRef.current = i; setSelectedTrack(i); }}
+                  style={{
+                    padding: '5px 10px',
+                    border: `1px solid ${i === selectedTrack ? '#00ffff' : '#223344'}`,
+                    color: i === selectedTrack ? '#00ffff' : '#445566',
+                    fontSize: 11, fontFamily: 'monospace', letterSpacing: 1,
+                    cursor: 'pointer',
+                    background: i === selectedTrack ? 'rgba(0,255,255,0.08)' : 'transparent',
+                    textShadow: i === selectedTrack ? '0 0 8px #00ffff' : 'none',
+                  }}
+                >
+                  {name}
+                </div>
+              ))}
+            </div>
           </div>
           <button style={STYLES.btn} onClick={startGame}>
             INSERT COIN

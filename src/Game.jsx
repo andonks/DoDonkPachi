@@ -9,6 +9,7 @@ const H = 640;
 function drawPlayer(ctx, x, y, frame, focused) {
   ctx.save();
   ctx.translate(x, y);
+  ctx.scale(1.5, 1.5);
 
   // Engine glow
   const g = ctx.createRadialGradient(0, 10, 2, 0, 10, 24);
@@ -62,6 +63,7 @@ function drawEnemy(ctx, e, frame) {
   ctx.translate(x, y);
 
   if (type === 'grunt') {
+    ctx.scale(2, 2);
     ctx.fillStyle = `hsl(${t * 18},90%,55%)`;
     ctx.beginPath();
     ctx.moveTo(0, 13); ctx.lineTo(-13, -4); ctx.lineTo(-17, 2);
@@ -71,6 +73,7 @@ function drawEnemy(ctx, e, frame) {
     ctx.beginPath(); ctx.ellipse(0, 5, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
 
   } else if (type === 'fighter') {
+    ctx.scale(2, 2);
     ctx.fillStyle = `hsl(${20 + t * 18},90%,55%)`;
     ctx.beginPath();
     ctx.moveTo(0, 19); ctx.lineTo(-20, -2); ctx.lineTo(-13, -17);
@@ -83,7 +86,7 @@ function drawEnemy(ctx, e, frame) {
 
   } else if (type === 'bomber') {
     const pulse = 1 + Math.sin(frame * 0.09) * 0.04;
-    ctx.scale(pulse, pulse);
+    ctx.scale(2 * pulse, 2 * pulse);
     ctx.fillStyle = `hsl(${t * 10},90%,38%)`;
     ctx.beginPath(); ctx.ellipse(0, 0, 26, 18, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = `hsl(${t * 10},90%,52%)`;
@@ -144,20 +147,30 @@ function drawEnemy(ctx, e, frame) {
 function drawBullet(ctx, b, frame) {
   ctx.save();
   if (b.owner === 'player') {
-    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 7);
+    // Rotate ellipse to align with bullet velocity direction
+    const angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 14);
     g.addColorStop(0, '#ffffcc'); g.addColorStop(0.4, '#ffff00'); g.addColorStop(1, 'rgba(255,180,0,0)');
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 5 : 3, b.pw ? 10 : 8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 5 : 3, b.pw ? 24 : 20, angle, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 2 : 1.5, b.pw ? 5 : 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 2 : 1.5, b.pw ? 14 : 12, angle, 0, Math.PI * 2); ctx.fill();
+  } else if (b.burst) {
+    // Elongated neon purple/blue — boss pod stream bullets
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 14);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.3, '#8800ff'); g.addColorStop(1, 'rgba(80,0,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, 4, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cc88ff';
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, 2, 12, 0, 0, Math.PI * 2); ctx.fill();
   } else {
     const p = 0.8 + Math.sin(frame * 0.22 + b.id * 1.7) * 0.2;
-    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 8 * p);
-    g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, b.color || '#ffee00'); g.addColorStop(1, 'rgba(200,150,0,0)');
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 16 * p);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, '#ff00cc'); g.addColorStop(1, 'rgba(255,0,180,0)');
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(b.x, b.y, 7 * p, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffffaa';
-    ctx.beginPath(); ctx.arc(b.x, b.y, 3 * p, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(b.x, b.y, 14 * p, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff88ee';
+    ctx.beginPath(); ctx.arc(b.x, b.y, 6 * p, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
 }
@@ -271,6 +284,7 @@ function drawCollectable(ctx, c, frame) {
   const pulse = 1 + Math.sin(frame * 0.14 + c.id * 1.9) * 0.1;
   ctx.save();
   ctx.translate(c.x, c.y);
+  ctx.scale(2, 2);
   ctx.rotate(frame * 0.025 + c.id * 0.8);
 
   // Outer glow
@@ -380,9 +394,9 @@ function explode(s, x, y, sz = 1) {
 // ─── Enemy definitions ────────────────────────────────────────────────────────
 
 const EDEFS = {
-  grunt:   { w: 24, h: 20, maxHp: 3,    score: 100,   fireRate: 200, bspd: 1.75 },
-  fighter: { w: 36, h: 30, maxHp: 8,    score: 400,   fireRate: 140, bspd: 2    },
-  bomber:  { w: 54, h: 42, maxHp: 30,   score: 1200,  fireRate: 76,  bspd: 1.4  },
+  grunt:   { w: 48, h: 40, maxHp: 3,    score: 100,   fireRate: 200, bspd: 1.75 },
+  fighter: { w: 72, h: 60, maxHp: 8,    score: 400,   fireRate: 140, bspd: 2    },
+  bomber:  { w: 108,h: 84, maxHp: 30,   score: 1200,  fireRate: 76,  bspd: 1.4  },
   boss:    { w: 240,h: 180, maxHp: 2000, score: 80000, fireRate: 36,  bspd: 1.75 },
 };
 
@@ -492,6 +506,29 @@ function updateEnemy(e, px, py, bullets) {
     }
   }
 
+  // Boss timed burst: last 60 frames of every 120-frame cycle.
+  // Fire only during the first 20 of those 60 frames (cycle 60–79).
+  // Skip firing (but still suppress normal fire) on the first burst
+  // window of each HP phase.
+  if (e.type === 'boss' && e.transitionTimer === 0 && e.y < H * 0.95) {
+    const ratio = e.hp / e.maxHp;
+    const hpPhase = ratio > 0.66 ? 1 : ratio > 0.33 ? 2 : 3;
+    if (e.lastHpPhase === undefined) { e.lastHpPhase = hpPhase; e.burstPhaseArmed = false; }
+    if (hpPhase !== e.lastHpPhase)   { e.lastHpPhase = hpPhase; e.burstPhaseArmed = false; }
+
+    const cycle = e.timer % 120;
+    // Arm once the first window's fire-zone has safely passed
+    if (!e.burstPhaseArmed && cycle >= 80) e.burstPhaseArmed = true;
+
+    if (cycle >= 60 && cycle < 80 && e.burstPhaseArmed && e.timer % 3 === 0) {
+      [-84, 84].forEach(ox => {
+        const b = mkBullet(e.x + ox, e.y + 40, 0, e.bspd * 3.5, 'enemy', '#8800ff');
+        b.burst = true;
+        bullets.push(b);
+      });
+    }
+  }
+
   // Shooting — only fire while in the top 95% of the screen
   if (e.fireTimer < e.fireRate) return;
   if (e.y > H * 0.95) return;
@@ -510,13 +547,16 @@ function updateEnemy(e, px, py, bullets) {
       break;
     }
     case 'bomber': {
-      circle(e.x, e.y, 14, e.bspd, e.angle).forEach(b => bullets.push(b));
-      e.angle += 0.22;
-      const v = aim(e.x, e.y, px, py, e.bspd * 1.3);
-      [-18, 0, 18].forEach(ox => bullets.push(mkBullet(e.x + ox, e.y + 22, v.vx, v.vy, 'enemy', '#ffaa00')));
+      // 3×3 cluster, all fired straight down
+      [-16, 0, 16].forEach(dx => {
+        [0, 10, 20].forEach(dy => {
+          bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#ffaa00'));
+        });
+      });
       break;
     }
     case 'boss': {
+      if (e.timer % 120 >= 60) break;  // burst window active — suppress normal fire
       const ratio = e.hp / e.maxHp;
       if (ratio > 0.66) {
         circle(e.x, e.y, 18, e.bspd, e.angle).forEach(b => bullets.push(b));
@@ -641,26 +681,18 @@ const WAVES = [
     { at: 310, type:'grunt',  x:170, pat:'hover_mid', vy:2.2 },
     { at: 315, type:'grunt',  x:190, pat:'hover_mid', vy:2.2 },
   ],
-  // 3: 16 fighters + 6 grunts (hover_mid), fighters enter in pairs
+  // 3: 8 fighters + 6 grunts (hover_mid), fighters enter in pairs
   [
     { at:   0, type:'fighter', x: 80, pat:'zigzag',    vy:1.5 },
     { at:   0, type:'fighter', x:400, pat:'zigzag',    vy:1.5 },
-    { at:   6, type:'fighter', x:100, pat:'zigzag',    vy:1.5 },
-    { at:   6, type:'fighter', x:380, pat:'zigzag',    vy:1.5 },
     { at:  35, type:'fighter', x:180, pat:'curve_r',   vy:1.3 },
     { at:  35, type:'fighter', x:300, pat:'curve_l',   vy:1.3 },
-    { at:  41, type:'fighter', x:200, pat:'curve_r',   vy:1.3 },
-    { at:  41, type:'fighter', x:280, pat:'curve_l',   vy:1.3 },
     { at:  65, type:'grunt',   x:120, pat:'hover_mid', vy:2.5 },
     { at:  65, type:'grunt',   x:360, pat:'hover_mid', vy:2.5 },
     { at:  95, type:'fighter', x:140, pat:'zigzag',    vy:1.5 },
     { at:  95, type:'fighter', x:340, pat:'zigzag',    vy:1.5 },
-    { at: 100, type:'fighter', x:160, pat:'zigzag',    vy:1.5 },
-    { at: 100, type:'fighter', x:320, pat:'zigzag',    vy:1.5 },
     { at: 130, type:'fighter', x:240, pat:'straight',  vy:1.4 },
     { at: 130, type:'fighter', x:120, pat:'curve_r',   vy:1.3 },
-    { at: 135, type:'fighter', x:260, pat:'straight',  vy:1.4 },
-    { at: 135, type:'fighter', x:140, pat:'curve_r',   vy:1.3 },
     { at: 165, type:'grunt',   x: 80, pat:'hover_mid', vy:2.5 },
     { at: 165, type:'grunt',   x:400, pat:'hover_mid', vy:2.5 },
     { at: 215, type:'grunt',   x:200, pat:'hover_mid', vy:2.5 },
@@ -764,6 +796,8 @@ function initState() {
     collectables: [],
     chain: 0,
     chainTimer: 0,
+    chainTextScale: 1.0,
+    flashTimer: 0,
     shake: 0,
     shakeX: 0,
     shakeY: 0,
@@ -1101,6 +1135,7 @@ export default function Game() {
               en.dead = true;
               s.score += en.score;
               s.chain++;
+              s.chainTextScale += 0.01;
               s.chainTimer = 200;
               const sz = en.type === 'boss' ? 3 : en.type === 'bomber' ? 2.2 : en.type === 'fighter' ? 1.5 : 1;
               explode(s, en.x, en.y, sz);
@@ -1117,6 +1152,7 @@ export default function Game() {
                 s.bossDeathX = en.x;
                 s.bossDeathY = en.y;
                 s.bossDeathTimer = 180;
+                s.flashTimer = 20;
                 // Convert every enemy bullet on screen into a pickup
                 s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
                 s.enemyBullets = [];
@@ -1196,9 +1232,11 @@ export default function Game() {
           }
 
           Audio.sfxPlayerHit();
+          s.flashTimer = 14;
           s.enemyBullets = [];
           s.chain = 0;
           s.chainTimer = 0;
+          s.chainTextScale = 1.0;
           // game over triggers when deathTimer expires (1-second delay)
         }
       }
@@ -1247,7 +1285,8 @@ export default function Game() {
       }
 
       // ── Chain timer ───────────────────────────────────────────────────────
-      if (s.chainTimer > 0) { s.chainTimer--; if (!s.chainTimer) s.chain = 0; }
+      if (s.chainTimer > 0) { s.chainTimer--; if (!s.chainTimer) { s.chain = 0; s.chainTextScale = 1.0; } }
+      if (s.flashTimer > 0) s.flashTimer--;
 
       // ── Explosions ────────────────────────────────────────────────────────
       s.explosions = s.explosions.filter(ex => {
@@ -1286,6 +1325,7 @@ export default function Game() {
         if (overlaps(pl.x, pl.y, pl.w * 0.8, pl.h * 0.8, c.x, c.y, 30, 30)) {
           s.score += COLLECT_PTS;
           s.chain++;
+          s.chainTextScale += 0.01;
           s.chainTimer = Math.max(s.chainTimer, 120);
           spawnParticles(s.particles, c.x, c.y, 6,
             ['#00ff88', '#aaffcc', '#ffffff'], [1, 4], [1, 3]);
@@ -1379,6 +1419,15 @@ export default function Game() {
 
       ctx.restore();
 
+      // White flash (player/boss death)
+      if (s.flashTimer > 0) {
+        ctx.save();
+        ctx.globalAlpha = (s.flashTimer / 14) * 0.85;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+      }
+
       // ─ HUD ──────────────────────────────────────────────────────────────
       // Top bar
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
@@ -1423,7 +1472,8 @@ export default function Game() {
         const ca = Math.min(1, s.chainTimer / 80);
         ctx.globalAlpha = ca;
         ctx.fillStyle = '#ffff00';
-        ctx.font = 'bold 20px monospace';
+        const chainPx = Math.round(10 * s.chainTextScale);
+        ctx.font = `bold ${chainPx}px monospace`;
         ctx.textAlign = 'center';
         ctx.fillText(`${s.chain} CHAIN!`, W / 2, H - 18);
         ctx.globalAlpha = 1;
@@ -1435,7 +1485,7 @@ export default function Game() {
         if (boss) {
           const t    = Math.max(0, boss.hp / boss.maxHp);
           const barW = W * 0.95;
-          const barH = 8;
+          const barH = 16;
           const cx   = W / 2;
           const by   = 44;
           const prog  = Math.min(1, s.bossBarAnim / 40);
@@ -1455,16 +1505,12 @@ export default function Game() {
           ctx.fillRect(cx - barW / 2, by, barW * t, barH);
           ctx.restore();
 
-          // Border + label
+          // Border
           ctx.save();
           ctx.globalAlpha = alpha;
           ctx.strokeStyle = '#cc00cc';
           ctx.lineWidth = 1;
           ctx.strokeRect(animX, by, animW, barH);
-          ctx.font = 'bold 9px monospace';
-          ctx.fillStyle = '#ff88ff';
-          ctx.textAlign = 'center';
-          ctx.fillText('B O S S', cx, by - 3);
           ctx.restore();
         }
       }
@@ -1520,6 +1566,67 @@ export default function Game() {
     };
   }, [screen]);
 
+  // Title screen canvas background animation
+  useEffect(() => {
+    if (screen !== 'title') return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+
+    const stars = Array.from({ length: 180 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vy: 0.35 + Math.random() * 2.8, r: Math.random() * 1.6 + 0.3,
+      alpha: 0.2 + Math.random() * 0.8,
+      hue: Math.random() < 0.12 ? 50 : (Math.random() < 0.18 ? 200 : 0),
+    }));
+    const buildings = makeBuildings();
+    let frame = 0;
+    let running = true;
+
+    function drawTitle() {
+      if (!running) return;
+
+      ctx.fillStyle = '#00000e';
+      ctx.fillRect(0, 0, W, H);
+
+      buildings.forEach(b => {
+        b.y += b.spd;
+        if (b.y > H + b.h) b.y = -b.h;
+        ctx.fillStyle = `hsla(${b.hue},60%,20%,${b.alpha})`;
+        ctx.fillRect(b.x - b.w / 2, b.y - b.h, b.w, b.h);
+      });
+
+      ctx.strokeStyle = 'rgba(0,60,120,0.25)';
+      ctx.lineWidth = 1;
+      const gs = 44;
+      const off = frame % gs;
+      for (let y = -gs + off; y < H; y += gs) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      ctx.strokeStyle = 'rgba(0,40,80,0.15)';
+      const doff = (frame * 0.3) % 80;
+      for (let x = -W + doff; x < W * 2; x += 80) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 110, H); ctx.stroke();
+      }
+
+      stars.forEach(st => {
+        st.y += st.vy;
+        if (st.y > H + 2) { st.y = -2; st.x = Math.random() * W; }
+        const col = st.hue === 0 ? `rgba(255,255,255,${st.alpha})`
+          : st.hue === 50  ? `rgba(255,220,100,${st.alpha})`
+          : `rgba(100,190,255,${st.alpha})`;
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2); ctx.fill();
+      });
+
+      frame++;
+      rafRef.current = requestAnimationFrame(drawTitle);
+    }
+
+    rafRef.current = requestAnimationFrame(drawTitle);
+    return () => { running = false; cancelAnimationFrame(rafRef.current); };
+  }, [screen]);
+
   // Keep canvas hi-score ref in sync with leaderboard state
   useEffect(() => {
     hiScoreRef.current = leaderboard[0]?.score ?? 0;
@@ -1552,29 +1659,6 @@ export default function Game() {
     return () => window.removeEventListener('keydown', onKey);
   }, [screen, finalScore]);
 
-  useEffect(() => {
-    if (screen !== 'title') return;
-    const handler = e => {
-      const count = Audio.TRACK_NAMES.length;
-      if (e.code === 'ArrowLeft') {
-        const t = ((selectedTrackRef.current - 1) + count) % count;
-        selectedTrackRef.current = t;
-        setSelectedTrack(t);
-      } else if (e.code === 'ArrowRight') {
-        const t = (selectedTrackRef.current + 1) % count;
-        selectedTrackRef.current = t;
-        setSelectedTrack(t);
-      } else {
-        const n = parseInt(e.key);
-        if (n >= 1 && n <= count) {
-          selectedTrackRef.current = n - 1;
-          setSelectedTrack(n - 1);
-        }
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [screen]);
 
   const startGame = () => {
     keysRef.current = {};
@@ -1594,41 +1678,20 @@ export default function Game() {
       {screen === 'title' && (
         <div style={STYLES.overlay}>
           <div style={STYLES.title}>DODONKPACHI</div>
-          <div style={STYLES.sub}>DATA STORM</div>
-          <div style={{ ...STYLES.controls, marginTop: 8 }}>
+          <div style={{ ...STYLES.sub, fontSize: 22, marginTop: -14, marginBottom: 18 }}>DATA STORM</div>
+          <div style={{ fontSize: 17, color: '#aaeeff', letterSpacing: 3, opacity: 0.7, textDecoration: 'underline' }}>
+            CONTROLS
+          </div>
+          <div style={{ ...STYLES.controls, marginBottom: 18 }}>
             <div>ARROWS / WASD — MOVE</div>
-            <div>Z — SHOOT (wide spread)</div>
-            <div>X — FOCUS (hold: auto-fire, more powerful)</div>
+            <div>Z — SPREAD SHOT</div>
+            <div>X — FOCUS SHOT</div>
             <div>SHIFT — BOMB (clears bullets)</div>
             <div>ESC / SPACE — PAUSE</div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#445566', letterSpacing: 2, marginBottom: 8 }}>
-              ◄► SELECT TRACK  •  KEYS 1–{Audio.TRACK_NAMES.length}
-            </div>
-            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-              {Audio.TRACK_NAMES.map((name, i) => (
-                <div
-                  key={i}
-                  onClick={() => { selectedTrackRef.current = i; setSelectedTrack(i); }}
-                  style={{
-                    padding: '5px 10px',
-                    border: `1px solid ${i === selectedTrack ? '#00ffff' : '#223344'}`,
-                    color: i === selectedTrack ? '#00ffff' : '#445566',
-                    fontSize: 11, fontFamily: 'monospace', letterSpacing: 1,
-                    cursor: 'pointer',
-                    background: i === selectedTrack ? 'rgba(0,255,255,0.08)' : 'transparent',
-                    textShadow: i === selectedTrack ? '0 0 8px #00ffff' : 'none',
-                  }}
-                >
-                  {name}
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
             <button style={STYLES.btn} onClick={startGame}>
-              INSERT COIN
+              PLAY
             </button>
             <button
               style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}

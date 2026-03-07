@@ -99,8 +99,10 @@ function drawEnemy(ctx, e, frame) {
     ctx.beginPath(); ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
 
   } else if (type === 'boss') {
+    // ── Scaled body (2× base size) ─────────────────────────────────────────
+    ctx.save();
     const pulse = 1 + Math.sin(frame * 0.05) * 0.025;
-    ctx.scale(pulse, pulse);
+    ctx.scale(2 * pulse, 2 * pulse);
 
     // Wings
     ctx.fillStyle = '#770077';
@@ -133,16 +135,7 @@ function drawEnemy(ctx, e, frame) {
       ctx.fillStyle = pg;
       ctx.beginPath(); ctx.arc(ox, 20, 7, 0, Math.PI * 2); ctx.fill();
     });
-
-    // HP bar
-    const hpW = 110;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(-hpW / 2, -58, hpW, 9);
-    ctx.fillStyle = `hsl(${t * 120},90%,50%)`;
-    ctx.fillRect(-hpW / 2, -58, hpW * t, 9);
-    ctx.strokeStyle = '#ff00ff';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(-hpW / 2, -58, hpW, 9);
+    ctx.restore();
   }
 
   ctx.restore();
@@ -233,6 +226,11 @@ function spawnExplosionRings(s, x, y, type) {
     push(0, 0, 80, 38, '#ff5500');
     push(0, 0, 50, 28, '#ffcc00', 6);
     push(0, 0, 26, 18, '#ffffff', 12);
+  } else if (type === 'player') {
+    push(0, 0, 130, 48, '#ffffff');
+    push(0, 0,  95, 40, '#aaddff',  7);
+    push(0, 0,  60, 30, '#0088ff', 14);
+    push(0, 0,  30, 20, '#ffffff', 20);
   } else if (type === 'boss') {
     const colors = ['#ff4400', '#ff8800', '#ffcc00', '#ffffff', '#ff2200'];
     for (let i = 0; i < 5; i++) {
@@ -260,6 +258,7 @@ function mkCollectable(x, y) {
     y: y + (Math.random() - 0.5) * 10,
     vy: 1.2,
     vx: (Math.random() - 0.5) * 0.8,
+    age: 0,
     id: _cid++,
   };
 }
@@ -384,13 +383,13 @@ const EDEFS = {
   grunt:   { w: 24, h: 20, maxHp: 3,    score: 100,   fireRate: 200, bspd: 1.75 },
   fighter: { w: 36, h: 30, maxHp: 8,    score: 400,   fireRate: 140, bspd: 2    },
   bomber:  { w: 54, h: 42, maxHp: 30,   score: 1200,  fireRate: 76,  bspd: 1.4  },
-  boss:    { w: 120,h: 90, maxHp: 1000, score: 80000, fireRate: 36,  bspd: 1.75 },
+  boss:    { w: 240,h: 180, maxHp: 2000, score: 80000, fireRate: 36,  bspd: 1.75 },
 };
 
-function createEnemy(type, x, pattern, vy = 1.5) {
+function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
   const d = EDEFS[type];
   return {
-    x, y: -(d.h / 2 + 10),
+    x, y: startY !== undefined ? startY : -(d.h / 2 + 10),
     type, pattern,
     w: d.w, h: d.h,
     hp: d.maxHp, maxHp: d.maxHp,
@@ -403,6 +402,9 @@ function createEnemy(type, x, pattern, vy = 1.5) {
     dead: false,
     angle: 0,          // pattern angle accumulator
     phase: 0,
+    transitionTimer: 0, // > 0 while boss is doing phase-transition charge
+    chargeX: 0, chargeY: 0,  // player pos saved at transition start
+    returnX: 0, returnY: 0,  // boss pos saved at transition start
   };
 }
 
@@ -439,26 +441,62 @@ function updateEnemy(e, px, py, bullets) {
       if (e.y < H * 0.22) e.y += e.vy;
       e.x = W * 0.73 + Math.sin(e.timer * 0.018) * (W * 0.14);
       break;
+    case 'side_l':   // enter from left edge, fly diagonally right-downward
+      e.x += 2.6;
+      e.y += e.vy;
+      break;
+    case 'side_r':   // enter from right edge, fly diagonally left-downward
+      e.x -= 2.6;
+      e.y += e.vy;
+      break;
+    case 'hover_mid':  // descend to mid-screen, hover & fire, then retreat up
+      if (e.phase === 0) {
+        e.y += e.vy;
+        if (e.y >= H * 0.43) { e.phase = 1; e.timer = 0; }
+      } else if (e.phase === 1) {
+        e.x += Math.sin(e.timer * 0.05) * 1.6;
+        e.x = Math.max(30, Math.min(W - 30, e.x));
+        if (e.timer > 160) e.phase = 2;
+      } else {
+        e.y -= e.vy * 1.5;
+      }
+      break;
     case 'boss': {
-      if (e.y < H * 0.2) {
+      if (e.transitionTimer > 0) {
+        if (e.transitionTimer > 80) {
+          // Stage 1: hold position — explosions spawned by main loop
+        } else if (e.transitionTimer > 30) {
+          // Stage 2: charge toward player position saved at transition start (half speed)
+          e.x += (e.chargeX - e.x) * 0.05;
+          e.y += (e.chargeY - e.y) * 0.05;
+        } else {
+          // Stage 3: pull back to origin
+          e.x += (e.returnX - e.x) * 0.15;
+          e.y += (e.returnY - e.y) * 0.15;
+        }
+        e.transitionTimer--;
+        if (e.transitionTimer === 0) e.phase++;
+        break;
+      }
+      // Normal movement
+      if (e.y < H * 0.22) {
         e.y += e.vy;
       } else {
         const targetX = W / 2 + Math.sin(e.timer * 0.009) * 160;
         e.x += (targetX - e.x) * 0.03;
-        if (e.hp < e.maxHp * 0.5 && e.phase === 0) {
-          e.phase = 1;
-        }
-        if (e.phase === 1) {
-          e.y = H * 0.2 + Math.sin(e.timer * 0.013) * 55;
+        if (e.phase >= 1) {
+          e.y = H * 0.22 + Math.sin(e.timer * 0.013) * 55;
         }
       }
       break;
     }
   }
 
-  // Shooting
+  // Shooting — only fire while in the top 95% of the screen
   if (e.fireTimer < e.fireRate) return;
+  if (e.y > H * 0.95) return;
   e.fireTimer = 0;
+  if (e.type === 'boss' && e.transitionTimer > 0) return; // no fire during transition
 
   switch (e.type) {
     case 'grunt': {
@@ -489,10 +527,10 @@ function updateEnemy(e, px, py, bullets) {
         e.angle += 0.22;
         // aimed burst from pods
         if (e.timer % 40 === 0) {
-          [-42, 42].forEach(ox => {
-            const v = aim(e.x + ox, e.y + 20, px, py, e.bspd * 1.2);
+          [-84, 84].forEach(ox => {
+            const v = aim(e.x + ox, e.y + 40, px, py, e.bspd * 1.2);
             for (let i = 0; i < 4; i++) {
-              bullets.push(mkBullet(e.x + ox, e.y + 20,
+              bullets.push(mkBullet(e.x + ox, e.y + 40,
                 v.vx + (Math.random() - 0.5) * 0.6, v.vy + (Math.random() - 0.5) * 0.6,
                 'enemy', '#ffee00'));
             }
@@ -503,10 +541,10 @@ function updateEnemy(e, px, py, bullets) {
         circle(e.x, e.y, 16, e.bspd * 1.5, -e.angle * 1.3).forEach(b => bullets.push(b));
         e.angle += 0.3;
         if (e.timer % 28 === 0) {
-          [-42, 42].forEach(ox => {
-            const v = aim(e.x + ox, e.y + 20, px, py, e.bspd * 1.4);
+          [-84, 84].forEach(ox => {
+            const v = aim(e.x + ox, e.y + 40, px, py, e.bspd * 1.4);
             for (let i = 0; i < 5; i++) {
-              bullets.push(mkBullet(e.x + ox, e.y + 20,
+              bullets.push(mkBullet(e.x + ox, e.y + 40,
                 v.vx + (Math.random() - 0.5) * 0.8, v.vy + (Math.random() - 0.5) * 0.8,
                 'enemy', '#ffee00'));
             }
@@ -524,84 +562,132 @@ function updateEnemy(e, px, py, bullets) {
 // Each entry: { at: frameOffset, type, x, pattern, vy }
 
 const WAVES = [
-  // 0: Opener — grunts (12)
+  // 0: Opener — 24 grunts, right side first then left side 5 sec later
   [
-    { at:  0, type:'grunt',   x: 80,  pat:'straight', vy:1.6 },
-    { at:  0, type:'grunt',   x:400,  pat:'straight', vy:1.6 },
-    { at: 20, type:'grunt',   x:190,  pat:'straight', vy:1.6 },
-    { at: 20, type:'grunt',   x:290,  pat:'straight', vy:1.6 },
-    { at: 40, type:'grunt',   x:130,  pat:'straight', vy:1.6 },
-    { at: 40, type:'grunt',   x:350,  pat:'straight', vy:1.6 },
-    { at: 60, type:'grunt',   x: 60,  pat:'straight', vy:1.9 },
-    { at: 60, type:'grunt',   x:420,  pat:'straight', vy:1.9 },
-    { at: 80, type:'grunt',   x:160,  pat:'zigzag',   vy:1.8 },
-    { at: 80, type:'grunt',   x:320,  pat:'zigzag',   vy:1.8 },
-    { at:100, type:'grunt',   x:240,  pat:'straight', vy:2.0 },
-    { at:120, type:'grunt',   x:200,  pat:'straight', vy:2.0 },
+    { at:  30, type:'grunt', x: 495, sy:  65, pat:'side_r', vy:1.6 },
+    { at:  30, type:'grunt', x: 495, sy: 125, pat:'side_r', vy:1.6 },
+    { at:  35, type:'grunt', x: 495, sy:  85, pat:'side_r', vy:1.6 },
+    { at:  35, type:'grunt', x: 495, sy: 145, pat:'side_r', vy:1.6 },
+    { at:  95, type:'grunt', x: 495, sy:  55, pat:'side_r', vy:1.9 },
+    { at:  95, type:'grunt', x: 495, sy: 115, pat:'side_r', vy:1.9 },
+    { at: 100, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.9 },
+    { at: 100, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:1.9 },
+    { at: 135, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:2.0 },
+    { at: 140, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:2.0 },
+    { at: 175, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:2.0 },
+    { at: 180, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:2.0 },
+    { at: 300, type:'grunt', x: -15, sy:  45, pat:'side_l', vy:1.6 },
+    { at: 300, type:'grunt', x: -15, sy: 105, pat:'side_l', vy:1.6 },
+    { at: 305, type:'grunt', x: -15, sy:  65, pat:'side_l', vy:1.6 },
+    { at: 305, type:'grunt', x: -15, sy: 125, pat:'side_l', vy:1.6 },
+    { at: 365, type:'grunt', x: -15, sy:  35, pat:'side_l', vy:1.9 },
+    { at: 365, type:'grunt', x: -15, sy:  90, pat:'side_l', vy:1.9 },
+    { at: 370, type:'grunt', x: -15, sy:  55, pat:'side_l', vy:1.9 },
+    { at: 370, type:'grunt', x: -15, sy: 110, pat:'side_l', vy:1.9 },
+    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:2.0 },
+    { at: 440, type:'grunt', x: -15, sy:  95, pat:'side_l', vy:2.0 },
+    { at: 475, type:'grunt', x: -15, sy:  50, pat:'side_l', vy:2.0 },
+    { at: 480, type:'grunt', x: -15, sy:  70, pat:'side_l', vy:2.0 },
   ],
-  // 1: Fighters + grunts (10)
+  // 1: 8 fighters + 12 grunts (sides), right side first then left 5 sec later
   [
-    { at:  0, type:'fighter', x:100,  pat:'curve_r',  vy:1.2 },
-    { at:  0, type:'fighter', x:380,  pat:'curve_l',  vy:1.2 },
-    { at: 30, type:'fighter', x:200,  pat:'curve_r',  vy:1.2 },
-    { at: 30, type:'fighter', x:280,  pat:'curve_l',  vy:1.2 },
-    { at: 60, type:'grunt',   x:160,  pat:'straight', vy:2.1 },
-    { at: 60, type:'grunt',   x:320,  pat:'straight', vy:2.1 },
-    { at: 75, type:'grunt',   x: 80,  pat:'straight', vy:2.1 },
-    { at: 75, type:'grunt',   x:400,  pat:'straight', vy:2.1 },
-    { at: 90, type:'grunt',   x:240,  pat:'zigzag',   vy:1.6 },
-    { at:110, type:'grunt',   x:200,  pat:'zigzag',   vy:1.6 },
+    { at:   0, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
+    { at:   0, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
+    { at:   5, type:'fighter', x:150, pat:'curve_r',  vy:1.2 },
+    { at:   5, type:'fighter', x:330, pat:'curve_l',  vy:1.2 },
+    { at:  40, type:'grunt',   x: 495, sy: 55, pat:'side_r', vy:2.1 },
+    { at:  45, type:'grunt',   x: 495, sy: 75, pat:'side_r', vy:2.1 },
+    { at:  65, type:'fighter', x:200, pat:'curve_r',  vy:1.2 },
+    { at:  65, type:'fighter', x:280, pat:'curve_l',  vy:1.2 },
+    { at:  70, type:'fighter', x:220, pat:'curve_r',  vy:1.2 },
+    { at:  70, type:'fighter', x:260, pat:'curve_l',  vy:1.2 },
+    { at:  95, type:'grunt',   x: 495, sy: 85, pat:'side_r', vy:2.1 },
+    { at: 100, type:'grunt',   x: 495, sy:105, pat:'side_r', vy:2.1 },
+    { at: 140, type:'grunt',   x: 495, sy:115, pat:'side_r', vy:1.9 },
+    { at: 145, type:'grunt',   x: 495, sy:135, pat:'side_r', vy:1.9 },
+    { at: 340, type:'grunt',   x: -15, sy: 55, pat:'side_l', vy:2.1 },
+    { at: 345, type:'grunt',   x: -15, sy: 75, pat:'side_l', vy:2.1 },
+    { at: 395, type:'grunt',   x: -15, sy: 85, pat:'side_l', vy:2.1 },
+    { at: 400, type:'grunt',   x: -15, sy:105, pat:'side_l', vy:2.1 },
+    { at: 440, type:'grunt',   x: -15, sy:115, pat:'side_l', vy:1.9 },
+    { at: 445, type:'grunt',   x: -15, sy:135, pat:'side_l', vy:1.9 },
   ],
-  // 2: Bombers + escort (14)
+  // 2: 2 bombers + 24 grunts (hover_mid)
   [
-    { at:  0, type:'bomber',  x:160,  pat:'hover_l',  vy:0.9 },
-    { at:  0, type:'bomber',  x:320,  pat:'hover_r',  vy:0.9 },
-    { at: 40, type:'grunt',   x:100,  pat:'straight', vy:2.2 },
-    { at: 40, type:'grunt',   x:380,  pat:'straight', vy:2.2 },
-    { at: 55, type:'grunt',   x: 60,  pat:'straight', vy:2.2 },
-    { at: 55, type:'grunt',   x:420,  pat:'straight', vy:2.2 },
-    { at: 90, type:'grunt',   x: 80,  pat:'curve_r',  vy:1.7 },
-    { at: 90, type:'grunt',   x:400,  pat:'curve_l',  vy:1.7 },
-    { at:110, type:'grunt',   x:150,  pat:'curve_r',  vy:1.7 },
-    { at:110, type:'grunt',   x:330,  pat:'curve_l',  vy:1.7 },
-    { at:130, type:'grunt',   x:200,  pat:'zigzag',   vy:2   },
-    { at:130, type:'grunt',   x:280,  pat:'zigzag',   vy:2   },
-    { at:150, type:'grunt',   x:130,  pat:'zigzag',   vy:2   },
-    { at:150, type:'grunt',   x:350,  pat:'zigzag',   vy:2   },
+    { at:   0, type:'bomber', x:160, pat:'hover_l',   vy:0.9 },
+    { at:   0, type:'bomber', x:320, pat:'hover_r',   vy:0.9 },
+    { at:  55, type:'grunt',  x:120, pat:'hover_mid', vy:2.2 },
+    { at:  55, type:'grunt',  x:360, pat:'hover_mid', vy:2.2 },
+    { at:  60, type:'grunt',  x:140, pat:'hover_mid', vy:2.2 },
+    { at:  60, type:'grunt',  x:340, pat:'hover_mid', vy:2.2 },
+    { at:  90, type:'grunt',  x: 80, pat:'hover_mid', vy:2.2 },
+    { at:  90, type:'grunt',  x:400, pat:'hover_mid', vy:2.2 },
+    { at:  95, type:'grunt',  x:100, pat:'hover_mid', vy:2.2 },
+    { at:  95, type:'grunt',  x:380, pat:'hover_mid', vy:2.2 },
+    { at: 130, type:'grunt',  x:200, pat:'hover_mid', vy:2.0 },
+    { at: 130, type:'grunt',  x:280, pat:'hover_mid', vy:2.0 },
+    { at: 135, type:'grunt',  x:220, pat:'hover_mid', vy:2.0 },
+    { at: 135, type:'grunt',  x:260, pat:'hover_mid', vy:2.0 },
+    { at: 175, type:'grunt',  x:140, pat:'hover_mid', vy:2.0 },
+    { at: 175, type:'grunt',  x:340, pat:'hover_mid', vy:2.0 },
+    { at: 180, type:'grunt',  x:160, pat:'hover_mid', vy:2.0 },
+    { at: 180, type:'grunt',  x:320, pat:'hover_mid', vy:2.0 },
+    { at: 225, type:'grunt',  x:100, pat:'hover_mid', vy:2.2 },
+    { at: 225, type:'grunt',  x:380, pat:'hover_mid', vy:2.2 },
+    { at: 230, type:'grunt',  x:120, pat:'hover_mid', vy:2.2 },
+    { at: 230, type:'grunt',  x:360, pat:'hover_mid', vy:2.2 },
+    { at: 275, type:'grunt',  x:240, pat:'hover_mid', vy:2.2 },
+    { at: 280, type:'grunt',  x:260, pat:'hover_mid', vy:2.2 },
+    { at: 310, type:'grunt',  x:170, pat:'hover_mid', vy:2.2 },
+    { at: 315, type:'grunt',  x:190, pat:'hover_mid', vy:2.2 },
   ],
-  // 3: Fighter formation (14)
+  // 3: 16 fighters + 6 grunts (hover_mid), fighters enter in pairs
   [
-    { at:  0, type:'fighter', x: 80,  pat:'zigzag',   vy:1.5 },
-    { at:  0, type:'fighter', x:400,  pat:'zigzag',   vy:1.5 },
-    { at: 20, type:'fighter', x:140,  pat:'zigzag',   vy:1.5 },
-    { at: 20, type:'fighter', x:340,  pat:'zigzag',   vy:1.5 },
-    { at: 40, type:'fighter', x:180,  pat:'curve_r',  vy:1.3 },
-    { at: 40, type:'fighter', x:300,  pat:'curve_l',  vy:1.3 },
-    { at: 60, type:'fighter', x:240,  pat:'straight', vy:1.4 },
-    { at: 60, type:'fighter', x:120,  pat:'curve_r',  vy:1.3 },
-    { at: 80, type:'grunt',   x:130,  pat:'straight', vy:2.5 },
-    { at: 80, type:'grunt',   x:240,  pat:'straight', vy:2.5 },
-    { at: 80, type:'grunt',   x:350,  pat:'straight', vy:2.5 },
-    { at:100, type:'grunt',   x: 80,  pat:'straight', vy:2.5 },
-    { at:100, type:'grunt',   x:190,  pat:'straight', vy:2.5 },
-    { at:100, type:'grunt',   x:300,  pat:'straight', vy:2.5 },
+    { at:   0, type:'fighter', x: 80, pat:'zigzag',    vy:1.5 },
+    { at:   0, type:'fighter', x:400, pat:'zigzag',    vy:1.5 },
+    { at:   6, type:'fighter', x:100, pat:'zigzag',    vy:1.5 },
+    { at:   6, type:'fighter', x:380, pat:'zigzag',    vy:1.5 },
+    { at:  35, type:'fighter', x:180, pat:'curve_r',   vy:1.3 },
+    { at:  35, type:'fighter', x:300, pat:'curve_l',   vy:1.3 },
+    { at:  41, type:'fighter', x:200, pat:'curve_r',   vy:1.3 },
+    { at:  41, type:'fighter', x:280, pat:'curve_l',   vy:1.3 },
+    { at:  65, type:'grunt',   x:120, pat:'hover_mid', vy:2.5 },
+    { at:  65, type:'grunt',   x:360, pat:'hover_mid', vy:2.5 },
+    { at:  95, type:'fighter', x:140, pat:'zigzag',    vy:1.5 },
+    { at:  95, type:'fighter', x:340, pat:'zigzag',    vy:1.5 },
+    { at: 100, type:'fighter', x:160, pat:'zigzag',    vy:1.5 },
+    { at: 100, type:'fighter', x:320, pat:'zigzag',    vy:1.5 },
+    { at: 130, type:'fighter', x:240, pat:'straight',  vy:1.4 },
+    { at: 130, type:'fighter', x:120, pat:'curve_r',   vy:1.3 },
+    { at: 135, type:'fighter', x:260, pat:'straight',  vy:1.4 },
+    { at: 135, type:'fighter', x:140, pat:'curve_r',   vy:1.3 },
+    { at: 165, type:'grunt',   x: 80, pat:'hover_mid', vy:2.5 },
+    { at: 165, type:'grunt',   x:400, pat:'hover_mid', vy:2.5 },
+    { at: 215, type:'grunt',   x:200, pat:'hover_mid', vy:2.5 },
+    { at: 215, type:'grunt',   x:300, pat:'hover_mid', vy:2.5 },
   ],
-  // 4: Four bombers + escorts (10)
+  // 4: 4 bombers + 12 grunts (hover_mid), bombers arrive in two pairs
   [
-    { at:  0, type:'bomber',  x:130,  pat:'hover_l',  vy:1.0 },
-    { at:  0, type:'bomber',  x:350,  pat:'hover_r',  vy:1.0 },
-    { at: 60, type:'bomber',  x:200,  pat:'hover_c',  vy:1.0 },
-    { at: 60, type:'bomber',  x:280,  pat:'hover_c',  vy:1.0 },
-    { at: 30, type:'grunt',   x:240,  pat:'straight', vy:2.6 },
-    { at: 50, type:'grunt',   x:160,  pat:'zigzag',   vy:2.1 },
-    { at: 50, type:'grunt',   x:320,  pat:'zigzag',   vy:2.1 },
-    { at: 90, type:'grunt',   x: 80,  pat:'zigzag',   vy:2.1 },
-    { at: 90, type:'grunt',   x:400,  pat:'zigzag',   vy:2.1 },
-    { at:110, type:'grunt',   x:240,  pat:'straight', vy:2.6 },
+    { at:   0, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
+    { at:   0, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
+    { at:  30, type:'grunt',  x:240, pat:'hover_mid', vy:2.6 },
+    { at:  35, type:'grunt',  x:260, pat:'hover_mid', vy:2.6 },
+    { at:  60, type:'bomber', x:200, pat:'hover_c',   vy:1.0 },
+    { at:  60, type:'bomber', x:280, pat:'hover_c',   vy:1.0 },
+    { at:  70, type:'grunt',  x:160, pat:'hover_mid', vy:2.1 },
+    { at:  70, type:'grunt',  x:320, pat:'hover_mid', vy:2.1 },
+    { at:  75, type:'grunt',  x:180, pat:'hover_mid', vy:2.1 },
+    { at:  75, type:'grunt',  x:300, pat:'hover_mid', vy:2.1 },
+    { at: 160, type:'grunt',  x: 80, pat:'hover_mid', vy:2.1 },
+    { at: 160, type:'grunt',  x:400, pat:'hover_mid', vy:2.1 },
+    { at: 165, type:'grunt',  x:100, pat:'hover_mid', vy:2.1 },
+    { at: 165, type:'grunt',  x:380, pat:'hover_mid', vy:2.1 },
+    { at: 210, type:'grunt',  x:240, pat:'hover_mid', vy:2.6 },
+    { at: 215, type:'grunt',  x:260, pat:'hover_mid', vy:2.6 },
   ],
   // 5: BOSS
   [
-    { at:  0, type:'boss',    x:240,  pat:'boss',     vy:0.55 },
+    { at:  0, type:'boss', x:240, pat:'boss', vy:0.55 },
   ],
 ];
 
@@ -644,6 +730,7 @@ function initState() {
       w: 28, h: 32,
       hp: 3,
       invTimer: 0,
+      deathTimer: 0,
       shootTimer: 0,
       bombs: 3,
     },
@@ -667,7 +754,12 @@ function initState() {
     waveQueue: [...WAVES[0]],
     waveClear: false,
     waveDelay: 0,
+    bossWarning: 0,
+    bossBarAnim: 0,
     bossDefeated: false,
+    bossDeathTimer: 0,
+    bossDeathX: 0,
+    bossDeathY: 0,
     explosions: [],
     collectables: [],
     chain: 0,
@@ -685,6 +777,11 @@ const LS_KEY = 'dondokpachi_scores';
 function loadScores() {
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
   catch { return []; }
+}
+
+function qualifiesForLeaderboard(score) {
+  const scores = loadScores();
+  return scores.length < 10 || score > scores[scores.length - 1].score;
 }
 
 function saveScore(initials, score) {
@@ -753,8 +850,8 @@ export default function Game() {
   const [initialsDisplay, setInitialsDisplay] = useState('');
   const [leaderboard, setLeaderboard]     = useState(() => loadScores());
   const [isWin, setIsWin]                 = useState(false);
-  const selectedTrackRef                  = useRef(0);
-  const [selectedTrack, setSelectedTrack] = useState(0);
+  const selectedTrackRef                  = useRef(2);
+  const [selectedTrack, setSelectedTrack] = useState(2);
 
   useEffect(() => {
     if (screen !== 'playing') return;
@@ -765,16 +862,37 @@ export default function Game() {
     Audio.startMusic(selectedTrackRef.current);
 
     const onKeyDown = e => {
+      // Pause toggle — handled before anything else; Space consumed here only
+      if (e.code === 'Escape' || e.code === 'Space') {
+        paused = !paused;
+        if (paused) Audio.stopMusic();
+        else {
+          const isBoss = stateRef.current?.waveIdx === WAVES.length - 1;
+          Audio.startMusic(isBoss ? Audio.BOSS_TRACK_IDX : selectedTrackRef.current);
+        }
+        return;
+      }
       keysRef.current[e.code] = true;
-      // Bomb on X press
-      if (e.code === 'KeyX') {
+      // Bomb on Shift press
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         const s = stateRef.current;
         if (!s || s.player.bombs <= 0) return;
         s.player.bombs--;
         s.enemyBullets = [];
         s.enemies.forEach(en => {
-          en.hp -= 80;
-          explode(s, en.x, en.y, 0.6);
+          if (en.type === 'boss') {
+            // Boss just takes heavy damage
+            en.hp -= 80;
+          } else {
+            // All other ships instantly destroyed
+            en.dead = true;
+            s.score += en.score;
+            const sz = en.type === 'bomber' ? 2.2 : en.type === 'fighter' ? 1.5 : 1;
+            explode(s, en.x, en.y, sz);
+            spawnExplosionRings(s, en.x, en.y, en.type);
+            const drops = DROP_COUNT[en.type] ?? 1;
+            for (let d = 0; d < drops; d++) s.collectables.push(mkCollectable(en.x, en.y));
+          }
         });
         Audio.sfxBomb();
         explode(s, s.player.x, s.player.y, 2.5);
@@ -798,36 +916,80 @@ export default function Game() {
     window.addEventListener('keyup',   onKeyUp);
 
     let running = true;
+    let paused  = false;
 
-    function loop() {
+    const TICK_MS = 1000 / 60;   // ~16.667 ms per game tick
+    let lastTick  = 0;
+
+    function loop(now) {
       if (!running) return;
+      if (paused) {
+        // Draw pause overlay over last frame and wait
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#00ffff';
+        ctx.font = 'bold 30px monospace';
+        ctx.fillText('PAUSED', W / 2, H / 2 - 10);
+        ctx.fillStyle = '#445566';
+        ctx.font = '12px monospace';
+        ctx.fillText('SPACE  or  ESC  to  resume', W / 2, H / 2 + 22);
+        ctx.restore();
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
+      // ── 60 fps cap — skip tick if not enough time has elapsed ─────────────
+      if (now - lastTick < TICK_MS - 1) {
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+      lastTick = now;
+
       const s = stateRef.current;
       const keys = keysRef.current;
       const pl = s.player;
-      const focused = keys['ShiftLeft'] || keys['ShiftRight'];
+      const focused = keys['KeyX'];
 
-      // ── Input ─────────────────────────────────────────────────────────────
-      const spd = focused ? 2.6 : 5.2;
-      if (keys['ArrowLeft'] || keys['KeyA']) pl.x = Math.max(pl.w / 2, pl.x - spd);
-      if (keys['ArrowRight']|| keys['KeyD']) pl.x = Math.min(W - pl.w / 2, pl.x + spd);
-      if (keys['ArrowUp']   || keys['KeyW']) pl.y = Math.max(pl.h / 2, pl.y - spd);
-      if (keys['ArrowDown'] || keys['KeyS']) pl.y = Math.min(H - pl.h / 2, pl.y + spd);
+      // ── Input (frozen while death animation plays) ────────────────────────
+      if (pl.deathTimer <= 0) {
+        const spd = focused ? 2.6 : 5.2;
+        if (keys['ArrowLeft'] || keys['KeyA']) pl.x = Math.max(pl.w / 2, pl.x - spd);
+        if (keys['ArrowRight']|| keys['KeyD']) pl.x = Math.min(W - pl.w / 2, pl.x + spd);
+        if (keys['ArrowUp']   || keys['KeyW']) pl.y = Math.max(pl.h / 2, pl.y - spd);
+        if (keys['ArrowDown'] || keys['KeyS']) pl.y = Math.min(H - pl.h / 2, pl.y + spd);
+      }
 
       // ── Shoot ─────────────────────────────────────────────────────────────
       pl.shootTimer++;
-      const rate = focused ? 8 : 5;
-      if ((keys['KeyZ'] || keys['Space']) && pl.shootTimer >= rate) {
-        pl.shootTimer = 0;
-        if (focused) {
+      if (pl.deathTimer > 0) { /* no shooting during death window */ }
+      else if (focused) {
+        // FOCUS (X held): auto-fire 2 tight streams, high damage, slower movement
+        if (pl.shootTimer >= 5) {
+          pl.shootTimer = 0;
           Audio.sfxFocusShoot();
-          const b = mkBullet(pl.x, pl.y - 18, 0, -19, 'player');
-          b.pw = true;
-          s.playerBullets.push(b);
-        } else {
+          [
+            { dx: -7, vx: -0.18 },
+            { dx:  7, vx:  0.18 },
+          ].forEach(({ dx, vx }) => {
+            const b = mkBullet(pl.x + dx, pl.y - 18, vx, -20, 'player');
+            b.pw = true;
+            s.playerBullets.push(b);
+          });
+        }
+      } else if (keys['KeyZ']) {
+        // SHOOT (Z): 7-bullet fan, 45° total (±22.5°), speed 20px/frame
+        if (pl.shootTimer >= 10) {
+          pl.shootTimer = 0;
           Audio.sfxShoot();
-          s.playerBullets.push(mkBullet(pl.x - 10, pl.y - 12, -0.5, -17, 'player'));
-          s.playerBullets.push(mkBullet(pl.x,      pl.y - 18,  0,   -17, 'player'));
-          s.playerBullets.push(mkBullet(pl.x + 10, pl.y - 12,  0.5, -17, 'player'));
+          s.playerBullets.push(mkBullet(pl.x - 20, pl.y - 10, -7.65, -18.5, 'player'));
+          s.playerBullets.push(mkBullet(pl.x - 12, pl.y - 14, -5.18, -19.3, 'player'));
+          s.playerBullets.push(mkBullet(pl.x -  5, pl.y - 17, -2.61, -19.8, 'player'));
+          s.playerBullets.push(mkBullet(pl.x,      pl.y - 18,  0,    -20,   'player'));
+          s.playerBullets.push(mkBullet(pl.x +  5, pl.y - 17,  2.61, -19.8, 'player'));
+          s.playerBullets.push(mkBullet(pl.x + 12, pl.y - 14,  5.18, -19.3, 'player'));
+          s.playerBullets.push(mkBullet(pl.x + 20, pl.y - 10,  7.65, -18.5, 'player'));
         }
       }
 
@@ -842,33 +1004,67 @@ export default function Game() {
       });
 
       // ── Wave logic ────────────────────────────────────────────────────────
-      if (s.waveDelay > 0) {
+      if (s.bossWarning > 0) {
+        // Hold here — boss warning countdown; start boss wave when it expires
+        s.bossWarning--;
+        if (s.bossWarning === 0) {
+          s.waveIdx = WAVES.length - 1;
+          s.waveTimer = 0;
+          s.waveQueue = [...WAVES[WAVES.length - 1]];
+          s.waveClear = false;
+          s.bossBarAnim = 1;
+          Audio.switchMusic(Audio.BOSS_TRACK_IDX);
+        }
+      } else if (s.waveDelay > 0) {
         s.waveDelay--;
       } else {
         s.waveTimer++;
         while (s.waveQueue.length > 0 && s.waveQueue[0].at <= s.waveTimer) {
           const ev = s.waveQueue.shift();
-          s.enemies.push(createEnemy(ev.type, ev.x, ev.pat, ev.vy));
+          s.enemies.push(createEnemy(ev.type, ev.x, ev.pat, ev.vy, ev.sy));
         }
-        // Wave complete when queue empty and all enemies dead
+        // Wave complete when queue empty and all enemies cleared
         if (s.waveQueue.length === 0 && s.enemies.length === 0 && !s.waveClear) {
           s.waveClear = true;
           const next = s.waveIdx + 1;
           if (next < WAVES.length) {
-            s.waveDelay = 90; // brief pause
-            s.waveIdx = next;
-            s.waveTimer = 0;
-            s.waveQueue = [...WAVES[next]];
-            s.waveClear = false;
+            if (next === WAVES.length - 1) {
+              // Final wave done — boss warning before the boss appears
+              s.bossWarning = 210;
+              Audio.sfxBossWarning();
+            } else {
+              // Normal transition — near-instant gap
+              s.waveDelay = 10;
+              s.waveIdx = next;
+              s.waveTimer = 0;
+              s.waveQueue = [...WAVES[next]];
+              s.waveClear = false;
+            }
           }
         }
       }
 
       // ── Update enemies ────────────────────────────────────────────────────
       s.enemies.forEach(e => updateEnemy(e, pl.x, pl.y, s.enemyBullets));
+
+      // Boss transition — ongoing explosions during freeze stage, shake during charge
+      s.enemies.forEach(en => {
+        if (en.type !== 'boss' || en.transitionTimer <= 0) return;
+        if (en.transitionTimer > 80 && s.frame % 9 === 0) {
+          const ox = (Math.random() - 0.5) * en.w * 0.55;
+          const oy = (Math.random() - 0.5) * en.h * 0.4;
+          spawnExplosionRings(s, en.x + ox, en.y + oy, 'bomber');
+          explode(s, en.x + ox, en.y + oy, 1.6);
+          Audio.sfxEnemyDie();
+        }
+        if (en.transitionTimer <= 80 && en.transitionTimer > 30) {
+          s.shake = Math.max(s.shake, 7); // rumble during charge
+        }
+      });
+
       s.enemies = s.enemies.filter(e => {
         if (e.dead) return false;
-        if (e.y > H + 120 || e.x < -200 || e.x > W + 200) return false;
+        if (e.y > H + 120 || e.y < -300 || e.x < -200 || e.x > W + 200) return false;
         return true;
       });
 
@@ -882,6 +1078,25 @@ export default function Game() {
             const dmg = b.pw ? 3 : 1;
             en.hp -= dmg;
             spawnParticles(s.particles, b.x, b.y, 3, ['#ffff00','#ffffff','#ffaa00'], [1,5],[1,3]);
+            // Boss phase transition trigger
+            if (en.type === 'boss' && en.transitionTimer === 0 && en.hp > 0) {
+              const ratio = en.hp / en.maxHp;
+              if ((en.phase === 0 && ratio <= 0.66) || (en.phase === 1 && ratio <= 0.33)) {
+                en.transitionTimer = 120;
+                en.chargeX = pl.x;
+                en.chargeY = pl.y;
+                en.returnX = en.x;
+                en.returnY = en.y;
+                s.enemyBullets = [];
+                for (let i = 0; i < 6; i++) {
+                  const ox = (Math.random() - 0.5) * en.w * 0.55;
+                  const oy = (Math.random() - 0.5) * en.h * 0.4;
+                  spawnExplosionRings(s, en.x + ox, en.y + oy, 'bomber');
+                  explode(s, en.x + ox, en.y + oy, 1.8);
+                }
+                Audio.sfxBigExplosion();
+              }
+            }
             if (en.hp <= 0) {
               en.dead = true;
               s.score += en.score;
@@ -897,47 +1112,137 @@ export default function Game() {
               }
               const drops = DROP_COUNT[en.type] ?? 1;
               for (let d = 0; d < drops; d++) s.collectables.push(mkCollectable(en.x, en.y));
-              if (en.type === 'boss') s.bossDefeated = true;
+              if (en.type === 'boss') {
+                s.bossDefeated = true;
+                s.bossDeathX = en.x;
+                s.bossDeathY = en.y;
+                s.bossDeathTimer = 180;
+                // Convert every enemy bullet on screen into a pickup
+                s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
+                s.enemyBullets = [];
+                // Initial burst: several big explosions scattered around the boss
+                for (let i = 0; i < 8; i++) {
+                  const ox = (Math.random() - 0.5) * 130;
+                  const oy = (Math.random() - 0.5) * 80;
+                  spawnExplosionRings(s, en.x + ox, en.y + oy, 'boss');
+                  explode(s, en.x + ox, en.y + oy, 2.2);
+                }
+              }
             }
           }
         });
       });
       s.playerBullets = s.playerBullets.filter(b => !b.hit);
 
-      // ── Collisions: enemy bullets → player ───────────────────────────────
+      // ── Collisions: enemy bullets + enemy bodies → player ────────────────
       if (pl.invTimer <= 0) {
+        let playerHit = false;
+
+        // Enemy bullets
         for (const b of s.enemyBullets) {
           if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 5, 5)) {
-            s.lives--;
-            pl.invTimer = 180;
-            explode(s, pl.x, pl.y, 1.5);
-            spawnExplosionRings(s, pl.x, pl.y, 'player');
-            Audio.sfxPlayerHit();
-            s.enemyBullets = [];
-            s.chain = 0;
-            s.chainTimer = 0;
-            if (s.lives <= 0) {
-              running = false;
-              setFinalScore(s.score);
-              setIsWin(false);
-              setScreen('enter_initials');
-              return;
-            }
+            playerHit = true;
             break;
           }
         }
-      } else {
-        pl.invTimer--;
+
+        // Enemy bodies — grunts/fighters also destroyed on impact
+        if (!playerHit) {
+          for (const e of s.enemies) {
+            if (e.dead) continue;
+            if (overlaps(pl.x, pl.y, pl.w * 0.5, pl.h * 0.5, e.x, e.y, e.w * 0.6, e.h * 0.6)) {
+              playerHit = true;
+              // small ships get rammed apart; bombers/boss shrug it off
+              if (e.type === 'grunt' || e.type === 'fighter') {
+                e.dead = true;
+                s.score += EDEFS[e.type].score;
+                spawnExplosionRings(s, e.x, e.y, e.type);
+                explode(s, e.x, e.y, e.type === 'fighter' ? 1.2 : 0.9);
+                Audio.sfxEnemyDie();
+                const drops = DROP_COUNT[e.type] ?? 1;
+                for (let d = 0; d < drops; d++) s.collectables.push(mkCollectable(e.x, e.y));
+              }
+              break;
+            }
+          }
+        }
+
+        if (playerHit) {
+          s.lives--;
+          pl.deathTimer = 60;   // 1 second frozen / invisible
+          pl.invTimer   = 240;  // total invincibility (includes death time)
+
+          // Big white & blue player explosion
+          spawnExplosionRings(s, pl.x, pl.y, 'player');
+          s.shake = Math.max(s.shake, 18);
+          const { particles: pp } = s;
+          for (let i = 0; i < 28; i++) {
+            const a = (i / 28) * Math.PI * 2 + Math.random() * 0.3;
+            const spd = 2.5 + Math.random() * 6;
+            const life = 22 + Math.random() * 30;
+            pp.push({ x: pl.x, y: pl.y,
+              vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+              r: 2 + Math.random() * 2.5, life, maxLife: life,
+              color: ['#ffffff','#aaddff','#0099ff','#cceeff'][Math.floor(Math.random() * 4)] });
+          }
+          for (let i = 0; i < 14; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const spd = Math.random() * 3.5;
+            const life = 35 + Math.random() * 40;
+            pp.push({ x: pl.x, y: pl.y,
+              vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+              r: 1.5 + Math.random() * 3, life, maxLife: life,
+              color: ['#ffffff','#ddeeff'][Math.floor(Math.random() * 2)] });
+          }
+
+          Audio.sfxPlayerHit();
+          s.enemyBullets = [];
+          s.chain = 0;
+          s.chainTimer = 0;
+          // game over triggers when deathTimer expires (1-second delay)
+        }
+      }
+      // Boss bar draw-in animation
+      if (s.bossBarAnim > 0 && s.bossBarAnim < 40) s.bossBarAnim++;
+
+      // Tick timers (deathTimer first; respawn position when it expires)
+      if (pl.deathTimer > 0) {
+        pl.deathTimer--;
+        if (pl.deathTimer === 0) {
+          if (s.lives <= 0) {
+            running = false;
+            setFinalScore(s.score);
+            setIsWin(false);
+            setScreen(qualifiesForLeaderboard(s.score) ? 'enter_initials' : 'leaderboard');
+            return;
+          }
+          pl.x = W / 2;
+          pl.y = H - 100;
+        }
+      }
+      if (pl.invTimer > 0) pl.invTimer--;
+
+      // ── Boss death explosion show ─────────────────────────────────────────
+      if (s.bossDeathTimer > 0) {
+        s.bossDeathTimer--;
+        if (s.frame % 7 === 0) {
+          const ox = (Math.random() - 0.5) * 140;
+          const oy = (Math.random() - 0.5) * 90;
+          spawnExplosionRings(s, s.bossDeathX + ox, s.bossDeathY + oy, 'bomber');
+          explode(s, s.bossDeathX + ox, s.bossDeathY + oy, 1.8);
+        }
+        if (s.frame % 20 === 0) Audio.sfxBigExplosion();
       }
 
       // ── Win condition ─────────────────────────────────────────────────────
-      if (s.bossDefeated && s.enemies.length === 0) {
+      if (s.bossDefeated && s.enemies.length === 0
+          && s.bossDeathTimer <= 0 && s.collectables.length === 0) {
         running = false;
         Audio.stopMusic();
         Audio.sfxWaveClear();
         setFinalScore(s.score);
         setIsWin(true);
-        setScreen('enter_initials');
+        setScreen(qualifiesForLeaderboard(s.score) ? 'enter_initials' : 'leaderboard');
         return;
       }
 
@@ -973,10 +1278,12 @@ export default function Game() {
 
       // ── Collectables ──────────────────────────────────────────────────────
       s.collectables = s.collectables.filter(c => {
+        c.age++;
+        if (c.age > 40) c.vy = Math.min(c.vy + 0.07, 5);
         c.x += c.vx;
         c.y += c.vy;
         c.vx *= 0.97;
-        if (overlaps(pl.x, pl.y, pl.w * 0.8, pl.h * 0.8, c.x, c.y, 14, 14)) {
+        if (overlaps(pl.x, pl.y, pl.w * 0.8, pl.h * 0.8, c.x, c.y, 30, 30)) {
           s.score += COLLECT_PTS;
           s.chain++;
           s.chainTimer = Math.max(s.chainTimer, 120);
@@ -1054,8 +1361,8 @@ export default function Game() {
       // Enemy bullets
       s.enemyBullets.forEach(b => drawBullet(ctx, b, s.frame));
 
-      // Player (flash when invincible)
-      if (pl.invTimer <= 0 || Math.floor(pl.invTimer / 5) % 2 === 0) {
+      // Player (hidden during death window; flash when invincible)
+      if (pl.deathTimer <= 0 && (pl.invTimer <= 0 || Math.floor(pl.invTimer / 5) % 2 === 0)) {
         drawPlayer(ctx, pl.x, pl.y, s.frame, focused);
         if (focused) {
           ctx.strokeStyle = 'rgba(0,255,255,0.55)';
@@ -1122,12 +1429,82 @@ export default function Game() {
         ctx.globalAlpha = 1;
       }
 
-      // Wave label
-      ctx.fillStyle = 'rgba(0,255,255,0.38)';
-      ctx.font = '11px monospace';
-      ctx.textAlign = 'right';
-      const wl = s.waveIdx === WAVES.length - 1 ? '!! BOSS !!' : `WAVE ${s.waveIdx + 1} / ${WAVES.length - 1}`;
-      ctx.fillText(wl, W - 8, H - 8);
+      // Fixed boss HP bar (top of screen, sweeps in from centre after warning)
+      if (s.bossBarAnim > 0) {
+        const boss = s.enemies.find(e => e.type === 'boss' && !e.dead);
+        if (boss) {
+          const t    = Math.max(0, boss.hp / boss.maxHp);
+          const barW = W * 0.95;
+          const barH = 8;
+          const cx   = W / 2;
+          const by   = 44;
+          const prog  = Math.min(1, s.bossBarAnim / 40);
+          const animW = barW * prog;
+          const animX = cx - animW / 2;
+          const alpha = Math.min(1, prog * 2.5);
+
+          // Track + clipped HP fill
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = 'rgba(40,0,40,0.85)';
+          ctx.fillRect(animX, by, animW, barH);
+          ctx.beginPath();
+          ctx.rect(animX, by, animW, barH);
+          ctx.clip();
+          ctx.fillStyle = `hsl(${t * 120},90%,50%)`;
+          ctx.fillRect(cx - barW / 2, by, barW * t, barH);
+          ctx.restore();
+
+          // Border + label
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = '#cc00cc';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(animX, by, animW, barH);
+          ctx.font = 'bold 9px monospace';
+          ctx.fillStyle = '#ff88ff';
+          ctx.textAlign = 'center';
+          ctx.fillText('B O S S', cx, by - 3);
+          ctx.restore();
+        }
+      }
+
+      // Boss warning overlay
+      if (s.bossWarning > 0) {
+        const blink   = Math.floor(s.frame / 5) % 2 === 0;
+        const pulse   = 1 + Math.sin(s.frame * 0.28) * 0.055;
+        const fadeIn  = Math.min(1, (210 - s.bossWarning) / 18);  // quick fade in
+        ctx.save();
+        ctx.textAlign = 'center';
+
+        // Red glow behind text
+        ctx.globalAlpha = fadeIn * (blink ? 0.95 : 0.22);
+        ctx.shadowColor = '#ff0000';
+        ctx.shadowBlur  = 40;
+        ctx.font = `bold ${Math.round(46 * pulse)}px monospace`;
+        ctx.fillStyle = '#ff1100';
+        ctx.fillText('///WARNING///', W / 2, H / 2 - 14);
+
+        // Secondary glow pass for extra intensity
+        ctx.shadowBlur = 18;
+        ctx.globalAlpha = fadeIn * (blink ? 0.5 : 0.1);
+        ctx.fillText('///WARNING///', W / 2, H / 2 - 14);
+
+        ctx.shadowBlur  = 0;
+        ctx.globalAlpha = fadeIn * (blink ? 0.88 : 0.18);
+        ctx.font = '15px monospace';
+        ctx.fillStyle = '#ffaa00';
+        ctx.fillText('BOSS  APPROACHING', W / 2, H / 2 + 22);
+
+        ctx.restore();
+      }
+
+      // Wave label (hidden — uncomment to debug)
+      // ctx.fillStyle = 'rgba(0,255,255,0.38)';
+      // ctx.font = '11px monospace';
+      // ctx.textAlign = 'right';
+      // const wl = s.waveIdx === WAVES.length - 1 ? '!! BOSS !!' : `WAVE ${s.waveIdx + 1} / ${WAVES.length - 1}`;
+      // ctx.fillText(wl, W - 8, H - 8);
 
       rafRef.current = requestAnimationFrame(loop);
     }
@@ -1216,13 +1593,14 @@ export default function Game() {
 
       {screen === 'title' && (
         <div style={STYLES.overlay}>
-          <div style={STYLES.title}>DONDOKPACHI</div>
-          <div style={STYLES.sub}>BULLET STORM</div>
+          <div style={STYLES.title}>DODONKPACHI</div>
+          <div style={STYLES.sub}>DATA STORM</div>
           <div style={{ ...STYLES.controls, marginTop: 8 }}>
             <div>ARROWS / WASD — MOVE</div>
-            <div>Z / SPACE — SHOOT</div>
-            <div>X — BOMB (clears bullets)</div>
-            <div>SHIFT — FOCUS (slow + precise)</div>
+            <div>Z — SHOOT (wide spread)</div>
+            <div>X — FOCUS (hold: auto-fire, more powerful)</div>
+            <div>SHIFT — BOMB (clears bullets)</div>
+            <div>ESC / SPACE — PAUSE</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 11, color: '#445566', letterSpacing: 2, marginBottom: 8 }}>
@@ -1248,9 +1626,17 @@ export default function Game() {
               ))}
             </div>
           </div>
-          <button style={STYLES.btn} onClick={startGame}>
-            INSERT COIN
-          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button style={STYLES.btn} onClick={startGame}>
+              INSERT COIN
+            </button>
+            <button
+              style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
+              onClick={() => { setIsWin(null); setScreen('leaderboard'); }}
+            >
+              LEADERBOARD
+            </button>
+          </div>
         </div>
       )}
 
@@ -1296,10 +1682,10 @@ export default function Game() {
           <div style={{ ...STYLES.overlay, gap: 10 }}>
             <div style={{
               ...STYLES.title, fontSize: 28,
-              color: isWin ? '#ffff00' : '#ff4444',
-              textShadow: isWin ? '0 0 16px #ffaa00' : '0 0 16px #ff0000',
+              color: isWin === null ? '#00ffff' : isWin ? '#ffff00' : '#ff4444',
+              textShadow: isWin === null ? '0 0 16px #00ffff' : isWin ? '0 0 16px #ffaa00' : '0 0 16px #ff0000',
             }}>
-              {isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
+              {isWin === null ? '— TOP PILOTS —' : isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
             </div>
 
             <div style={{ fontFamily: 'monospace', width: 320 }}>

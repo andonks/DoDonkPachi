@@ -312,9 +312,61 @@ const TRACKS = [
     hihats: new Set([0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]),
     loop: 64,
   },
+
+  // ── Track 4: ANNIHILATOR ─ 235 BPM, E minor ──────────────────────────────
+  // Boss battle theme — 8th-note kick, relentless 16th hihats, screaming lead
+  // Progression: Em | C | G | D
+  // NOT listed in TRACK_NAMES — triggered automatically for the boss fight
+  {
+    name: 'ANNIHILATOR',
+    bpm: 235,
+    bass: [
+      // 8th-note power root+fifth pattern
+      40,null,47,null, 40,null,47,null,   // Em: E2 B2 E2 B2
+      36,null,43,null, 36,null,43,null,   // C:  C2 G2 C2 G2
+      43,null,50,null, 43,null,50,null,   // G:  G2 D3 G2 D3
+      38,null,45,null, 38,null,40,null,   // D:  D2 A2 D2 E2
+    ],
+    lead: [
+      // Bar 1 — Em: blast upward
+      76,null,79,null, 83,null,84,null,   // E5 G5 B5 C6
+      84,null,81,null, 79,null,76,null,   // C6 A5 G5 E5
+      // Bar 2 — C: high register run
+      72,null,76,null, 79,null,83,null,   // C5 E5 G5 B5
+      84,null,83,null, 79,null,72,null,   // C6 B5 G5 C5
+      // Bar 3 — G: peak intensity
+      79,null,81,null, 83,null,84,null,   // G5 A5 B5 C6
+      83,null,81,null, 79,null,76,null,   // B5 A5 G5 E5
+      // Bar 4 — D: fierce close + root drop
+      74,null,76,null, 79,null,83,null,   // D5 E5 G5 B5
+      84,null,83,null, 79,null,64,null,   // C6 B5 G5 E4 (dramatic drop)
+    ],
+    arp: [
+      // Em — 8th-note ascending/descending arpeggios
+      64,null,67,null, 71,null,76,null,   // E4 G4 B4 E5
+      79,null,76,null, 71,null,67,null,   // G5 E5 B4 G4
+      71,null,76,null, 79,null,83,null,   // B4 E5 G5 B5
+      83,null,79,null, 76,null,71,null,   // B5 G5 E5 B4
+      // C — 8th-note
+      60,null,64,null, 67,null,72,null,   // C4 E4 G4 C5
+      76,null,72,null, 67,null,64,null,   // E5 C5 G4 E4
+      // G — 8th-note
+      67,null,71,null, 74,null,79,null,   // G4 B4 D5 G5
+      83,null,79,null, 74,null,71,null,   // B5 G5 D5 B4
+      // D — 8th-note
+      62,null,66,null, 69,null,74,null,   // D4 F#4 A4 D5
+      78,null,74,null, 69,null,62,null,   // F#5 D5 A4 D4
+    ],
+    kicks:  new Set([0, 4, 8, 12, 16, 20, 24, 28]),  // every 8th note
+    snares: new Set([8, 24]),
+    hihats: new Set([0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30]),
+    loop: 64,
+  },
 ];
 
-export const TRACK_NAMES = TRACKS.map(t => t.name);
+// First 4 tracks are player-selectable; index 4 (ANNIHILATOR) is boss-only
+export const TRACK_NAMES    = TRACKS.slice(0, 4).map(t => t.name);
+export const BOSS_TRACK_IDX = 4;
 
 // ─── Sequencer ────────────────────────────────────────────────────────────────
 
@@ -421,4 +473,10 @@ export function stopMusic() {
   musicRunning = false;
   clearInterval(schedulerTimer);
   schedulerTimer = null;
+}
+
+// Stop the current track and immediately start another (e.g. boss music)
+export function switchMusic(trackIndex) {
+  stopMusic();
+  startMusic(trackIndex);
 }

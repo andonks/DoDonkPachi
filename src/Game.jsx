@@ -704,8 +704,8 @@ const WAVES = [
     { at:   0, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
     { at:  30, type:'grunt',  x:240, pat:'hover_mid', vy:2.6 },
     { at:  35, type:'grunt',  x:260, pat:'hover_mid', vy:2.6 },
-    { at:  60, type:'bomber', x:200, pat:'hover_c',   vy:1.0 },
-    { at:  60, type:'bomber', x:280, pat:'hover_c',   vy:1.0 },
+    { at:  60, type:'bomber', x:200, pat:'hover_l',   vy:1.0 },
+    { at:  90, type:'bomber', x:280, pat:'hover_r',   vy:1.0 },
     { at:  70, type:'grunt',  x:160, pat:'hover_mid', vy:2.1 },
     { at:  70, type:'grunt',  x:320, pat:'hover_mid', vy:2.1 },
     { at:  75, type:'grunt',  x:180, pat:'hover_mid', vy:2.1 },
@@ -797,6 +797,12 @@ function initState() {
     chain: 0,
     chainTimer: 0,
     chainTextScale: 1.0,
+    chainBossHitCooldown: 0,   // frames until boss hit can increment chain again (120 = 2 s)
+    chainBossDecayTimer: 60,   // ticks down; each expiry drops chain by 1 if boss not hit
+    chainBossHitThisSecond: false, // did a bullet land on the boss in the current decay window?
+    gpsAccum: 0,               // GPS running sum: cumulative base scores of all kills in chain
+    medalCount: 0,             // total pickups collected (for score calc screen)
+    deathCount: 0,             // number of times player was hit (for No Deaths bonus)
     flashTimer: 0,
     shake: 0,
     shakeX: 0,
@@ -884,6 +890,10 @@ export default function Game() {
   const [initialsDisplay, setInitialsDisplay] = useState('');
   const [leaderboard, setLeaderboard]     = useState(() => loadScores());
   const [isWin, setIsWin]                 = useState(false);
+  const [calcBonuses, setCalcBonuses]     = useState([]);
+  const [calcDisplayScore, setCalcDisplayScore] = useState(0);
+  const [calcLines, setCalcLines]         = useState([]);
+  // each entry: { labelVis, detailVis, detailNum, ptsVis, ptsNum }
   const selectedTrackRef                  = useRef(2);
   const [selectedTrack, setSelectedTrack] = useState(2);
 
@@ -906,6 +916,7 @@ export default function Game() {
         }
         return;
       }
+      if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
       keysRef.current[e.code] = true;
       // Bomb on Shift press
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -949,8 +960,9 @@ export default function Game() {
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup',   onKeyUp);
 
-    let running = true;
-    let paused  = false;
+    let running   = true;
+    let paused    = false;
+    let debugMode = false;
 
     const TICK_MS = 1000 / 60;   // ~16.667 ms per game tick
     let lastTick  = 0;
@@ -1112,6 +1124,16 @@ export default function Game() {
             const dmg = b.pw ? 3 : 1;
             en.hp -= dmg;
             spawnParticles(s.particles, b.x, b.y, 3, ['#ffff00','#ffffff','#ffaa00'], [1,5],[1,3]);
+            // Boss chain — refresh display on any hit; increment once per 2 s
+            if (en.type === 'boss' && en.hp > 0) {
+              s.chainBossHitThisSecond = true;
+              s.chainTimer = 200; // keep counter visible while hitting the boss
+              if (s.chainBossHitCooldown === 0) {
+                s.chain++;
+                s.chainTextScale += 0.01;
+                s.chainBossHitCooldown = 120;
+              }
+            }
             // Boss phase transition trigger
             if (en.type === 'boss' && en.transitionTimer === 0 && en.hp > 0) {
               const ratio = en.hp / en.maxHp;
@@ -1133,7 +1155,9 @@ export default function Game() {
             }
             if (en.hp <= 0) {
               en.dead = true;
-              s.score += en.score;
+              // GPS: score += gpsAccum + base, then bank base for future multiplier
+              s.score += s.gpsAccum + en.score;
+              s.gpsAccum += en.score;
               s.chain++;
               s.chainTextScale += 0.01;
               s.chainTimer = 200;
@@ -1171,7 +1195,7 @@ export default function Game() {
       s.playerBullets = s.playerBullets.filter(b => !b.hit);
 
       // ── Collisions: enemy bullets + enemy bodies → player ────────────────
-      if (pl.invTimer <= 0) {
+      if (pl.invTimer <= 0 && !debugMode) {
         let playerHit = false;
 
         // Enemy bullets
@@ -1205,6 +1229,8 @@ export default function Game() {
 
         if (playerHit) {
           s.lives--;
+          s.deathCount++;
+          s.medalCount = 0;     // medal streak resets on death
           pl.deathTimer = 60;   // 1 second frozen / invisible
           pl.invTimer   = 240;  // total invincibility (includes death time)
 
@@ -1237,6 +1263,7 @@ export default function Game() {
           s.chain = 0;
           s.chainTimer = 0;
           s.chainTextScale = 1.0;
+          s.gpsAccum = 0;
           // game over triggers when deathTimer expires (1-second delay)
         }
       }
@@ -1280,12 +1307,35 @@ export default function Game() {
         Audio.sfxWaveClear();
         setFinalScore(s.score);
         setIsWin(true);
-        setScreen(qualifiesForLeaderboard(s.score) ? 'enter_initials' : 'leaderboard');
+        setCalcBonuses([
+          { label: 'MEDALS COLLECTED', detailCount: s.medalCount, detailSuffix: '× 1,000',  pts: s.medalCount * 1000 },
+          { label: 'LIVES REMAINING',  detailCount: s.lives,      detailSuffix: '× 200,000', pts: s.lives * 200000 },
+          { label: 'NO DEATHS',        detailText: s.deathCount === 0 ? 'PERFECT!' : '--',   pts: s.deathCount === 0 ? 1000000 : 0 },
+        ]);
+        setScreen('score_calc');
         return;
       }
 
-      // ── Chain timer ───────────────────────────────────────────────────────
-      if (s.chainTimer > 0) { s.chainTimer--; if (!s.chainTimer) { s.chain = 0; s.chainTextScale = 1.0; } }
+      // ── Chain timer / boss decay ──────────────────────────────────────────
+      const bossAlive = s.enemies.some(e => e.type === 'boss' && !e.dead);
+      if (bossAlive) {
+        // Boss phase: cooldown for hit-based increment
+        if (s.chainBossHitCooldown > 0) s.chainBossHitCooldown--;
+        // Every 60 frames (1 s), drop chain by 1 if boss wasn't hit this window
+        if (--s.chainBossDecayTimer <= 0) {
+          s.chainBossDecayTimer = 60;
+          if (!s.chainBossHitThisSecond && s.chain > 0) {
+            s.chain--;
+            s.chainTextScale = Math.max(1.0, s.chainTextScale - 0.01);
+            if (s.chain === 0) s.gpsAccum = 0;
+          }
+          s.chainBossHitThisSecond = false;
+        }
+      } else if (!s.bossWarning) {
+        // Normal phase (not in WARNING): timer-based chain expiry
+        if (s.chainTimer > 0) { s.chainTimer--; if (!s.chainTimer) { s.chain = 0; s.chainTextScale = 1.0; s.gpsAccum = 0; } }
+      }
+      // bossWarning > 0: chain timer is paused — do nothing
       if (s.flashTimer > 0) s.flashTimer--;
 
       // ── Explosions ────────────────────────────────────────────────────────
@@ -1324,9 +1374,7 @@ export default function Game() {
         c.vx *= 0.97;
         if (overlaps(pl.x, pl.y, pl.w * 0.8, pl.h * 0.8, c.x, c.y, 30, 30)) {
           s.score += COLLECT_PTS;
-          s.chain++;
-          s.chainTextScale += 0.01;
-          s.chainTimer = Math.max(s.chainTimer, 120);
+          s.medalCount++;
           spawnParticles(s.particles, c.x, c.y, 6,
             ['#00ff88', '#aaffcc', '#ffffff'], [1, 4], [1, 3]);
           return false;
@@ -1439,13 +1487,13 @@ export default function Game() {
       ctx.font = 'bold 13px monospace';
       ctx.fillStyle = '#00ffff';
       ctx.textAlign = 'left';
-      ctx.fillText(`SCORE  ${String(s.score).padStart(10,'0')}`, 8, 22);
+      ctx.fillText(`SCORE  ${String(s.score).padStart(7,'0')}`, 8, 22);
 
       // Hi-score (top center)
       const hi = hiScoreRef.current;
       ctx.textAlign = 'center';
       ctx.fillStyle = s.score >= hi && hi > 0 ? '#ffff00' : 'rgba(0,220,220,0.65)';
-      ctx.fillText(`HI  ${String(Math.max(hi, s.score)).padStart(10,'0')}`, W / 2, 22);
+      ctx.fillText(`HI  ${String(Math.max(hi, s.score)).padStart(7,'0')}`, W / 2, 22);
 
       ctx.textAlign = 'right';
       // Life icons
@@ -1468,7 +1516,7 @@ export default function Game() {
       }
 
       // Chain
-      if (s.chain > 1) {
+      if (s.chain > 0) {
         const ca = Math.min(1, s.chainTimer / 80);
         ctx.globalAlpha = ca;
         ctx.fillStyle = '#ffff00';
@@ -1552,6 +1600,14 @@ export default function Game() {
       // const wl = s.waveIdx === WAVES.length - 1 ? '!! BOSS !!' : `WAVE ${s.waveIdx + 1} / ${WAVES.length - 1}`;
       // ctx.fillText(wl, W - 8, H - 8);
 
+      // Debug mode indicator
+      if (debugMode) {
+        ctx.font = 'bold 11px monospace';
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#ff4444';
+        ctx.fillText('DEBUG MODE', W - 8, H - 8);
+      }
+
       rafRef.current = requestAnimationFrame(loop);
     }
 
@@ -1563,6 +1619,93 @@ export default function Game() {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+    };
+  }, [screen]);
+
+  // Score calculation screen — sequenced per-element reveal with count-up animation
+  useEffect(() => {
+    if (screen !== 'score_calc') return;
+
+    let cancelled = false;
+    const timers = [];
+    const rafIds = [];
+
+    // Initialise all lines hidden
+    setCalcLines(calcBonuses.map(() => ({
+      labelVis: false, detailVis: false, detailNum: 0, ptsVis: false, ptsNum: 0,
+    })));
+    setCalcDisplayScore(finalScore);
+
+    // Resolves after ms; always resolves so `await` unblocks (check cancelled after)
+    const wait = ms => new Promise(resolve => {
+      const id = setTimeout(resolve, ms);
+      timers.push(id);
+    });
+
+    // Animates 0 → target over duration ms, calling onTick(value) each frame
+    const countUp = (target, duration, onTick) => new Promise(resolve => {
+      if (target === 0) { onTick(0); resolve(); return; }
+      const t0 = performance.now();
+      const tick = now => {
+        if (cancelled) { resolve(); return; }
+        const p  = Math.min(1, (now - t0) / duration);
+        const ep = 1 - Math.pow(1 - p, 3);          // ease-out cubic
+        onTick(Math.round(ep * target));
+        if (p < 1) { rafIds.push(requestAnimationFrame(tick)); }
+        else       { onTick(target); resolve(); }
+      };
+      rafIds.push(requestAnimationFrame(tick));
+    });
+
+    const setLine = (i, patch) =>
+      setCalcLines(prev => prev.map((l, j) => j === i ? { ...l, ...patch } : l));
+
+    const run = async () => {
+      let runningScore = finalScore;
+      await wait(600);                               // initial pause before first line
+
+      for (let i = 0; i < calcBonuses.length; i++) {
+        if (cancelled) return;
+        const b = calcBonuses[i];
+
+        // ① Label
+        setLine(i, { labelVis: true });
+        await wait(1000);
+        if (cancelled) return;
+
+        // ② Detail (count up the numeric part if present)
+        setLine(i, { detailVis: true });
+        if (b.detailCount != null && b.detailCount > 0) {
+          await countUp(b.detailCount, 600, val => setLine(i, { detailNum: val }));
+        }
+        await wait(1000);
+        if (cancelled) return;
+
+        // ③ Points (count up pts AND overall score simultaneously)
+        setLine(i, { ptsVis: true });
+        if (b.pts > 0) {
+          const base = runningScore;
+          await countUp(b.pts, 800, val => {
+            setLine(i, { ptsNum: val });
+            setCalcDisplayScore(base + val);
+          });
+          runningScore += b.pts;
+        }
+        await wait(1000);
+        if (cancelled) return;
+      }
+
+      // All done — commit final score and transition
+      setFinalScore(runningScore);
+      setScreen(qualifiesForLeaderboard(runningScore) ? 'enter_initials' : 'leaderboard');
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+      rafIds.forEach(cancelAnimationFrame);
     };
   }, [screen]);
 
@@ -1703,6 +1846,59 @@ export default function Game() {
         </div>
       )}
 
+      {screen === 'score_calc' && (
+        <div style={STYLES.overlay}>
+          <div style={{ ...STYLES.title, color: '#ffff00', textShadow: '0 0 20px #ffaa00, 0 0 50px #ff8800' }}>
+            ALL CLEAR!
+          </div>
+          <div style={STYLES.score}>{String(calcDisplayScore).padStart(7, '0')}</div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 360 }}>
+            {calcBonuses.map((bonus, i) => {
+              const line = calcLines[i] ?? {};
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    letterSpacing: 1,
+                    opacity: line.labelVis ? 1 : 0,
+                    transition: 'opacity 0.2s ease',
+                    minHeight: 22,
+                  }}
+                >
+                  {/* Label */}
+                  <span style={{ color: '#aaeeff', minWidth: 160 }}>{bonus.label}</span>
+
+                  {/* Detail */}
+                  <span style={{
+                    color: '#667788', margin: '0 12px', minWidth: 110, textAlign: 'right',
+                    opacity: line.detailVis ? 1 : 0, transition: 'opacity 0.15s ease',
+                  }}>
+                    {bonus.detailCount != null
+                      ? `${line.detailNum} ${bonus.detailSuffix}`
+                      : bonus.detailText}
+                  </span>
+
+                  {/* Points */}
+                  <span style={{
+                    color: bonus.pts > 0 ? '#ffff00' : '#445566',
+                    minWidth: 100, textAlign: 'right',
+                    opacity: line.ptsVis ? 1 : 0, transition: 'opacity 0.15s ease',
+                  }}>
+                    {bonus.pts > 0 ? `+${(line.ptsNum ?? 0).toLocaleString()}` : '---'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {screen === 'enter_initials' && (
         <div style={STYLES.overlay}>
           <div style={{
@@ -1712,7 +1908,7 @@ export default function Game() {
           }}>
             {isWin ? 'ALL CLEAR!' : 'GAME OVER'}
           </div>
-          <div style={STYLES.score}>{String(finalScore).padStart(10, '0')}</div>
+          <div style={STYLES.score}>{String(finalScore).padStart(7, '0')}</div>
           <div style={{ ...STYLES.sub, marginTop: -6 }}>ENTER YOUR INITIALS</div>
 
           <div style={{ display: 'flex', gap: 10 }}>
@@ -1777,7 +1973,7 @@ export default function Game() {
                   }}>
                     <span style={{ opacity: 0.6 }}>{i + 1}.</span>
                     <span style={{ fontWeight: 'bold', letterSpacing: 2 }}>{entry.initials}</span>
-                    <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(10, '0')}</span>
+                    <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(7, '0')}</span>
                   </div>
                 );
               })}

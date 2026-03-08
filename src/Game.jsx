@@ -277,7 +277,7 @@ function mkCollectable(x, y) {
 }
 
 const DROP_COUNT = { grunt: 1, fighter: 2, bomber: 5, boss: 20 };
-const COLLECT_PTS = 200;
+const COLLECT_PTS = 300;
 
 function drawCollectable(ctx, c, frame) {
   const r = 9;
@@ -285,7 +285,7 @@ function drawCollectable(ctx, c, frame) {
   ctx.save();
   ctx.translate(c.x, c.y);
   ctx.scale(2, 2);
-  ctx.rotate(frame * 0.025 + c.id * 0.8);
+//  ctx.rotate(frame * 0.025 + c.id * 0.8);
 
   // Outer glow
   const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.2);
@@ -393,11 +393,12 @@ function explode(s, x, y, sz = 1) {
 
 // ─── Enemy definitions ────────────────────────────────────────────────────────
 
+// Stats and base kill scores
 const EDEFS = {
-  grunt:   { w: 48, h: 40, maxHp: 3,    score: 100,   fireRate: 200, bspd: 1.75 },
-  fighter: { w: 72, h: 60, maxHp: 8,    score: 400,   fireRate: 140, bspd: 2    },
-  bomber:  { w: 108,h: 84, maxHp: 30,   score: 1200,  fireRate: 76,  bspd: 1.4  },
-  boss:    { w: 240,h: 180, maxHp: 2000, score: 80000, fireRate: 36,  bspd: 1.75 },
+  grunt:   { w: 48, h: 40, maxHp: 3,    score: 500,   fireRate: 170, bspd: 1.75 },
+  fighter: { w: 72, h: 60, maxHp: 8,    score: 2000,   fireRate: 140, bspd: 2    },
+  bomber:  { w: 108,h: 84, maxHp: 30,   score: 6000,  fireRate: 76,  bspd: 1.4  },
+  boss:    { w: 240,h: 180, maxHp: 2000, score: 200000, fireRate: 36,  bspd: 1.75 },
 };
 
 function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
@@ -1177,7 +1178,7 @@ export default function Game() {
                 s.bossDeathY = en.y;
                 s.bossDeathTimer = 180;
                 s.flashTimer = 20;
-                // Convert every enemy bullet on screen into a pickup
+                // Convert every enemy bullet on screen into a collectable pickup
                 s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
                 s.enemyBullets = [];
                 // Initial burst: several big explosions scattered around the boss
@@ -1307,9 +1308,10 @@ export default function Game() {
         Audio.sfxWaveClear();
         setFinalScore(s.score);
         setIsWin(true);
+        // Level Clear bonus calculations
         setCalcBonuses([
           { label: 'MEDALS COLLECTED', detailCount: s.medalCount, detailSuffix: '× 1,000',  pts: s.medalCount * 1000 },
-          { label: 'LIVES REMAINING',  detailCount: s.lives,      detailSuffix: '× 200,000', pts: s.lives * 200000 },
+          { label: 'LIVES REMAINING',  detailCount: s.lives,      detailSuffix: '× 1,000,000', pts: s.lives * 1000000 },
           { label: 'NO DEATHS',        detailText: s.deathCount === 0 ? 'PERFECT!' : '--',   pts: s.deathCount === 0 ? 1000000 : 0 },
         ]);
         setScreen('score_calc');
@@ -1367,8 +1369,9 @@ export default function Game() {
 
       // ── Collectables ──────────────────────────────────────────────────────
       s.collectables = s.collectables.filter(c => {
-        c.age++;
-        if (c.age > 40) c.vy = Math.min(c.vy + 0.07, 5);
+// acceleration
+//        c.age++;
+//        if (c.age > 40) c.vy = Math.min(c.vy + 0.07, 5);
         c.x += c.vx;
         c.y += c.vy;
         c.vx *= 0.97;

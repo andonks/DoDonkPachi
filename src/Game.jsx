@@ -869,7 +869,7 @@ const STYLES = {
   title: { fontSize: 50, color: '#00ffff', textShadow: '0 0 20px #00ffff, 0 0 40px #0088ff', letterSpacing: 4 },
   sub: { fontSize: 24, color: '#aaeeff', letterSpacing: 2 },
   controls: { fontFamily: 'monospace', fontSize: 16, color: '#E2DED7', lineHeight: 1.8 },
-  score: { fontSize: 30, color: '#ffff00' },
+  score: { fontFamily: 'Sixtyfour', fontSize: 54, color: '#ffff00' },
   btn: {
     padding: '10px 32px',
     fontSize: 16,
@@ -1942,7 +1942,7 @@ export default function Game() {
           </div>
 
           <div style={STYLES.controls}>
-            TYPE LETTERS  •  BACKSPACE TO DELETE  •  ENTER TO CONFIRM
+            BACKSPACE TO DELETE • ENTER TO CONFIRM
           </div>
         </div>
       )}

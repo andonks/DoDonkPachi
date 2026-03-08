@@ -281,7 +281,9 @@ const COLLECT_PTS = 300;
 
 function drawCollectable(ctx, c, frame) {
   const r = 9;
-  const pulse = 1 + Math.sin(frame * 0.14 + c.id * 1.9) * 0.1;
+  const pulse = 1;
+//  removed pulsing effect
+//  const pulse = 1 + Math.sin(frame * 0.14 + c.id * 1.9) * 0.1;
   ctx.save();
   ctx.translate(c.x, c.y);
   ctx.scale(2, 2);
@@ -941,6 +943,7 @@ export default function Game() {
           }
         });
         Audio.sfxBomb();
+        // origin of explosion animation?
         explode(s, s.player.x, s.player.y, 2.5);
         // flash particles
         for (let i = 0; i < 60; i++) {
@@ -1369,9 +1372,9 @@ export default function Game() {
 
       // ── Collectables ──────────────────────────────────────────────────────
       s.collectables = s.collectables.filter(c => {
-// acceleration
+//  acceleration
 //        c.age++;
-//        if (c.age > 40) c.vy = Math.min(c.vy + 0.07, 5);
+//        if (c.age > 40) c.vy = Math.min(c.vy + 0.01, 5);
         c.x += c.vx;
         c.y += c.vy;
         c.vx *= 0.97;
@@ -1487,16 +1490,17 @@ export default function Game() {
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(0, 34); ctx.lineTo(W, 34); ctx.stroke();
 
+      // Player current score (top left)
       ctx.font = 'bold 13px monospace';
       ctx.fillStyle = '#00ffff';
       ctx.textAlign = 'left';
-      ctx.fillText(`SCORE  ${String(s.score).padStart(7,'0')}`, 8, 22);
+      ctx.fillText(`SCORE  ${String(s.score).padStart(1,'0')}`, 8, 22);
 
       // Hi-score (top center)
       const hi = hiScoreRef.current;
       ctx.textAlign = 'center';
       ctx.fillStyle = s.score >= hi && hi > 0 ? '#ffff00' : 'rgba(0,220,220,0.65)';
-      ctx.fillText(`HI  ${String(Math.max(hi, s.score)).padStart(7,'0')}`, W / 2, 22);
+      ctx.fillText(`HI  ${String(Math.max(hi, s.score)).padStart(1,'0')}`, W / 2, 22);
 
       ctx.textAlign = 'right';
       // Life icons
@@ -1854,7 +1858,7 @@ export default function Game() {
           <div style={{ ...STYLES.title, color: '#ffff00', textShadow: '0 0 20px #ffaa00, 0 0 50px #ff8800' }}>
             ALL CLEAR!
           </div>
-          <div style={STYLES.score}>{String(calcDisplayScore).padStart(7, '0')}</div>
+          <div style={STYLES.score}>{String(calcDisplayScore).padStart(1, '0')}</div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 360 }}>
             {calcBonuses.map((bonus, i) => {
@@ -1911,7 +1915,7 @@ export default function Game() {
           }}>
             {isWin ? 'ALL CLEAR!' : 'GAME OVER'}
           </div>
-          <div style={STYLES.score}>{String(finalScore).padStart(7, '0')}</div>
+          <div style={STYLES.score}>{String(finalScore).padStart(1, '0')}</div>
           <div style={{ ...STYLES.sub, marginTop: -6 }}>ENTER YOUR INITIALS</div>
 
           <div style={{ display: 'flex', gap: 10 }}>
@@ -1976,7 +1980,7 @@ export default function Game() {
                   }}>
                     <span style={{ opacity: 0.6 }}>{i + 1}.</span>
                     <span style={{ fontWeight: 'bold', letterSpacing: 2 }}>{entry.initials}</span>
-                    <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(7, '0')}</span>
+                    <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(8, '0')}</span>
                   </div>
                 );
               })}

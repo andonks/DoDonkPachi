@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as Audio from './audio.js';
+import './index.css';
 
 const W = 480;
 const H = 640;
@@ -839,6 +840,7 @@ function saveScore(initials, score) {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
+// Fonts and text style sheet
 
 const STYLES = {
   wrapper: {
@@ -860,18 +862,18 @@ const STYLES = {
     justifyContent: 'center',
     background: 'rgba(0,0,0,0.78)',
     color: '#fff',
-    fontFamily: 'monospace',
+    fontFamily: 'PixelifySans',
     textAlign: 'center',
     gap: 18,
   },
-  title: { fontSize: 38, color: '#00ffff', textShadow: '0 0 20px #00ffff, 0 0 40px #0088ff', letterSpacing: 4 },
-  sub: { fontSize: 15, color: '#aaeeff', letterSpacing: 2 },
-  controls: { fontSize: 12, color: '#667788', lineHeight: 1.8 },
-  score: { fontSize: 22, color: '#ffff00' },
+  title: { fontSize: 50, color: '#00ffff', textShadow: '0 0 20px #00ffff, 0 0 40px #0088ff', letterSpacing: 4 },
+  sub: { fontSize: 24, color: '#aaeeff', letterSpacing: 2 },
+  controls: { fontFamily: 'monospace', fontSize: 16, color: '#E2DED7', lineHeight: 1.8 },
+  score: { fontSize: 30, color: '#ffff00' },
   btn: {
     padding: '10px 32px',
     fontSize: 16,
-    fontFamily: 'monospace',
+    fontFamily: 'PixelifySans',
     background: '#00ffff',
     color: '#000',
     border: 'none',
@@ -980,10 +982,10 @@ export default function Game() {
         ctx.fillRect(0, 0, W, H);
         ctx.textAlign = 'center';
         ctx.fillStyle = '#00ffff';
-        ctx.font = 'bold 30px monospace';
+        ctx.font = 'bold 30px Sixtyfour';
         ctx.fillText('PAUSED', W / 2, H / 2 - 10);
-        ctx.fillStyle = '#445566';
-        ctx.font = '12px monospace';
+        ctx.fillStyle = '#E2DED7';
+        ctx.font = '24px PixelifySans';
         ctx.fillText('SPACE  or  ESC  to  resume', W / 2, H / 2 + 22);
         ctx.restore();
         rafRef.current = requestAnimationFrame(loop);
@@ -1491,19 +1493,19 @@ export default function Game() {
       ctx.beginPath(); ctx.moveTo(0, 34); ctx.lineTo(W, 34); ctx.stroke();
 
       // Player current score (top left)
-      ctx.font = 'bold 13px monospace';
+      ctx.font = '18px "Sixtyfour", monospace';
       ctx.fillStyle = '#00ffff';
       ctx.textAlign = 'left';
-      ctx.fillText(`SCORE  ${String(s.score).padStart(1,'0')}`, 8, 22);
+      ctx.fillText(`${String(s.score).padStart(1,'0')}`, 8, 22);
 
       // Hi-score (top center)
       const hi = hiScoreRef.current;
       ctx.textAlign = 'center';
       ctx.fillStyle = s.score >= hi && hi > 0 ? '#ffff00' : 'rgba(0,220,220,0.65)';
-      ctx.fillText(`HI  ${String(Math.max(hi, s.score)).padStart(1,'0')}`, W / 2, 22);
+      ctx.fillText(`${String(Math.max(hi, s.score)).padStart(1,'0')}`, W / 2, 22);
 
       ctx.textAlign = 'right';
-      // Life icons
+      // Ship count
       for (let i = 0; i < s.lives; i++) {
         const lx = W - 10 - i * 18;
         ctx.fillStyle = '#00ffff';
@@ -1522,13 +1524,13 @@ export default function Game() {
         ctx.fill();
       }
 
-      // Chain
+      // Chain counter
       if (s.chain > 0) {
         const ca = Math.min(1, s.chainTimer / 80);
         ctx.globalAlpha = ca;
         ctx.fillStyle = '#ffff00';
         const chainPx = Math.round(10 * s.chainTextScale);
-        ctx.font = `bold ${chainPx}px monospace`;
+        ctx.font = `${chainPx}px Sixtyfour`;
         ctx.textAlign = 'center';
         ctx.fillText(`${s.chain} CHAIN!`, W / 2, H - 18);
         ctx.globalAlpha = 1;
@@ -1827,12 +1829,12 @@ export default function Game() {
 
       {screen === 'title' && (
         <div style={STYLES.overlay}>
-          <div style={STYLES.title}>DODONKPACHI</div>
-          <div style={{ ...STYLES.sub, fontSize: 22, marginTop: -14, marginBottom: 18 }}>DATA STORM</div>
-          <div style={{ fontSize: 17, color: '#aaeeff', letterSpacing: 3, opacity: 0.7, textDecoration: 'underline' }}>
+          <div style={{ fontFamily: 'Sixtyfour', fontSize: 40, color: '#E2DED7'}}>DoDonkPACHI</div>
+          <div style={{ ...STYLES.sub, fontSize: 30, marginTop: -14, marginBottom: 18 }}>DATA STORM</div>
+          <div style={{ fontSize: 24, color: '#aaeeff', letterSpacing: 3, opacity: 0.7, textDecoration: 'underline' }}>
             CONTROLS
           </div>
-          <div style={{ ...STYLES.controls, marginBottom: 18 }}>
+          <div style={{ ...STYLES.controls, marginTop: -8, marginBottom: 18 }}>
             <div>ARROWS / WASD — MOVE</div>
             <div>Z — SPREAD SHOT</div>
             <div>X — FOCUS SHOT</div>
@@ -1849,6 +1851,9 @@ export default function Game() {
             >
               LEADERBOARD
             </button>
+          </div>
+          <div style={{ ...STYLES.controls, marginTop: 18, marginBottom: 18 }}>
+            <div>(C) Andy Krueger 2026</div>
           </div>
         </div>
       )}
@@ -1870,7 +1875,7 @@ export default function Game() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    fontFamily: 'monospace',
+                    fontFamily: 'PixelifySans',
                     fontSize: 13,
                     letterSpacing: 1,
                     opacity: line.labelVis ? 1 : 0,
@@ -1926,7 +1931,7 @@ export default function Game() {
                   width: 48, height: 60,
                   border: `2px solid ${active ? '#00ffff' : '#2a4455'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 34, fontFamily: 'monospace', color: '#fff', fontWeight: 'bold',
+                  fontSize: 34, fontFamily: 'PixelifySans', color: '#fff', fontWeight: 'bold',
                   background: active ? 'rgba(0,255,255,0.08)' : 'rgba(0,0,0,0.3)',
                   boxShadow: active ? '0 0 12px rgba(0,255,255,0.4)' : 'none',
                 }}>
@@ -1951,10 +1956,10 @@ export default function Game() {
               color: isWin === null ? '#00ffff' : isWin ? '#ffff00' : '#ff4444',
               textShadow: isWin === null ? '0 0 16px #00ffff' : isWin ? '0 0 16px #ffaa00' : '0 0 16px #ff0000',
             }}>
-              {isWin === null ? '— TOP PILOTS —' : isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
+              {isWin === null ? '— LEADERBOARD —' : isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
             </div>
 
-            <div style={{ fontFamily: 'monospace', width: 320 }}>
+            <div style={{ fontFamily: 'PixelifySans', width: 400 }}>
               <div style={{
                 color: '#00ffff', fontSize: 13, letterSpacing: 3,
                 textAlign: 'center', marginBottom: 6, opacity: 0.8,
@@ -1962,7 +1967,7 @@ export default function Game() {
                 ── TOP PILOTS ──
               </div>
               {leaderboard.length === 0 && (
-                <div style={{ color: '#445566', textAlign: 'center', fontSize: 12 }}>
+                <div style={{ color: '#445566', textAlign: 'left', fontSize: 14 }}>
                   NO RECORDS YET
                 </div>
               )}
@@ -1971,14 +1976,15 @@ export default function Game() {
                 return (
                   <div key={i} style={{
                     display: 'grid',
-                    gridTemplateColumns: '28px 52px 1fr',
-                    padding: '4px 10px',
+                    gridTemplateColumns: '80px auto auto',
+                    padding: '8px 0px',
                     background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
                     borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
                     color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
-                    fontSize: 14,
+                    fontSize: 24,
+                    fontFamily: 'Sixtyfour'
                   }}>
-                    <span style={{ opacity: 0.6 }}>{i + 1}.</span>
+                    <span style={{ opacity: 0.6, textAlign: 'left' }}>{i + 1}.</span>
                     <span style={{ fontWeight: 'bold', letterSpacing: 2 }}>{entry.initials}</span>
                     <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(8, '0')}</span>
                   </div>
@@ -1987,7 +1993,7 @@ export default function Game() {
             </div>
 
             <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-              <button style={STYLES.btn} onClick={startGame}>PLAY AGAIN</button>
+              <button style={STYLES.btn} onClick={startGame}>PLAY</button>
               <button style={{ ...STYLES.btn, background: '#223', color: '#88aacc', border: '1px solid #334' }}
                 onClick={() => setScreen('title')}>
                 TITLE

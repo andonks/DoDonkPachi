@@ -1854,6 +1854,7 @@ export default function Game() {
           </div>
           <div style={{ ...STYLES.controls, marginTop: 18, marginBottom: 18 }}>
             <div>(C) Andy Krueger 2026</div>
+            <div>Music by DavidKBD, licenced under CC By 4.0 (https://creativecommons.org/licenses/by/4.0/)</div>
           </div>
         </div>
       )}

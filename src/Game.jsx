@@ -643,15 +643,6 @@ const WAVES = [
     { at:   0, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
     { at:   0, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
-    { at:   100, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
-    { at:   100, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
-
-    { at:  200, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
-    { at:  200, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
-
-    { at:  300, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
-    { at:  300, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
-
     { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
     { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
     { at:  55, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
@@ -661,6 +652,15 @@ const WAVES = [
     { at:  85, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
     { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
     { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+
+    { at: 120, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
+    { at: 120, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
+
+    { at: 200, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
+    { at: 200, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
+
+    { at: 300, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
+    { at: 300, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
     { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
     { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
@@ -674,32 +674,36 @@ const WAVES = [
   ],
   // 2: 2 bombers + 24 grunts (hover_mid)
   [
-    { at:   0, type:'bomber', x:160, pat:'hover_l',   vy:0.9 },
-    { at:   0, type:'bomber', x:320, pat:'hover_r',   vy:0.9 },
-    { at:  55, type:'grunt',  x:120, pat:'hover_mid', vy:2.2 },
-    { at:  55, type:'grunt',  x:360, pat:'hover_mid', vy:2.2 },
-    { at:  60, type:'grunt',  x:140, pat:'hover_mid', vy:2.2 },
-    { at:  60, type:'grunt',  x:340, pat:'hover_mid', vy:2.2 },
-    { at:  90, type:'grunt',  x: 80, pat:'hover_mid', vy:2.2 },
-    { at:  90, type:'grunt',  x:400, pat:'hover_mid', vy:2.2 },
-    { at:  95, type:'grunt',  x:100, pat:'hover_mid', vy:2.2 },
-    { at:  95, type:'grunt',  x:380, pat:'hover_mid', vy:2.2 },
-    { at: 130, type:'grunt',  x:200, pat:'hover_mid', vy:2.0 },
-    { at: 130, type:'grunt',  x:280, pat:'hover_mid', vy:2.0 },
-    { at: 135, type:'grunt',  x:220, pat:'hover_mid', vy:2.0 },
-    { at: 135, type:'grunt',  x:260, pat:'hover_mid', vy:2.0 },
-    { at: 175, type:'grunt',  x:140, pat:'hover_mid', vy:2.0 },
-    { at: 175, type:'grunt',  x:340, pat:'hover_mid', vy:2.0 },
-    { at: 180, type:'grunt',  x:160, pat:'hover_mid', vy:2.0 },
-    { at: 180, type:'grunt',  x:320, pat:'hover_mid', vy:2.0 },
-    { at: 225, type:'grunt',  x:100, pat:'hover_mid', vy:2.2 },
-    { at: 225, type:'grunt',  x:380, pat:'hover_mid', vy:2.2 },
-    { at: 230, type:'grunt',  x:120, pat:'hover_mid', vy:2.2 },
-    { at: 230, type:'grunt',  x:360, pat:'hover_mid', vy:2.2 },
-    { at: 275, type:'grunt',  x:240, pat:'hover_mid', vy:2.2 },
-    { at: 280, type:'grunt',  x:260, pat:'hover_mid', vy:2.2 },
-    { at: 310, type:'grunt',  x:170, pat:'hover_mid', vy:2.2 },
-    { at: 315, type:'grunt',  x:190, pat:'hover_mid', vy:2.2 },
+    { at:   0, type:'grunt',   x:30, pat:'hover_mid', vy:2.2 },
+    { at:   0, type:'grunt',  x:450, pat:'hover_mid', vy:2.2 },
+    { at:  30, type:'grunt',   x:80, pat:'hover_mid', vy:2.2 },
+    { at:  30, type:'grunt',  x:400, pat:'hover_mid', vy:2.2 },
+    { at:  60, type:'grunt',  x:130, pat:'hover_mid', vy:2.2 },
+    { at:  60, type:'grunt',  x:350, pat:'hover_mid', vy:2.2 },
+    { at:  90, type:'grunt',  x:180, pat:'hover_mid', vy:2.2 },
+    { at:  90, type:'grunt',  x:300, pat:'hover_mid', vy:2.2 },
+
+    { at: 100, type:'bomber', x:160, pat:'hover_l',   vy:0.9 },
+
+    { at: 105, type:'grunt',   x:30, pat:'hover_mid', vy:2.0 },
+    { at: 105, type:'grunt',  x:450, pat:'hover_mid', vy:2.0 },
+    { at: 135, type:'grunt',   x:80, pat:'hover_mid', vy:2.0 },
+    { at: 135, type:'grunt',  x:400, pat:'hover_mid', vy:2.0 },
+    { at: 165, type:'grunt',  x:130, pat:'hover_mid', vy:2.0 },
+    { at: 165, type:'grunt',  x:350, pat:'hover_mid', vy:2.0 },
+    { at: 195, type:'grunt',  x:180, pat:'hover_mid', vy:2.0 },
+    { at: 195, type:'grunt',  x:300, pat:'hover_mid', vy:2.0 },
+
+    { at: 220, type:'bomber', x:320, pat:'hover_r',   vy:0.9 },
+
+    { at: 225, type:'grunt',   x:30, pat:'hover_mid', vy:2.2 },
+    { at: 225, type:'grunt',  x:450, pat:'hover_mid', vy:2.2 },
+    { at: 255, type:'grunt',   x:80, pat:'hover_mid', vy:2.2 },
+    { at: 255, type:'grunt',  x:400, pat:'hover_mid', vy:2.2 },
+    { at: 285, type:'grunt',  x:130, pat:'hover_mid', vy:2.2 },
+    { at: 285, type:'grunt',  x:350, pat:'hover_mid', vy:2.2 },
+    { at: 315, type:'grunt',  x:180, pat:'hover_mid', vy:2.2 },
+    { at: 315, type:'grunt',  x:300, pat:'hover_mid', vy:2.2 },
   ],
   // 3: 8 fighters + 6 grunts (hover_mid), fighters enter in pairs
   [
@@ -1869,9 +1873,10 @@ export default function Game() {
             </button>
           </div>
           <div style={{ ...STYLES.controls, marginTop: 18, marginBottom: 18 }}>
-            <div>(C) Andy Krueger 2026</div>
+            <div>&copy; Andy Krueger 2026</div>
             <div>Music by DavidKBD, licenced under CC By 4.0 (https://creativecommons.org/licenses/by/4.0/)</div>
           </div>
+          <div style={{ ...STYLES.controls, fontSize: 12, marginTop: 18, marginBottom: 0 }}>version 0.1.0</div>
         </div>
       )}
 

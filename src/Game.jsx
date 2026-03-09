@@ -908,7 +908,6 @@ export default function Game() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     stateRef.current = initState();
-    Audio.startMusic(selectedTrackRef.current);
 
     const onKeyDown = e => {
       // Pause toggle — handled before anything else; Space consumed here only
@@ -1815,6 +1814,7 @@ export default function Game() {
   const startGame = () => {
     keysRef.current = {};
     Audio.initAudio();
+    Audio.startMusic(selectedTrackRef.current);
     setScreen('playing');
   };
 

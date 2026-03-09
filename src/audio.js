@@ -1,4 +1,6 @@
 // Synthesized audio engine — Web Audio API, no external files needed
+import mainStageTheme from './music/Interstellar.wav';
+import bossBattleTheme from './music/Horsehead_Nebula.wav';
 
 let ac = null;
 let master = null;
@@ -459,20 +461,18 @@ function tick() {
   }
 }
 
+let wavAudio = null;
+
 export function startMusic(trackIndex = 0) {
-  if (!ac || musicRunning) return;
-  activeTrack = trackIndex;
-  STEP_DUR = 60 / TRACKS[trackIndex].bpm / 4;
-  musicRunning = true;
-  nextNoteTime = ac.currentTime + 0.05;
-  currentStep  = 0;
-  schedulerTimer = setInterval(tick, TICK_MS);
+  if (wavAudio) { wavAudio.pause(); wavAudio = null; }
+  const src = trackIndex === BOSS_TRACK_IDX ? bossBattleTheme : mainStageTheme;
+  wavAudio = new Audio(src);
+  wavAudio.loop = true;
+  wavAudio.play().catch(() => {});
 }
 
 export function stopMusic() {
-  musicRunning = false;
-  clearInterval(schedulerTimer);
-  schedulerTimer = null;
+  if (wavAudio) { wavAudio.pause(); wavAudio = null; }
 }
 
 // Stop the current track and immediately start another (e.g. boss music)

@@ -20,16 +20,18 @@ export function initAudio() {
   if (ac) { ac.resume(); return; }
   ac = new (window.AudioContext || window.webkitAudioContext)();
 
+// ─── Volume Controls ──────────────────────────────────────────────────────────
+
   master = ac.createGain();
-  master.gain.value = 0.75;
+  master.gain.value = 0.95;
   master.connect(ac.destination);
 
   sfxOut = ac.createGain();
-  sfxOut.gain.value = 0.55;
+  sfxOut.gain.value = 0.85;
   sfxOut.connect(master);
 
   musicOut = ac.createGain();
-  musicOut.gain.value = 0.45;
+  musicOut.gain.value = 0.25;
   musicOut.connect(master);
 }
 
@@ -121,12 +123,22 @@ export function sfxPlayerHit() {
 export function sfxBomb() {
   if (!ac) return;
   const t = ac.currentTime;
-  noise(1.0, 1.0, 40, 8000, sfxOut, t);
-  synth('sine', 50, 0.55, 1.1, sfxOut, t);
-  synth('sawtooth', f => {
+//  OG Bomb -------------------------------
+//  noise(1.0, 1.0, 40, 8000, sfxOut, t);
+//  synth('sine', 50, 0.55, 1.1, sfxOut, t);
+//  synth('sawtooth', f => {
+//    f.setValueAtTime(55, t);
+//    f.exponentialRampToValueAtTime(2800, t + 0.55);
+//  }, 0.55, 0.7, sfxOut, t);
+
+//  Big Explosion Bomb -------------------------------
+  noise(0.85, 0.9, 60, 5000, sfxOut, t);
+  synth('sine',     80,  0.5, 0.7, sfxOut, t);
+  synth('sawtooth', 110, 0.3, 0.5, sfxOut, t);
+  synth('sine', f => {
     f.setValueAtTime(55, t);
-    f.exponentialRampToValueAtTime(2800, t + 0.55);
-  }, 0.55, 0.7, sfxOut, t);
+    f.exponentialRampToValueAtTime(28, t + 0.9);
+  }, 0.45, 1.0, sfxOut, t);
 }
 
 export function sfxWaveClear() {

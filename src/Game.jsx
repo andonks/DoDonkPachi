@@ -437,11 +437,11 @@ function updateEnemy(e, px, py, bullets) {
       break;
     case 'curve_r':
       e.y += e.vy;
-      e.x += Math.sin(e.timer * 0.025) * 2.2;
+      e.x += Math.sin(e.timer * 0.025) * 1.2;
       break;
     case 'curve_l':
       e.y += e.vy;
-      e.x -= Math.sin(e.timer * 0.025) * 2.2;
+      e.x -= Math.sin(e.timer * 0.025) * 1.2;
       break;
     case 'zigzag':
       e.y += e.vy;
@@ -608,53 +608,69 @@ function updateEnemy(e, px, py, bullets) {
 const WAVES = [
   // 0: Opener — 24 grunts, right side first then left side 5 sec later
   [
-    { at:  30, type:'grunt', x: 495, sy:  65, pat:'side_r', vy:1.6 },
-    { at:  30, type:'grunt', x: 495, sy: 125, pat:'side_r', vy:1.6 },
-    { at:  35, type:'grunt', x: 495, sy:  85, pat:'side_r', vy:1.6 },
-    { at:  35, type:'grunt', x: 495, sy: 145, pat:'side_r', vy:1.6 },
-    { at:  95, type:'grunt', x: 495, sy:  55, pat:'side_r', vy:1.9 },
-    { at:  95, type:'grunt', x: 495, sy: 115, pat:'side_r', vy:1.9 },
-    { at: 100, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.9 },
-    { at: 100, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:1.9 },
-    { at: 135, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:2.0 },
-    { at: 140, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:2.0 },
-    { at: 175, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:2.0 },
-    { at: 180, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:2.0 },
-    { at: 300, type:'grunt', x: -15, sy:  45, pat:'side_l', vy:1.6 },
-    { at: 300, type:'grunt', x: -15, sy: 105, pat:'side_l', vy:1.6 },
-    { at: 305, type:'grunt', x: -15, sy:  65, pat:'side_l', vy:1.6 },
-    { at: 305, type:'grunt', x: -15, sy: 125, pat:'side_l', vy:1.6 },
-    { at: 365, type:'grunt', x: -15, sy:  35, pat:'side_l', vy:1.9 },
-    { at: 365, type:'grunt', x: -15, sy:  90, pat:'side_l', vy:1.9 },
-    { at: 370, type:'grunt', x: -15, sy:  55, pat:'side_l', vy:1.9 },
-    { at: 370, type:'grunt', x: -15, sy: 110, pat:'side_l', vy:1.9 },
-    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:2.0 },
-    { at: 440, type:'grunt', x: -15, sy:  95, pat:'side_l', vy:2.0 },
-    { at: 475, type:'grunt', x: -15, sy:  50, pat:'side_l', vy:2.0 },
-    { at: 480, type:'grunt', x: -15, sy:  70, pat:'side_l', vy:2.0 },
+    { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
+    { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at:  55, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at:  55, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+
+    { at:  85, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
+    { at:  85, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+
+    { at: 140, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
+    { at: 140, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at: 165, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at: 165, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+
+    { at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
+    { at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+
+    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
+    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+
+    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
+    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
   ],
   // 1: 8 fighters + 12 grunts (sides), right side first then left 5 sec later
   [
     { at:   0, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
     { at:   0, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
-    { at:   5, type:'fighter', x:150, pat:'curve_r',  vy:1.2 },
-    { at:   5, type:'fighter', x:330, pat:'curve_l',  vy:1.2 },
-    { at:  40, type:'grunt',   x: 495, sy: 55, pat:'side_r', vy:2.1 },
-    { at:  45, type:'grunt',   x: 495, sy: 75, pat:'side_r', vy:2.1 },
-    { at:  65, type:'fighter', x:200, pat:'curve_r',  vy:1.2 },
-    { at:  65, type:'fighter', x:280, pat:'curve_l',  vy:1.2 },
-    { at:  70, type:'fighter', x:220, pat:'curve_r',  vy:1.2 },
-    { at:  70, type:'fighter', x:260, pat:'curve_l',  vy:1.2 },
-    { at:  95, type:'grunt',   x: 495, sy: 85, pat:'side_r', vy:2.1 },
-    { at: 100, type:'grunt',   x: 495, sy:105, pat:'side_r', vy:2.1 },
-    { at: 140, type:'grunt',   x: 495, sy:115, pat:'side_r', vy:1.9 },
-    { at: 145, type:'grunt',   x: 495, sy:135, pat:'side_r', vy:1.9 },
-    { at: 340, type:'grunt',   x: -15, sy: 55, pat:'side_l', vy:2.1 },
-    { at: 345, type:'grunt',   x: -15, sy: 75, pat:'side_l', vy:2.1 },
-    { at: 395, type:'grunt',   x: -15, sy: 85, pat:'side_l', vy:2.1 },
-    { at: 400, type:'grunt',   x: -15, sy:105, pat:'side_l', vy:2.1 },
-    { at: 440, type:'grunt',   x: -15, sy:115, pat:'side_l', vy:1.9 },
-    { at: 445, type:'grunt',   x: -15, sy:135, pat:'side_l', vy:1.9 },
+
+    { at:   100, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
+    { at:   100, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
+
+    { at:  200, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
+    { at:  200, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
+
+    { at:  300, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
+    { at:  300, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
+
+    { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
+    { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at:  55, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at:  55, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+
+    { at:  85, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
+    { at:  85, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
+    { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+
+    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
+    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+
+    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
+    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
   ],
   // 2: 2 bombers + 24 grunts (hover_mid)
   [
@@ -913,12 +929,12 @@ export default function Game() {
       // Pause toggle — handled before anything else; Space consumed here only
       if (e.code === 'Escape' || e.code === 'Space') {
         paused = !paused;
-        if (paused) Audio.stopMusic();
-        else {
-          const isBoss = stateRef.current?.waveIdx === WAVES.length - 1;
-          Audio.startMusic(isBoss ? Audio.BOSS_TRACK_IDX : selectedTrackRef.current);
-        }
-        return;
+        // if (paused) Audio.stopMusic();
+        // else {
+          // const isBoss = stateRef.current?.waveIdx === WAVES.length - 1;
+          // Audio.startMusic(isBoss ? Audio.BOSS_TRACK_IDX : selectedTrackRef.current);
+        // }
+        // return;
       }
       if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
       keysRef.current[e.code] = true;
@@ -1932,7 +1948,7 @@ export default function Game() {
                   width: 48, height: 60,
                   border: `2px solid ${active ? '#00ffff' : '#2a4455'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 34, fontFamily: 'PixelifySans', color: '#fff', fontWeight: 'bold',
+                  fontSize: 34, fontFamily: 'Sixtyfour', color: '#fff', fontWeight: 'bold',
                   background: active ? 'rgba(0,255,255,0.08)' : 'rgba(0,0,0,0.3)',
                   boxShadow: active ? '0 0 12px rgba(0,255,255,0.4)' : 'none',
                 }}>

@@ -958,7 +958,7 @@ export default function Game() {
         s.enemies.forEach(en => {
           if (en.type === 'boss') {
             // Boss just takes heavy damage
-            en.hp -= 80;
+            en.hp -= 160;
           } else {
             // All other ships instantly destroyed
             en.dead = true;
@@ -971,15 +971,15 @@ export default function Game() {
           }
         });
         Audio.sfxBomb();
-        // origin of explosion animation?
-        explode(s, s.player.x, s.player.y, 2.5);
+        // origin point of explosion animation
+        explode(s, W/2, H/2, 2.5);
         // flash particles
         for (let i = 0; i < 60; i++) {
           const a = Math.random() * Math.PI * 2;
           const spd = 1 + Math.random() * 12;
           const life = 20 + Math.random() * 30;
           s.particles.push({
-            x: s.player.x, y: s.player.y,
+            x: W/2, y: H/2,
             vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
             r: 2 + Math.random() * 4, life, maxLife: life,
             color: ['#00ffff','#ffffff','#aaffff'][Math.floor(Math.random() * 3)],
@@ -1533,11 +1533,23 @@ export default function Game() {
       ctx.textAlign = 'right';
       // Ship count
       for (let i = 0; i < s.lives; i++) {
-        const lx = W - 10 - i * 18;
+        // hey! This is a smarter way of managing the x variable
+        const lx = W - 20 - i * 36;
         ctx.fillStyle = '#00ffff';
+        //body
         ctx.beginPath();
-        ctx.moveTo(lx, 12); ctx.lineTo(lx + 7, 24); ctx.lineTo(lx - 7, 24);
-        ctx.closePath(); ctx.fill();
+        ctx.moveTo(lx, 1);
+        ctx.lineTo(lx+7,15);
+        ctx.lineTo(lx+5,23);
+        ctx.lineTo(lx-5,23);
+        ctx.lineTo(lx-7,15);
+        ctx.closePath();
+        ctx.fill();
+        //fins
+        ctx.beginPath();
+        ctx.moveTo(lx-7, 15);  ctx.lineTo(lx-15, 22); ctx.lineTo(lx-12, 11); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(lx+7, 15);  ctx.lineTo(lx+15, 22); ctx.lineTo(lx+12, 11); ctx.closePath(); ctx.fill();
       }
 
       // Bomb count
@@ -1545,8 +1557,22 @@ export default function Game() {
       ctx.fillStyle = '#ffff44';
       ctx.font = '12px monospace';
       for (let i = 0; i < s.player.bombs; i++) {
+        const b2b = i*22;
         ctx.beginPath();
-        ctx.arc(10 + i * 16, H - 10, 5, 0, Math.PI * 2);
+        // body
+        ctx.arc(10 + b2b, H - 20, 5, 0, Math.PI * 2);
+        ctx.moveTo(15+b2b,H-20);
+        ctx.lineTo(15+b2b,H-12);
+        ctx.lineTo(5+b2b,H-12);
+        ctx.lineTo(5+b2b,H-20);
+        // fins
+        ctx.moveTo(10+b2b,H-13);
+        ctx.lineTo(15+b2b,H-8);
+        ctx.lineTo(15+b2b,H-3);
+        ctx.lineTo(10+b2b,H-8);
+        ctx.lineTo(5+b2b,H-3);
+        ctx.lineTo(5+b2b,H-8);
+        ctx.lineTo(10+b2b,H-13);
         ctx.fill();
       }
 
@@ -2021,13 +2047,17 @@ export default function Game() {
               })}
             </div>
 
-            <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-              <button style={STYLES.btn} onClick={startGame}>PLAY</button>
-              <button style={{ ...STYLES.btn, background: '#223', color: '#88aacc', border: '1px solid #334' }}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              <button style={STYLES.btn} onClick={startGame}>
+                PLAY
+              </button>
+              <button
+                style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
                 onClick={() => setScreen('title')}>
-                TITLE
+                TITLE SCREEN
               </button>
             </div>
+
           </div>
         );
       })()}

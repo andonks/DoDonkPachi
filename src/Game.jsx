@@ -641,7 +641,6 @@ const WAVES = [
   // 1: 4 fighters + 12 grunts (sides), right side first then left
   [
     { at:   0, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
-    // { at:   0, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
     { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
     { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
@@ -653,13 +652,10 @@ const WAVES = [
     { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
     { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
 
-    // { at: 120, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
     { at: 120, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
     { at: 200, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
-    // { at: 200, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
-    // { at: 300, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
     { at: 300, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
     { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
@@ -685,15 +681,6 @@ const WAVES = [
 
     { at: 100, type:'bomber', x:160, pat:'hover_l',   vy:0.9 },
 
-    //{ at: 105, type:'grunt',   x:30, pat:'hover_mid', vy:2.0 },
-    //{ at: 105, type:'grunt',  x:450, pat:'hover_mid', vy:2.0 },
-    //{ at: 135, type:'grunt',   x:80, pat:'hover_mid', vy:2.0 },
-    //{ at: 135, type:'grunt',  x:400, pat:'hover_mid', vy:2.0 },
-    //{ at: 165, type:'grunt',  x:130, pat:'hover_mid', vy:2.0 },
-    //{ at: 165, type:'grunt',  x:350, pat:'hover_mid', vy:2.0 },
-    //{ at: 195, type:'grunt',  x:180, pat:'hover_mid', vy:2.0 },
-    //{ at: 195, type:'grunt',  x:300, pat:'hover_mid', vy:2.0 },
-
     { at: 220, type:'bomber', x:320, pat:'hover_r',   vy:0.9 },
 
     { at: 225, type:'grunt',   x:30, pat:'hover_mid', vy:2.2 },
@@ -718,8 +705,6 @@ const WAVES = [
 
     { at: 165, type:'grunt',   x: 80, pat:'hover_mid', vy:2.5 },
     { at: 165, type:'grunt',   x:400, pat:'hover_mid', vy:2.5 },
-    // { at: 215, type:'grunt',   x:200, pat:'hover_mid', vy:2.5 },
-    // { at: 215, type:'grunt',   x:300, pat:'hover_mid', vy:2.5 },
 
     { at: 230, type:'fighter', x:100, pat:'zigzag',    vy:1.5 },
     { at: 230, type:'fighter', x:380, pat:'zigzag',    vy:1.5 },
@@ -736,27 +721,32 @@ const WAVES = [
 
     { at: 360, type:'fighter', x:100, pat:'curve_r',  vy:1.3 },
     { at: 360, type:'fighter', x:380, pat:'curve_l',  vy:1.3 },
-
-
   ],
-  // 4: 4 bombers + 12 grunts (hover_mid), bombers arrive in two pairs
+  // 4: 4 bombers in 2 pairs + 12 grunts (hover_mid) + crisscross
   [
     { at:   0, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
     { at:   0, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
-    { at:  30, type:'grunt',  x:240, pat:'hover_mid', vy:2.6 },
-    { at:  35, type:'grunt',  x:260, pat:'hover_mid', vy:2.6 },
-    { at:  60, type:'bomber', x:200, pat:'hover_l',   vy:1.0 },
-    { at:  90, type:'bomber', x:280, pat:'hover_r',   vy:1.0 },
-    { at:  70, type:'grunt',  x:160, pat:'hover_mid', vy:2.1 },
-    { at:  70, type:'grunt',  x:320, pat:'hover_mid', vy:2.1 },
-    { at:  75, type:'grunt',  x:180, pat:'hover_mid', vy:2.1 },
-    { at:  75, type:'grunt',  x:300, pat:'hover_mid', vy:2.1 },
-    { at: 160, type:'grunt',  x: 80, pat:'hover_mid', vy:2.1 },
-    { at: 160, type:'grunt',  x:400, pat:'hover_mid', vy:2.1 },
-    { at: 165, type:'grunt',  x:100, pat:'hover_mid', vy:2.1 },
-    { at: 165, type:'grunt',  x:380, pat:'hover_mid', vy:2.1 },
-    { at: 210, type:'grunt',  x:240, pat:'hover_mid', vy:2.6 },
-    { at: 215, type:'grunt',  x:260, pat:'hover_mid', vy:2.6 },
+
+    { at:  50, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at:  50, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+
+    { at:  90, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at:  90, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+
+    { at: 120, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 120, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+
+    { at: 150, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
+    { at: 150, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+
+    { at: 165, type:'grunt',  x: 80, pat:'hover_mid', vy:2.5 },
+    { at: 165, type:'grunt',  x:400, pat:'hover_mid', vy:2.5 },
+
+    { at: 200, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
+    { at: 200, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
+
+    { at: 215, type:'grunt',  x: 80, pat:'hover_mid', vy:2.5 },
+    { at: 215, type:'grunt',  x:400, pat:'hover_mid', vy:2.5 },
   ],
   // 5: BOSS
   [

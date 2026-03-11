@@ -2,12 +2,12 @@
   "name": "dondokpachi",
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://andonks.github.io/DoDonkPachi",
+  "homepage": "https://andonks.github.io/DoDonkPachi/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "react": "^18.3.1",

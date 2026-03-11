@@ -1751,7 +1751,7 @@ export default function Game() {
         if (b.pts > 0) {
           const base = runningScore;
           await countUp(b.pts, 800, val => {
-            Audio.scoreTally();
+            Audio.sfxScoreTally();
             setLine(i, { ptsNum: val });
             setCalcDisplayScore(base + val);
           });
@@ -1907,15 +1907,15 @@ export default function Game() {
             </button>
             <button
               style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
-              onClick={() => { setIsWin(null); setScreen('leaderboard'); Audio.sfxButton(); }}>
+              onClick={() => { setIsWin(null); setScreen('leaderboard'); }}>
               LEADERBOARD
             </button>
           </div>
-          <div style={{ ...STYLES.controls, marginTop: 18, marginBottom: 18 }}>
+          <div style={{ ...STYLES.controls, fontSize: 14, marginTop: 18, marginBottom: 18 }}>
             <div>&copy; Andy Krueger 2026</div>
             <div>Music by DavidKBD, licenced under CC By 4.0 (https://creativecommons.org/licenses/by/4.0/)</div>
           </div>
-          <div style={{ ...STYLES.controls, fontSize: 10, marginTop: 18, marginBottom: 0 }}>version 0.1.0</div>
+          <div style={{ ...STYLES.controls, fontSize: 10, marginTop: 9, marginBottom: 0 }}>version 0.1.0</div>
         </div>
       )}
 

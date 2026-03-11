@@ -157,9 +157,10 @@ export function sfxBossWarning() {
 
 // ─── Andy's Custom SFX ────────────────────────────────────────────────────────
 
-export function scoreTally() {
-  return;
-  synth('triangle', hz(m), 0.28, 0.5, sfxOut, t + i * 0.13);
+export function sfxScoreTally() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  [81].forEach((m, i) => synth('triangle', hz(m), 0.28, 0.5, sfxOut, t + i * 0.13));
 }
 
 export function sfxAssWarning() {
@@ -181,7 +182,6 @@ export function sfxPause() {
   const t = ac.currentTime;
   [69, 81].forEach((m, i) => synth('triangle', hz(m), 0.28, 0.5, sfxOut, t + i * 0.13));
 }
-
 
 // ─── Music tracks ─────────────────────────────────────────────────────────────
 // All tracks: bass=32 steps (loops 2×), lead+arp=64 steps, 16th-note resolution

@@ -155,6 +155,34 @@ export function sfxBossWarning() {
   synth('sawtooth', 440, 0.5, 0.6,  sfxOut, t + 0.9);
 }
 
+// ─── Andy's Custom SFX ────────────────────────────────────────────────────────
+
+export function scoreTally() {
+  return;
+  synth('triangle', hz(m), 0.28, 0.5, sfxOut, t + i * 0.13);
+}
+
+export function sfxAssWarning() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  synth('sawtooth', 70, 1.9, 4, sfxOut, t);
+  synth('sawtooth', 70, 1.9, 4, sfxOut, t + 1);
+  synth('sawtooth', 70, 1.9, 4,  sfxOut, t + 2);
+}
+
+export function sfxExplodeSmush() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  synth('sawtooth', 20, 1.9, 2, sfxOut, t);
+}
+
+export function sfxPause() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  [69, 81].forEach((m, i) => synth('triangle', hz(m), 0.28, 0.5, sfxOut, t + i * 0.13));
+}
+
+
 // ─── Music tracks ─────────────────────────────────────────────────────────────
 // All tracks: bass=32 steps (loops 2×), lead+arp=64 steps, 16th-note resolution
 

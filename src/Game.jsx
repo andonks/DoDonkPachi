@@ -940,6 +940,9 @@ export default function Game() {
       // Pause toggle — handled before anything else; Space consumed here only
       if (e.code === 'Escape' || e.code === 'Space') {
         paused = !paused;
+        if (paused == true) {
+          Audio.sfxPause();
+        }
         // if (paused) Audio.stopMusic();
         // else {
           // const isBoss = stateRef.current?.waveIdx === WAVES.length - 1;
@@ -1109,7 +1112,7 @@ export default function Game() {
             if (next === WAVES.length - 1) {
               // Final wave done — boss warning before the boss appears
               s.bossWarning = 210;
-              Audio.sfxBossWarning();
+              Audio.sfxAssWarning();
             } else {
               // Normal transition — near-instant gap
               s.waveDelay = 10;
@@ -1342,8 +1345,9 @@ export default function Game() {
         // Level Clear bonus calculations
         setCalcBonuses([
           { label: 'MEDALS COLLECTED', detailCount: s.medalCount, detailSuffix: '× 1,000',  pts: s.medalCount * 1000 },
-          { label: 'LIVES REMAINING',  detailCount: s.lives,      detailSuffix: '× 1,000,000', pts: s.lives * 1000000 },
-          { label: 'NO DEATHS',        detailText: s.deathCount === 0 ? 'PERFECT!' : '--',   pts: s.deathCount === 0 ? 1000000 : 0 },
+          { label: 'BOMBS REMAINING', detailCount: s.player.bombs, detailSuffix: '× 250,000', pts: s.player.bombs * 250000 },
+          { label: 'LIVES REMAINING', detailCount: s.lives,      detailSuffix: '× 1,000,000', pts: s.lives * 1000000 },
+          { label: 'NO DEATHS',       detailText: s.deathCount === 0 ? 'PERFECT!' : '--',   pts: s.deathCount === 0 ? 250000 : 0 },
         ]);
         setScreen('score_calc');
         return;
@@ -1747,6 +1751,7 @@ export default function Game() {
         if (b.pts > 0) {
           const base = runningScore;
           await countUp(b.pts, 800, val => {
+            Audio.scoreTally();
             setLine(i, { ptsNum: val });
             setCalcDisplayScore(base + val);
           });
@@ -1850,10 +1855,12 @@ export default function Game() {
         setInitialsDisplay(next);
       } else if (/^[a-zA-Z]$/.test(e.key) && cur.length < 3) {
         const next = cur + e.key.toUpperCase();
+        Audio.sfxBigExplosion();
         initialsRef.current = next;
         setInitialsDisplay(next);
       } else if (e.key === 'Enter' && cur.length === 3) {
         const scores = saveScore(cur, finalScore);
+        Audio.sfxWaveClear;
         setLeaderboard(scores);
         setScreen('leaderboard');
       }
@@ -1900,8 +1907,7 @@ export default function Game() {
             </button>
             <button
               style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
-              onClick={() => { setIsWin(null); setScreen('leaderboard'); }}
-            >
+              onClick={() => { setIsWin(null); setScreen('leaderboard'); Audio.sfxButton(); }}>
               LEADERBOARD
             </button>
           </div>
@@ -1909,7 +1915,7 @@ export default function Game() {
             <div>&copy; Andy Krueger 2026</div>
             <div>Music by DavidKBD, licenced under CC By 4.0 (https://creativecommons.org/licenses/by/4.0/)</div>
           </div>
-          <div style={{ ...STYLES.controls, fontSize: 12, marginTop: 18, marginBottom: 0 }}>version 0.1.0</div>
+          <div style={{ ...STYLES.controls, fontSize: 10, marginTop: 18, marginBottom: 0 }}>version 0.1.0</div>
         </div>
       )}
 

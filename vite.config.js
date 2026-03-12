@@ -4,9 +4,4 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/DoDonkPachi/',
-  build: {
-    rollupOptions: {
-      input: 'src/main.jsx'
-    }
-  }
 })

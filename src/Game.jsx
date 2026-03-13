@@ -1658,23 +1658,32 @@ export default function Game() {
       ctx.textAlign = 'right';
       // Ship count
       for (let i = 0; i < s.lives; i++) {
-        // hey! This is a smarter way of managing the x variable
         const lx = W - 20 - i * 36;
         ctx.fillStyle = '#00ffff';
-        //body
+        ctx.strokeStyle = '#00ffff';
         ctx.beginPath();
-        ctx.moveTo(lx, 1);
-        ctx.lineTo(lx+7,15);
-        ctx.lineTo(lx+5,23);
-        ctx.lineTo(lx-5,23);
-        ctx.lineTo(lx-7,15);
+        ctx.moveTo(lx, 2);
+        ctx.lineTo(lx-5, 16);
+        ctx.lineTo(lx-5, 5);
+        ctx.lineTo(lx-5, 16);
+        ctx.lineTo(lx-6, 18);
+        ctx.lineTo(lx-10, 18);
+        ctx.lineTo(lx-5, 23);
+        ctx.lineTo(lx-5, 19);
+        ctx.lineTo(lx-1, 19);
+        ctx.lineTo(lx-1, 21);
+        ctx.lineTo(lx+1, 21);
+        ctx.lineTo(lx+1, 19);
+        ctx.lineTo(lx+5, 19);
+        ctx.lineTo(lx+5, 23);
+        ctx.lineTo(lx+10, 18);
+        ctx.lineTo(lx+6, 18);
+        ctx.lineTo(lx+5, 16);
+        ctx.lineTo(lx+5, 5);
+        ctx.lineTo(lx+5, 16);
         ctx.closePath();
         ctx.fill();
-        //fins
-        ctx.beginPath();
-        ctx.moveTo(lx-7, 15);  ctx.lineTo(lx-15, 22); ctx.lineTo(lx-12, 11); ctx.closePath(); ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(lx+7, 15);  ctx.lineTo(lx+15, 22); ctx.lineTo(lx+12, 11); ctx.closePath(); ctx.fill();
+        ctx.stroke();
       }
 
       // Bomb count

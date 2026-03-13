@@ -79,19 +79,19 @@ function noise(gainVal, dur, hpHz, lpHz, dest, t = ac.currentTime) {
 
 export function sfxShoot() {
   if (!ac) return;
-  synth('square',   880, 0.16, 0.06, sfxOut);
-  synth('square',   660, 0.07, 0.05, sfxOut);
+  synth('square',   540, 0.21, 0.06, sfxOut);
+  synth('square',   430, 0.17, 0.05, sfxOut);
 }
 
 export function sfxFocusShoot() {
   if (!ac) return;
-  synth('sawtooth', 1320, 0.12, 0.055, sfxOut);
+  synth('square', 420, 0.27, 0.055, sfxOut);
 }
 
 export function sfxEnemyDie() {
   if (!ac) return;
   const t = ac.currentTime;
-  noise(0.45, 0.18, 1200, null, sfxOut, t);
+  noise(0.45, 0.18, 100, null, sfxOut, t);
   synth('sawtooth', f => {
     f.setValueAtTime(380, t);
     f.exponentialRampToValueAtTime(80, t + 0.2);
@@ -101,9 +101,9 @@ export function sfxEnemyDie() {
 export function sfxBigExplosion() {
   if (!ac) return;
   const t = ac.currentTime;
-  noise(0.85, 0.9, 60, 5000, sfxOut, t);
-  synth('sine',     80,  0.5, 0.7, sfxOut, t);
-  synth('sawtooth', 110, 0.3, 0.5, sfxOut, t);
+  noise(0.85, 0.9, 40, 2000, sfxOut, t);
+  synth('sine',     30,  0.5, 0.7, sfxOut, t);
+  synth('sawtooth', 50, 0.3, 0.5, sfxOut, t);
   synth('sine', f => {
     f.setValueAtTime(55, t);
     f.exponentialRampToValueAtTime(28, t + 0.9);
@@ -113,7 +113,7 @@ export function sfxBigExplosion() {
 export function sfxPlayerHit() {
   if (!ac) return;
   const t = ac.currentTime;
-  noise(0.6, 0.35, 250, 3500, sfxOut, t);
+  noise(0.6, 0.35, 250, 2500, sfxOut, t);
   synth('sawtooth', f => {
     f.setValueAtTime(200, t);
     f.exponentialRampToValueAtTime(70, t + 0.35);
@@ -123,18 +123,9 @@ export function sfxPlayerHit() {
 export function sfxBomb() {
   if (!ac) return;
   const t = ac.currentTime;
-//  OG Bomb -------------------------------
-//  noise(1.0, 1.0, 40, 8000, sfxOut, t);
-//  synth('sine', 50, 0.55, 1.1, sfxOut, t);
-//  synth('sawtooth', f => {
-//    f.setValueAtTime(55, t);
-//    f.exponentialRampToValueAtTime(2800, t + 0.55);
-//  }, 0.55, 0.7, sfxOut, t);
-
-//  Big Explosion Bomb -------------------------------
-  noise(0.85, 0.9, 60, 5000, sfxOut, t);
-  synth('sine',     80,  0.5, 0.7, sfxOut, t);
-  synth('sawtooth', 110, 0.3, 0.5, sfxOut, t);
+  noise(0.85, 0.9, 40, 2000, sfxOut, t);
+  synth('sine',     30,  0.5, 0.7, sfxOut, t);
+  synth('sawtooth', 50, 0.3, 0.5, sfxOut, t);
   synth('sine', f => {
     f.setValueAtTime(55, t);
     f.exponentialRampToValueAtTime(28, t + 0.9);
@@ -171,16 +162,22 @@ export function sfxAssWarning() {
   synth('sawtooth', 70, 1.9, 4,  sfxOut, t + 2);
 }
 
-export function sfxExplodeSmush() {
-  if (!ac) return;
-  const t = ac.currentTime;
-  synth('sawtooth', 20, 1.9, 2, sfxOut, t);
-}
-
 export function sfxPause() {
   if (!ac) return;
   const t = ac.currentTime;
   [69, 81].forEach((m, i) => synth('triangle', hz(m), 0.28, 0.5, sfxOut, t + i * 0.13));
+}
+
+export function sfxExplodeSmush() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  synth('sawtooth', 20, 0.5, 0.9, sfxOut, t);
+}
+
+export function sfxWhack() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  noise(0.85, 0.5, 40, 1000, sfxOut, t);
 }
 
 // ─── Music tracks ─────────────────────────────────────────────────────────────

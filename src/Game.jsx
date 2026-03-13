@@ -13,46 +13,155 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.scale(1.5, 1.5);
 
   // Engine glow
-  const g = ctx.createRadialGradient(0, 10, 2, 0, 10, 24);
+  const g = ctx.createRadialGradient(0, 20, 2, 0, 10, 24);
   g.addColorStop(0, 'rgba(0,200,255,0.85)');
   g.addColorStop(1, 'rgba(0,0,200,0)');
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.ellipse(0, 10, 22, 18, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 20, 22, 18, 0, 0, Math.PI * 2);
   ctx.fill();
 
+  // Engine flames
+  const fl = 3 + Math.sin(frame * 0.4) * 2.5;
+  ctx.fillStyle = '00FFFE';
+  ctx.beginPath();
+  ctx.moveTo(-9, 15); ctx.lineTo(3, 15); ctx.lineTo(-3, 15 + fl * 2.8); ctx.closePath(); ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(-3, 15); ctx.lineTo(9, 15); ctx.lineTo(3, 15 + fl * 2.8); ctx.closePath(); ctx.fill();
+
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.moveTo(-7, 15); ctx.lineTo(1, 15); ctx.lineTo(-3, 30 + fl * 2.8); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-1, 15); ctx.lineTo(7, 15); ctx.lineTo(3, 30 + fl * 2.8); ctx.closePath(); ctx.fill();
+
   // Wings
-  ctx.fillStyle = focused ? '#0099bb' : '#007aa0';
+  ctx.strokeStyle = '#334C83';
+  ctx.fillStyle = '#ACB5B7';
   ctx.beginPath();
-  ctx.moveTo(-13, 4);  ctx.lineTo(-26, 14); ctx.lineTo(-21, -2); ctx.closePath(); ctx.fill();
+  ctx.moveTo(-5, 10);
+  ctx.lineTo(-15, 6);
+  ctx.lineTo(-18, 9);
+  ctx.lineTo(-8, 21);
+  ctx.lineTo(-6, 18);
+  ctx.lineTo(-8, 12);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
   ctx.beginPath();
-  ctx.moveTo( 13, 4);  ctx.lineTo( 26, 14); ctx.lineTo( 21, -2); ctx.closePath(); ctx.fill();
+  ctx.moveTo(5, 10);
+  ctx.lineTo(15, 6);
+  ctx.lineTo(18, 9);
+  ctx.lineTo(8, 21);
+  ctx.lineTo(6, 18);
+  ctx.lineTo(8, 12);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Nose Guns
+  ctx.strokeStyle = '#334C83';
+  ctx.fillStyle = '#ACB5B7';
+  ctx.beginPath();
+  ctx.rect(-4, -18, 2, 9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.rect(2, -18, 2, 9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 
   // Body
-  ctx.fillStyle = focused ? '#00ffff' : '#00ddee';
+  ctx.fillStyle = '#334C83';
   ctx.beginPath();
-  ctx.moveTo(0, -17);
-  ctx.lineTo(11, 2);
-  ctx.lineTo(9, 15);
-  ctx.lineTo(-9, 15);
-  ctx.lineTo(-11, 2);
+  ctx.moveTo(-3, -12);
+
+  ctx.lineTo(3, -12);
+  ctx.lineTo(14, 15);
+  ctx.lineTo(-14, 15);
+  ctx.lineTo(-3, -12);
   ctx.closePath();
   ctx.fill();
 
   // Cockpit
-  ctx.fillStyle = '#aaffff';
+  ctx.fillStyle = 'yellow';
   ctx.beginPath();
-  ctx.ellipse(0, -4, 4, 6, 0, 0, Math.PI * 2);
+  ctx.moveTo(2, -15);
+  ctx.lineTo(2, -8);
+  ctx.lineTo(-2, -8);
+  ctx.lineTo(-2, -15);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Engines
+  ctx.fillStyle = '#ACB5B7';
+  ctx.beginPath();
+  ctx.moveTo(-5, 11);
+  ctx.lineTo(-4, 18);
+  ctx.lineTo(-1, 18);
+  ctx.lineTo(0, 12);
+  ctx.lineTo(1, 18);
+  ctx.lineTo(4, 18);
+  ctx.lineTo(5, 11);
+  ctx.lineTo(-5, 11);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Cannons
+  ctx.strokeStyle = '#334C83';
+  ctx.fillStyle = '#ACB5B7';
+  ctx.beginPath();
+  ctx.rect(-10, -12, 2, 20);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.rect(-10, 8, 2, 4);
+  ctx.closePath();
   ctx.fill();
 
-  // Engine flame
-  const fl = 3 + Math.sin(frame * 0.4) * 2.5;
-  ctx.fillStyle = '#ff7700';
   ctx.beginPath();
-  ctx.moveTo(-6, 15); ctx.lineTo(6, 15); ctx.lineTo(0, 15 + fl * 2.8); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#ffee00';
+  ctx.rect(8, -12, 2, 20);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
   ctx.beginPath();
-  ctx.moveTo(-3, 15); ctx.lineTo(3, 15); ctx.lineTo(0, 15 + fl * 1.4); ctx.closePath(); ctx.fill();
+  ctx.rect(8, 8, 2, 4);
+  ctx.closePath();
+  ctx.fill();
+
+  // Crystal Gem
+  //ctx.fillStyle = 'black';
+  //ctx.arc(0, 2, 4, 0, Math.PI * 2);
+  //ctx.fill();
+
+  // Panel Lining
+  ctx.strokeStyle = '#ACB5B7';
+  ctx.beginPath();
+  ctx.moveTo(2, -5);
+  ctx.lineTo(2, 5);
+  ctx.lineTo(4, 10);
+  ctx.moveTo(-2, -5);
+  ctx.lineTo(-2, 5);
+  ctx.lineTo(-4, 10);
+  ctx.stroke();
+
+  // Safety Hatch
+  ctx.strokeStyle = 'yellow';
+  ctx.beginPath();
+  ctx.moveTo(2, -7);
+  ctx.lineTo(-2, -7);
+  ctx.closePath();
+  ctx.stroke();
 
   ctx.restore();
 }
@@ -165,6 +274,7 @@ function drawBullet(ctx, b, frame) {
     ctx.fillStyle = '#cc88ff';
     ctx.beginPath(); ctx.ellipse(b.x, b.y, 2, 12, 0, 0, Math.PI * 2); ctx.fill();
   } else {
+    // default enemy bullets?
     const p = 0.8 + Math.sin(frame * 0.22 + b.id * 1.7) * 0.2;
     const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 16 * p);
     g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, '#ff00cc'); g.addColorStop(1, 'rgba(255,0,180,0)');
@@ -950,7 +1060,7 @@ export default function Game() {
         // }
         // return;
       }
-      if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
+      // if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
       keysRef.current[e.code] = true;
       // Bomb on Shift press
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -1490,10 +1600,21 @@ export default function Game() {
       // Player (hidden during death window; flash when invincible)
       if (pl.deathTimer <= 0 && (pl.invTimer <= 0 || Math.floor(pl.invTimer / 5) % 2 === 0)) {
         drawPlayer(ctx, pl.x, pl.y, s.frame, focused);
+
+        // focus gem glow
         if (focused) {
-          ctx.strokeStyle = 'rgba(0,255,255,0.55)';
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.arc(pl.x, pl.y, 5, 0, Math.PI * 2); ctx.stroke();
+          const gradient = ctx.createRadialGradient(pl.x, pl.y+4, 2, pl.x, pl.y+4, 7);
+          gradient.addColorStop(0, "#FFECFE");
+          gradient.addColorStop(1, "yellow");
+          ctx.fillStyle = gradient;
+          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 7, 0, Math.PI * 2); ctx.fill();
+        }
+        else {
+          const gradient = ctx.createRadialGradient(pl.x, pl.y+2, 1, pl.x, pl.y, 5);
+          gradient.addColorStop(0, "yellow");
+          gradient.addColorStop(1, "black");
+          ctx.fillStyle = gradient;
+          ctx.beginPath(); ctx.arc(pl.x, pl.y, 5, 0, Math.PI * 2); ctx.fill();
         }
       }
 

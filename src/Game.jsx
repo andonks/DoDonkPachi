@@ -9,6 +9,40 @@ const ship1 = '#003A8A';
 const ship2 = '#9FA7B7';
 const ship3 = '#D383D3';
 
+// ─── Fancy Title Animation ───────────────────────────────────────────────────
+
+export function FancyText({ text }) {
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setFlash(true);
+    }, 1200);
+
+    const t2 = setTimeout(() => {
+      setFlash(false);
+    }, 1900);
+
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+    };
+  }, []);
+
+  return (
+    <h1 className={`fancy ${flash ? "flash" : ""}`}>
+      {text.split("").map((letter, i) => (
+        <span
+          key={i}
+          style={{ animationDelay: `${i * 0.07}s` }}
+        >
+          {letter === " " ? "\u00A0" : letter}
+        </span>
+      ))}
+    </h1>
+  );
+}
+
 // ─── Drawing ──────────────────────────────────────────────────────────────────
 
 function drawPlayer(ctx, x, y, frame, focused) {
@@ -2021,7 +2055,7 @@ export default function Game() {
 
       {screen === 'title' && (
         <div style={STYLES.overlay}>
-          <div style={{ fontFamily: 'Sixtyfour', fontSize: 40, color: '#E2DED7'}}>DoDonkPACHI</div>
+          <div><FancyText text="DoDonkPACHI" /></div>
           <div style={{ ...STYLES.sub, fontSize: 30, marginTop: -14, marginBottom: 18 }}>DATA STORM</div>
           <div style={{ fontSize: 24, color: '#aaeeff', letterSpacing: 3, opacity: 0.7, textDecoration: 'underline' }}>
             CONTROLS

@@ -7,3 +7,90 @@
   font-family: 'Sixtyfour';
   src: local('Sixtyfour'), url(./fonts/Sixtyfour.ttf) format('truetype');
 }
+
+.fancy {
+  position: relative;
+  font-family: 'Sixtyfour', sans-serif;
+  letter-spacing: -4px;
+  color: white;
+  font-size: 42px;
+  text-shadow: 0 0 4px rgba(255,255,255,.4);
+}
+
+/* letters start compressed */
+.fancy span {
+  display: inline-block;
+  transform: translateY(-80px) scaleX(0);
+  opacity: 0;
+  animation: letterDrop 0.5s ease forwards;
+}
+
+/* stagger separation */
+@keyframes letterDrop {
+  0% {
+    transform: translateY(-80px) scaleX(0);
+    opacity: 0;
+  }
+
+  60% {
+    transform: translateY(10px) scaleX(1);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateY(-3px);
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* cyan scanline */
+/* diffuse cyan flash */
+.fancy::after {
+  content: "";
+  position: absolute;
+  inset: -40px;          /* expands glow area without affecting layout */
+  pointer-events: none;
+  opacity: 0;
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0,255,255,0.45) 0%,
+    rgba(0,255,255,0.25) 25%,
+    rgba(0,255,255,0.10) 45%,
+    rgba(0,255,255,0.04) 60%,
+    transparent 75%
+  );
+
+  filter: blur(18px);
+
+  animation: titleGlow 0.6s ease-out forwards;
+  animation-delay: 0.8s;
+}
+
+
+@keyframes titleGlow {
+  0% {
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* flash glow during scan */
+.fancy.flash span {
+  color: #00ffff;
+  text-shadow:
+    0 0 6px #00ffff,
+    0 0 12px #00ffff,
+    0 0 24px #00ffff;
+}

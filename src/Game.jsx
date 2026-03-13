@@ -5,6 +5,10 @@ import './index.css';
 const W = 480;
 const H = 640;
 
+const ship1 = '#003A8A';
+const ship2 = '#9FA7B7';
+const ship3 = '#D383D3';
+
 // ─── Drawing ──────────────────────────────────────────────────────────────────
 
 function drawPlayer(ctx, x, y, frame, focused) {
@@ -23,10 +27,9 @@ function drawPlayer(ctx, x, y, frame, focused) {
 
   // Engine flames
   const fl = 3 + Math.sin(frame * 0.4) * 2.5;
-  ctx.fillStyle = '00FFFE';
+  ctx.fillStyle = ship3;
   ctx.beginPath();
   ctx.moveTo(-9, 15); ctx.lineTo(3, 15); ctx.lineTo(-3, 15 + fl * 2.8); ctx.closePath(); ctx.fill();
-
   ctx.beginPath();
   ctx.moveTo(-3, 15); ctx.lineTo(9, 15); ctx.lineTo(3, 15 + fl * 2.8); ctx.closePath(); ctx.fill();
 
@@ -36,9 +39,9 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.beginPath();
   ctx.moveTo(-1, 15); ctx.lineTo(7, 15); ctx.lineTo(3, 30 + fl * 2.8); ctx.closePath(); ctx.fill();
 
-  // Wings
-  ctx.strokeStyle = '#334C83';
-  ctx.fillStyle = '#ACB5B7';
+  // Tail Wings
+  ctx.strokeStyle = ship1;
+  ctx.fillStyle = ship2;
   ctx.beginPath();
   ctx.moveTo(-5, 10);
   ctx.lineTo(-15, 6);
@@ -62,8 +65,8 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.stroke();
 
   // Nose Guns
-  ctx.strokeStyle = '#334C83';
-  ctx.fillStyle = '#ACB5B7';
+  ctx.strokeStyle = ship1;
+  ctx.fillStyle = ship2;
   ctx.beginPath();
   ctx.rect(-4, -18, 2, 9);
   ctx.closePath();
@@ -77,7 +80,7 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.stroke();
 
   // Body
-  ctx.fillStyle = '#334C83';
+  ctx.fillStyle = ship1;
   ctx.beginPath();
   ctx.moveTo(-3, -12);
 
@@ -88,19 +91,8 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.closePath();
   ctx.fill();
 
-  // Cockpit
-  ctx.fillStyle = 'yellow';
-  ctx.beginPath();
-  ctx.moveTo(2, -15);
-  ctx.lineTo(2, -8);
-  ctx.lineTo(-2, -8);
-  ctx.lineTo(-2, -15);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
   // Engines
-  ctx.fillStyle = '#ACB5B7';
+  ctx.fillStyle = ship2;
   ctx.beginPath();
   ctx.moveTo(-5, 11);
   ctx.lineTo(-4, 18);
@@ -115,14 +107,12 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.stroke();
 
   // Cannons
-  ctx.strokeStyle = '#334C83';
-  ctx.fillStyle = '#ACB5B7';
+  ctx.strokeStyle = ship1;
   ctx.beginPath();
   ctx.rect(-10, -12, 2, 20);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
   ctx.beginPath();
   ctx.rect(-10, 8, 2, 4);
   ctx.closePath();
@@ -133,11 +123,21 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
   ctx.beginPath();
   ctx.rect(8, 8, 2, 4);
   ctx.closePath();
   ctx.fill();
+
+  // Cockpit
+  ctx.fillStyle = ship3;
+  ctx.beginPath();
+  ctx.moveTo(2, -15);
+  ctx.lineTo(2, -8);
+  ctx.lineTo(-2, -8);
+  ctx.lineTo(-2, -15);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 
   // Crystal Gem
   //ctx.fillStyle = 'black';
@@ -145,7 +145,7 @@ function drawPlayer(ctx, x, y, frame, focused) {
   //ctx.fill();
 
   // Panel Lining
-  ctx.strokeStyle = '#ACB5B7';
+  ctx.strokeStyle = ship3;
   ctx.beginPath();
   ctx.moveTo(2, -5);
   ctx.lineTo(2, 5);
@@ -155,8 +155,6 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.lineTo(-4, 10);
   ctx.stroke();
 
-  // Safety Hatch
-  ctx.strokeStyle = 'yellow';
   ctx.beginPath();
   ctx.moveTo(2, -7);
   ctx.lineTo(-2, -7);
@@ -174,16 +172,19 @@ function drawEnemy(ctx, e, frame) {
 
   if (type === 'grunt') {
     ctx.scale(2, 2);
+    ctx.fillStyle = '#ff9999';
+    ctx.beginPath(); ctx.ellipse(0, 5, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = `hsl(${t * 18},90%,55%)`;
     ctx.beginPath();
-    ctx.moveTo(0, 13); ctx.lineTo(-13, -4); ctx.lineTo(-17, 2);
-    ctx.lineTo(0, 7); ctx.lineTo(17, 2); ctx.lineTo(13, -4);
+    ctx.moveTo(-9, 14); ctx.lineTo(-2, 2); ctx.lineTo(-6, -4); ctx.lineTo(-11, 0);
     ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#ff9999';
-    ctx.beginPath(); ctx.ellipse(0, 5, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.moveTo(9, 14); ctx.lineTo(2, 2); ctx.lineTo(6, -4); ctx.lineTo(11, 0);
+    ctx.closePath(); ctx.fill();
 
   } else if (type === 'fighter') {
     ctx.scale(2, 2);
+    ctx.fillStyle = '#cc5500';
+    ctx.fillRect(-15, -5, 5, 20); ctx.fillRect(10, -5, 5, 20);
     ctx.fillStyle = `hsl(${20 + t * 18},90%,55%)`;
     ctx.beginPath();
     ctx.moveTo(0, 19); ctx.lineTo(-20, -2); ctx.lineTo(-13, -17);
@@ -191,8 +192,6 @@ function drawEnemy(ctx, e, frame) {
     ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#ffbb66';
     ctx.beginPath(); ctx.ellipse(0, 2, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cc5500';
-    ctx.fillRect(-19, -5, 5, 11); ctx.fillRect(14, -5, 5, 11);
 
   } else if (type === 'bomber') {
     const pulse = 1 + Math.sin(frame * 0.09) * 0.04;
@@ -205,7 +204,7 @@ function drawEnemy(ctx, e, frame) {
     ctx.lineTo(32, -10); ctx.lineTo(36, 4);
     ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#660000';
-    [-19, 0, 19].forEach(ox => ctx.fillRect(ox - 3, 14, 6, 14));
+    [-9, 0, 9].forEach(ox => ctx.fillRect(ox - 3, 14, 6, 14));
     const cg = ctx.createRadialGradient(0, 0, 0, 0, 0, 10);
     cg.addColorStop(0, '#ff4444'); cg.addColorStop(1, 'transparent');
     ctx.fillStyle = cg;
@@ -1603,18 +1602,21 @@ export default function Game() {
 
         // focus gem glow
         if (focused) {
-          const gradient = ctx.createRadialGradient(pl.x, pl.y+4, 2, pl.x, pl.y+4, 7);
-          gradient.addColorStop(0, "#FFECFE");
-          gradient.addColorStop(1, "yellow");
+          const gradient = ctx.createRadialGradient(pl.x, pl.y+4, 3, pl.x, pl.y+4, 12);
+          gradient.addColorStop(0, "yellow");
+          gradient.addColorStop(1, "transparent");
           ctx.fillStyle = gradient;
-          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 7, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 12, 0, Math.PI * 2); ctx.fill();
         }
         else {
-          const gradient = ctx.createRadialGradient(pl.x, pl.y+2, 1, pl.x, pl.y, 5);
+          ctx.fillStyle = "black";
+          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 5, 0, Math.PI * 2); ctx.fill();
+          const gradient = ctx.createRadialGradient(pl.x, pl.y+4, 1, pl.x, pl.y+4, 6);
           gradient.addColorStop(0, "yellow");
-          gradient.addColorStop(1, "black");
+          gradient.addColorStop(1, "transparent");
           ctx.fillStyle = gradient;
-          ctx.beginPath(); ctx.arc(pl.x, pl.y, 5, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 6, 0, Math.PI * 2); ctx.fill();
+
         }
       }
 
@@ -1658,29 +1660,29 @@ export default function Game() {
       ctx.textAlign = 'right';
       // Ship count
       for (let i = 0; i < s.lives; i++) {
-        const lx = W - 20 - i * 36;
+        const lx = W - 16 - i * 26;
         ctx.fillStyle = '#00ffff';
         ctx.strokeStyle = '#00ffff';
         ctx.beginPath();
-        ctx.moveTo(lx, 2);
-        ctx.lineTo(lx-5, 16);
-        ctx.lineTo(lx-5, 5);
-        ctx.lineTo(lx-5, 16);
-        ctx.lineTo(lx-6, 18);
-        ctx.lineTo(lx-10, 18);
-        ctx.lineTo(lx-5, 23);
-        ctx.lineTo(lx-5, 19);
-        ctx.lineTo(lx-1, 19);
+        ctx.moveTo(lx, 4);
+        ctx.lineTo(lx-5, 18);
+        ctx.lineTo(lx-5, 7);
+        ctx.lineTo(lx-5, 18);
+        ctx.lineTo(lx-6, 20);
+        ctx.lineTo(lx-10, 20);
+        ctx.lineTo(lx-5, 25);
+        ctx.lineTo(lx-5, 21);
         ctx.lineTo(lx-1, 21);
+        ctx.lineTo(lx-1, 23);
+        ctx.lineTo(lx+1, 23);
         ctx.lineTo(lx+1, 21);
-        ctx.lineTo(lx+1, 19);
-        ctx.lineTo(lx+5, 19);
-        ctx.lineTo(lx+5, 23);
-        ctx.lineTo(lx+10, 18);
-        ctx.lineTo(lx+6, 18);
-        ctx.lineTo(lx+5, 16);
-        ctx.lineTo(lx+5, 5);
-        ctx.lineTo(lx+5, 16);
+        ctx.lineTo(lx+5, 21);
+        ctx.lineTo(lx+5, 25);
+        ctx.lineTo(lx+10, 20);
+        ctx.lineTo(lx+6, 20);
+        ctx.lineTo(lx+5, 18);
+        ctx.lineTo(lx+5, 7);
+        ctx.lineTo(lx+5, 18);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();

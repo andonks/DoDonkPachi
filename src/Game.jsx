@@ -987,6 +987,15 @@ function initState() {
 // ─── Leaderboard helpers ──────────────────────────────────────────────────────
 
 const LS_KEY = 'dondokpachi_scores';
+const LS_LAST_INITIALS_KEY = 'dondokpachi_last_initials';
+
+function loadLastInitials() {
+  return localStorage.getItem(LS_LAST_INITIALS_KEY) || null;
+}
+
+function saveLastInitials(initials) {
+  localStorage.setItem(LS_LAST_INITIALS_KEY, initials);
+}
 
 function loadScores() {
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
@@ -1007,6 +1016,33 @@ function saveScore(initials, score) {
     scores.map(s => ({ initials: s.initials, score: s.score }))
   ));
   return scores; // isNew flag only lives in memory for highlighting
+}
+
+// ─── API helpers ──────────────────────────────────────────────────────────────
+
+const API_BASE = 'https://dodonkpachi.onrender.com';
+
+async function fetchGlobalScores() {
+  const res = await fetch(`${API_BASE}/api/scores`);
+  if (!res.ok) throw new Error('Failed to fetch global scores');
+  return res.json();
+}
+
+async function postScore(initials, score) {
+  await fetch(`${API_BASE}/api/scores`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ player: initials, score }),
+  });
+}
+
+function qualifiesForGlobal(score, globalScores) {
+  if (!globalScores || globalScores.length < 10) return true;
+  return score > globalScores[globalScores.length - 1].score;
+}
+
+function qualifiesForAnyBoard(score, globalScores) {
+  return qualifiesForLeaderboard(score) || qualifiesForGlobal(score, globalScores);
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -1069,6 +1105,11 @@ export default function Game() {
   const [calcDisplayScore, setCalcDisplayScore] = useState(0);
   const [calcLines, setCalcLines]         = useState([]);
   // each entry: { labelVis, detailVis, detailNum, ptsVis, ptsNum }
+  const [globalScores, setGlobalScores]   = useState([]);
+  const [globalLoading, setGlobalLoading] = useState(false);
+  const [leaderboardTab, setLeaderboardTab] = useState('global');
+  const [newInitials, setNewInitials]     = useState('');
+  const globalScoresRef                   = useRef([]);
   const selectedTrackRef                  = useRef(2);
   const [selectedTrack, setSelectedTrack] = useState(2);
 
@@ -1456,7 +1497,19 @@ export default function Game() {
             running = false;
             setFinalScore(s.score);
             setIsWin(false);
-            setScreen(qualifiesForLeaderboard(s.score) ? 'enter_initials' : 'leaderboard');
+            if (qualifiesForAnyBoard(s.score, globalScoresRef.current)) {
+              setScreen('enter_initials');
+            } else {
+              const last = loadLastInitials() || '???';
+              postScore(last, s.score).catch(console.error);
+              setGlobalLoading(true);
+              fetchGlobalScores()
+                .then(fresh => { setGlobalScores(fresh); globalScoresRef.current = fresh; })
+                .catch(console.error)
+                .finally(() => setGlobalLoading(false));
+              setLeaderboardTab('global');
+              setScreen('leaderboard');
+            }
             return;
           }
           pl.x = W / 2;
@@ -1929,7 +1982,19 @@ export default function Game() {
 
       // All done — commit final score and transition
       setFinalScore(runningScore);
-      setScreen(qualifiesForLeaderboard(runningScore) ? 'enter_initials' : 'leaderboard');
+      if (qualifiesForAnyBoard(runningScore, globalScoresRef.current)) {
+        setScreen('enter_initials');
+      } else {
+        const last = loadLastInitials() || '???';
+        postScore(last, runningScore).catch(console.error);
+        setGlobalLoading(true);
+        fetchGlobalScores()
+          .then(fresh => { setGlobalScores(fresh); globalScoresRef.current = fresh; })
+          .catch(console.error)
+          .finally(() => setGlobalLoading(false));
+        setLeaderboardTab('global');
+        setScreen('leaderboard');
+      }
     };
 
     run();
@@ -2007,6 +2072,20 @@ export default function Game() {
     hiScoreRef.current = leaderboard[0]?.score ?? 0;
   }, [leaderboard]);
 
+  // Fetch global scores once on mount so they're ready before the first game ends
+  useEffect(() => {
+    setGlobalLoading(true);
+    fetchGlobalScores()
+      .then(scores => { setGlobalScores(scores); globalScoresRef.current = scores; })
+      .catch(console.error)
+      .finally(() => setGlobalLoading(false));
+  }, []);
+
+  // Keep globalScoresRef in sync whenever state updates
+  useEffect(() => {
+    globalScoresRef.current = globalScores;
+  }, [globalScores]);
+
   // Initials entry screen
   useEffect(() => {
     if (screen !== 'enter_initials') return;
@@ -2025,10 +2104,34 @@ export default function Game() {
         initialsRef.current = next;
         setInitialsDisplay(next);
       } else if (e.key === 'Enter' && cur.length === 3) {
-        const scores = saveScore(cur, finalScore);
-        Audio.sfxWaveClear;
-        setLeaderboard(scores);
-        setScreen('leaderboard');
+        saveLastInitials(cur);
+        setNewInitials(cur);
+        const isLocalQualifier = qualifiesForLeaderboard(finalScore);
+        if (isLocalQualifier) {
+          const scores = saveScore(cur, finalScore);
+          setLeaderboard(scores);
+        }
+        Audio.sfxWaveClear();
+        // Always POST for full game history. Tab choice is purely a display decision:
+        // new global best → GLOBAL, otherwise LOCAL if score qualifies there, else GLOBAL.
+        const existingGlobal = globalScoresRef.current.find(e => e.player === cur);
+        const isNewGlobalBest = !existingGlobal || finalScore > existingGlobal.score;
+        postScore(cur, finalScore)
+          .then(() => fetchGlobalScores())
+          .then(fresh => {
+            setGlobalScores(fresh);
+            globalScoresRef.current = fresh;
+            if (isNewGlobalBest) {
+              setLeaderboardTab('global');
+            } else {
+              setLeaderboardTab(isLocalQualifier ? 'local' : 'global');
+            }
+            setScreen('leaderboard');
+          })
+          .catch(() => {
+            setLeaderboardTab(isLocalQualifier ? 'local' : 'global');
+            setScreen('leaderboard');
+          });
       }
     };
 
@@ -2039,6 +2142,7 @@ export default function Game() {
 
   const startGame = () => {
     keysRef.current = {};
+    setNewInitials('');
     Audio.initAudio();
     Audio.startMusic(selectedTrackRef.current);
     setScreen('playing');
@@ -2073,7 +2177,16 @@ export default function Game() {
             </button>
             <button
               style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
-              onClick={() => { setIsWin(null); setScreen('leaderboard'); }}>
+              onClick={() => {
+                setIsWin(null);
+                setLeaderboardTab('global');
+                setGlobalLoading(true);
+                fetchGlobalScores()
+                  .then(s => { setGlobalScores(s); globalScoresRef.current = s; })
+                  .catch(console.error)
+                  .finally(() => setGlobalLoading(false));
+                setScreen('leaderboard');
+              }}>
               LEADERBOARD
             </button>
           </div>
@@ -2174,65 +2287,130 @@ export default function Game() {
         </div>
       )}
 
-      {screen === 'leaderboard' && (() => {
-        const hiEntry = leaderboard[0];
-        return (
-          <div style={{ ...STYLES.overlay, gap: 10 }}>
+      {screen === 'leaderboard' && (
+        <div style={{ ...STYLES.overlay, gap: 10 }}>
+          {/* Header */}
+          <div style={{
+            ...STYLES.title, fontSize: 28,
+            color: isWin === null ? '#00ffff' : isWin ? '#ffff00' : '#ff4444',
+            textShadow: isWin === null ? '0 0 16px #00ffff' : isWin ? '0 0 16px #ffaa00' : '0 0 16px #ff0000',
+          }}>
+            {isWin === null ? '— LEADERBOARD —' : isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex' }}>
+            {['global', 'local'].map(tab => (
+              <button
+                key={tab}
+                style={{
+                  ...STYLES.btn,
+                  fontSize: 13,
+                  padding: '6px 28px',
+                  letterSpacing: 3,
+                  background: leaderboardTab === tab ? '#00ffff' : 'transparent',
+                  color: leaderboardTab === tab ? '#000' : '#00ffff',
+                  border: '1px solid #00ffff55',
+                  borderRadius: tab === 'global' ? '4px 0 0 4px' : '0 4px 4px 0',
+                }}
+                onClick={() => setLeaderboardTab(tab)}
+              >
+                {tab.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
+          {/* Score list */}
+          <div style={{ fontFamily: 'PixelifySans', width: 400 }}>
             <div style={{
-              ...STYLES.title, fontSize: 28,
-              color: isWin === null ? '#00ffff' : isWin ? '#ffff00' : '#ff4444',
-              textShadow: isWin === null ? '0 0 16px #00ffff' : isWin ? '0 0 16px #ffaa00' : '0 0 16px #ff0000',
+              color: '#00ffff', fontSize: 13, letterSpacing: 3,
+              textAlign: 'center', marginBottom: 6, opacity: 0.8,
             }}>
-              {isWin === null ? '— LEADERBOARD —' : isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
+              ── TOP PILOTS ──
             </div>
 
-            <div style={{ fontFamily: 'PixelifySans', width: 400 }}>
-              <div style={{
-                color: '#00ffff', fontSize: 13, letterSpacing: 3,
-                textAlign: 'center', marginBottom: 6, opacity: 0.8,
-              }}>
-                ── TOP PILOTS ──
-              </div>
-              {leaderboard.length === 0 && (
-                <div style={{ color: '#445566', textAlign: 'left', fontSize: 14 }}>
+            {leaderboardTab === 'global' ? (
+              globalLoading ? (
+                <div style={{ color: '#445566', textAlign: 'center', fontSize: 14, padding: '12px 0' }}>
+                  LOADING...
+                </div>
+              ) : globalScores.length === 0 ? (
+                <div style={{ color: '#445566', textAlign: 'center', fontSize: 14 }}>
                   NO RECORDS YET
                 </div>
-              )}
-              {leaderboard.map((entry, i) => {
-                const isPlayer = !!entry.isNew;
-                return (
-                  <div key={i} style={{
-                    display: 'grid',
-                    gridTemplateColumns: '80px auto auto',
-                    padding: '8px 0px',
-                    background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
-                    borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
-                    color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
-                    fontSize: 24,
-                    fontFamily: 'Sixtyfour'
-                  }}>
-                    <span style={{ opacity: 0.6, textAlign: 'left' }}>{i + 1}.</span>
-                    <span style={{ fontWeight: 'bold', letterSpacing: 2 }}>{entry.initials}</span>
-                    <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(8, '0')}</span>
+              ) : (
+                // Deduplicate: one entry per player (highest score), sorted desc, top 10
+                (() => {
+                  const seen = new Set();
+                  const deduped = globalScores
+                    .slice()
+                    .sort((a, b) => b.score - a.score)
+                    .filter(e => !seen.has(e.player) && seen.add(e.player))
+                    .slice(0, 10);
+                  return deduped.map((entry, i) => {
+                  const isPlayer = !!newInitials && entry.player === newInitials;
+                  return (
+                    <div key={i} style={{
+                      display: 'grid',
+                      gridTemplateColumns: '80px auto auto',
+                      padding: '8px 0px',
+                      background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
+                      borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
+                      color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
+                      fontSize: 24,
+                      fontFamily: 'Sixtyfour',
+                    }}>
+                      <span style={{ opacity: 0.6, textAlign: 'left' }}>{i + 1}.</span>
+                      <span style={{ fontWeight: 'bold', letterSpacing: 2 }}>{entry.player}</span>
+                      <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(8, '0')}</span>
+                    </div>
+                  );
+                  })
+                })()
+              )
+            ) : (
+              <>
+                {leaderboard.length === 0 && (
+                  <div style={{ color: '#445566', textAlign: 'center', fontSize: 14 }}>
+                    NO RECORDS YET
                   </div>
-                );
-              })}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-              <button style={STYLES.btn} onClick={startGame}>
-                PLAY
-              </button>
-              <button
-                style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
-                onClick={() => setScreen('title')}>
-                TITLE SCREEN
-              </button>
-            </div>
-
+                )}
+                {leaderboard.map((entry, i) => {
+                  const isPlayer = !!entry.isNew;
+                  return (
+                    <div key={i} style={{
+                      display: 'grid',
+                      gridTemplateColumns: '80px auto auto',
+                      padding: '8px 0px',
+                      background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
+                      borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
+                      color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
+                      fontSize: 24,
+                      fontFamily: 'Sixtyfour',
+                    }}>
+                      <span style={{ opacity: 0.6, textAlign: 'left' }}>{i + 1}.</span>
+                      <span style={{ fontWeight: 'bold', letterSpacing: 2 }}>{entry.initials}</span>
+                      <span style={{ textAlign: 'right' }}>{String(entry.score).padStart(8, '0')}</span>
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>
-        );
-      })()}
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            <button style={STYLES.btn} onClick={startGame}>
+              PLAY
+            </button>
+            <button
+              style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
+              onClick={() => setScreen('title')}>
+              TITLE SCREEN
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

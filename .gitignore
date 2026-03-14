@@ -1,1 +1,7 @@
 node_modules
+dist
+
+# Environment / secrets — never commit these
+config.env
+server/config.env
+.env

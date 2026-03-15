@@ -1090,8 +1090,8 @@ const STYLES = {
   controls: { fontFamily: 'monospace', fontSize: 16, color: '#E2DED7', lineHeight: 1.8 },
   score: { fontFamily: 'Sixtyfour', fontSize: 54, color: '#ffff00' },
   btn: {
-    padding: '10px 32px',
-    fontSize: 16,
+    padding: '8px 20px',
+    fontSize: 20,
     fontFamily: 'PixelifySans',
     background: '#00ffff',
     color: '#000',
@@ -2234,7 +2234,7 @@ export default function Game() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     fontFamily: 'PixelifySans',
-                    fontSize: 13,
+                    fontSize: 16,
                     letterSpacing: 1,
                     opacity: line.labelVis ? 1 : 0,
                     transition: 'opacity 0.2s ease',
@@ -2306,7 +2306,7 @@ export default function Game() {
       )}
 
       {screen === 'leaderboard' && (
-        <div style={{ ...STYLES.overlay, gap: 10 }}>
+        <div style={{ ...STYLES.overlay, gap: 10, justifyContent: 'flex-start', paddingTop: 24 }}>
           {/* Header */}
           <div style={{
             ...STYLES.title, fontSize: 28,
@@ -2323,12 +2323,13 @@ export default function Game() {
                 key={tab}
                 style={{
                   ...STYLES.btn,
-                  fontSize: 13,
-                  padding: '6px 28px',
+                  fontFamily: 'monospace',
+                  fontSize: 15,
+                  padding: '5px 20px',
                   letterSpacing: 3,
-                  background: leaderboardTab === tab ? '#00ffff' : 'transparent',
-                  color: leaderboardTab === tab ? '#000' : '#00ffff',
-                  border: '1px solid #00ffff55',
+                  background: leaderboardTab === tab ? 'white' : 'transparent',
+                  color: leaderboardTab === tab ? '#000' : 'white',
+                  border: '1px solid white',
                   borderRadius: tab === 'global' ? '4px 0 0 4px' : '0 4px 4px 0',
                 }}
                 onClick={() => setLeaderboardTab(tab)}
@@ -2394,7 +2395,7 @@ export default function Game() {
                     <div key={i} style={{
                       display: 'grid',
                       gridTemplateColumns: '80px auto auto',
-                      padding: '8px 0px',
+                      padding: '7px 0px',
                       background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
                       borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
                       color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
@@ -2422,7 +2423,7 @@ export default function Game() {
                     <div key={i} style={{
                       display: 'grid',
                       gridTemplateColumns: '80px auto auto',
-                      padding: '8px 0px',
+                      padding: '7px 0px',
                       background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
                       borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
                       color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
@@ -2440,7 +2441,7 @@ export default function Game() {
           </div>
 
           {/* Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingBottom: 24, gap: 10 }}>
             <button style={STYLES.btn} onClick={startGame}>
               PLAY
             </button>

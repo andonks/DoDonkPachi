@@ -1,5 +1,6 @@
 node_modules
 dist
+dist/assets
 
 # Environment / secrets — never commit these
 config.env

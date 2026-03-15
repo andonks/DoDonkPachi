@@ -1023,17 +1023,30 @@ function saveScore(initials, score) {
 const API_BASE = 'https://dodonkpachi.onrender.com';
 
 async function fetchGlobalScores() {
-  const res = await fetch(`${API_BASE}/api/scores`);
-  if (!res.ok) throw new Error('Failed to fetch global scores');
-  return res.json();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(`${API_BASE}/api/scores`, { signal: controller.signal });
+    if (!res.ok) throw new Error('Failed to fetch global scores');
+    return res.json();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function postScore(initials, score) {
-  await fetch(`${API_BASE}/api/scores`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ player: initials, score }),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  try {
+    await fetch(`${API_BASE}/api/scores`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player: initials, score }),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function qualifiesForGlobal(score, globalScores) {
@@ -1107,6 +1120,7 @@ export default function Game() {
   // each entry: { labelVis, detailVis, detailNum, ptsVis, ptsNum }
   const [globalScores, setGlobalScores]   = useState([]);
   const [globalLoading, setGlobalLoading] = useState(false);
+  const [globalError, setGlobalError]     = useState(false);
   const [leaderboardTab, setLeaderboardTab] = useState('global');
   const [newInitials, setNewInitials]     = useState('');
   const globalScoresRef                   = useRef([]);
@@ -1503,9 +1517,10 @@ export default function Game() {
               const last = loadLastInitials() || '???';
               postScore(last, s.score).catch(console.error);
               setGlobalLoading(true);
+              setGlobalError(false);
               fetchGlobalScores()
                 .then(fresh => { setGlobalScores(fresh); globalScoresRef.current = fresh; })
-                .catch(console.error)
+                .catch(err => { console.error(err); setGlobalError(true); })
                 .finally(() => setGlobalLoading(false));
               setLeaderboardTab('global');
               setScreen('leaderboard');
@@ -1988,9 +2003,10 @@ export default function Game() {
         const last = loadLastInitials() || '???';
         postScore(last, runningScore).catch(console.error);
         setGlobalLoading(true);
+        setGlobalError(false);
         fetchGlobalScores()
           .then(fresh => { setGlobalScores(fresh); globalScoresRef.current = fresh; })
-          .catch(console.error)
+          .catch(err => { console.error(err); setGlobalError(true); })
           .finally(() => setGlobalLoading(false));
         setLeaderboardTab('global');
         setScreen('leaderboard');
@@ -2075,9 +2091,10 @@ export default function Game() {
   // Fetch global scores once on mount so they're ready before the first game ends
   useEffect(() => {
     setGlobalLoading(true);
+    setGlobalError(false);
     fetchGlobalScores()
       .then(scores => { setGlobalScores(scores); globalScoresRef.current = scores; })
-      .catch(console.error)
+      .catch(err => { console.error(err); setGlobalError(true); })
       .finally(() => setGlobalLoading(false));
   }, []);
 
@@ -2181,9 +2198,10 @@ export default function Game() {
                 setIsWin(null);
                 setLeaderboardTab('global');
                 setGlobalLoading(true);
+                setGlobalError(false);
                 fetchGlobalScores()
                   .then(s => { setGlobalScores(s); globalScoresRef.current = s; })
-                  .catch(console.error)
+                  .catch(err => { console.error(err); setGlobalError(true); })
                   .finally(() => setGlobalLoading(false));
                 setScreen('leaderboard');
               }}>
@@ -2333,6 +2351,29 @@ export default function Game() {
               globalLoading ? (
                 <div style={{ color: '#445566', textAlign: 'center', fontSize: 14, padding: '12px 0' }}>
                   LOADING...
+                </div>
+              ) : globalError ? (
+                <div style={{ color: '#ff4444', textAlign: 'center', fontSize: 13, padding: '12px 0', lineHeight: 1.8 }}>
+                  SERVER UNAVAILABLE<br/>
+                  <span style={{ fontSize: 11, opacity: 0.7 }}>Render may be waking up.</span><br/>
+                  <button
+                    onClick={() => {
+                      setGlobalLoading(true);
+                      setGlobalError(false);
+                      fetchGlobalScores()
+                        .then(scores => { setGlobalScores(scores); globalScoresRef.current = scores; })
+                        .catch(err => { console.error(err); setGlobalError(true); })
+                        .finally(() => setGlobalLoading(false));
+                    }}
+                    style={{
+                      marginTop: 8, padding: '4px 14px', fontSize: 12,
+                      fontFamily: 'PixelifySans', letterSpacing: 2,
+                      background: 'transparent', color: '#ff4444',
+                      border: '1px solid #ff444488', cursor: 'pointer',
+                    }}
+                  >
+                    RETRY
+                  </button>
                 </div>
               ) : globalScores.length === 0 ? (
                 <div style={{ color: '#445566', textAlign: 'center', fontSize: 14 }}>

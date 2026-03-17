@@ -9,6 +9,12 @@ const ship1 = '#003A8A';
 const ship2 = '#9FA7B7';
 const ship3 = '#D383D3';
 
+let xTarget;
+let yTarget;
+
+let turret1;
+
+
 // ─── Fancy Title Animation ───────────────────────────────────────────────────
 
 export function FancyText({ text }) {
@@ -198,7 +204,22 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.restore();
 }
 
-function drawEnemy(ctx, e, frame) {
+// Source - https://stackoverflow.com/a/9614122
+// Posted by Christian Mann, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-03-16, License - CC BY-SA 3.0
+
+// function turretAngle(cx, cy, ex, ey) {
+//  var dy = ey - cy;
+//  var dx = ex - cx;
+//  var theta = Math.atan2(dy, dx); // range (-PI, PI]
+//  theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
+  // if (theta < 0) theta = 360 + theta; // range [0, 360)
+
+//  console.log(theta);
+//  return theta;
+//}
+
+function drawEnemy(ctx, e, frame, playerX, playerY) {
   const { x, y, type, hp, maxHp } = e;
   const t = hp / maxHp;
   ctx.save();
@@ -243,6 +264,36 @@ function drawEnemy(ctx, e, frame) {
     cg.addColorStop(0, '#ff4444'); cg.addColorStop(1, 'transparent');
     ctx.fillStyle = cg;
     ctx.beginPath(); ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
+
+  } else if (type === 'tank') {
+    // body
+    ctx.fillStyle = `hotpink`;
+    ctx.beginPath();
+    ctx.rect(-30,-30,60,60);
+    ctx.closePath();
+    ctx.fill();
+    // turret
+
+    ctx.fillStyle = 'purple';
+    ctx.beginPath();
+    ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    const dy = playerY - e.y;
+    const dx = playerX - e.x;
+    var theta = Math.atan2(dy, dx);
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = 'orange';
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo(60 * Math.cos(theta), 60 * Math.sin(theta));
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = 'orange';
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    turret1 = theta;
+    console.log(turret1);
 
   } else if (type === 'boss') {
     // ── Scaled body (2× base size) ─────────────────────────────────────────
@@ -420,7 +471,7 @@ function mkCollectable(x, y) {
   };
 }
 
-const DROP_COUNT = { grunt: 1, fighter: 2, bomber: 5, boss: 20 };
+const DROP_COUNT = { grunt: 1, fighter: 2, bomber: 5 };
 const COLLECT_PTS = 300;
 
 function drawCollectable(ctx, c, frame) {
@@ -541,9 +592,10 @@ function explode(s, x, y, sz = 1) {
 
 // Stats and base kill scores
 const EDEFS = {
-  grunt:   { w: 48, h: 40, maxHp: 3,    score: 500,   fireRate: 170, bspd: 1.75 },
-  fighter: { w: 72, h: 60, maxHp: 8,    score: 2000,   fireRate: 140, bspd: 2    },
-  bomber:  { w: 108,h: 84, maxHp: 30,   score: 6000,  fireRate: 76,  bspd: 1.4  },
+  grunt:   { w: 48, h: 40, maxHp: 8,    score: 500,   fireRate: 120, bspd: 1.75 },
+  fighter: { w: 72, h: 60, maxHp: 16,    score: 2000,   fireRate: 140, bspd: 2    },
+  bomber:  { w: 108,h: 84, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4  },
+  tank:    { w: 108,h: 84, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4  },
   boss:    { w: 240,h: 180, maxHp: 2000, score: 200000, fireRate: 36,  bspd: 1.75 },
 };
 
@@ -569,7 +621,7 @@ function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
   };
 }
 
-function updateEnemy(e, px, py, bullets) {
+function updateEnemy(ctx, e, px, py, bullets) {
   e.timer++;
   e.fireTimer++;
 
@@ -607,8 +659,20 @@ function updateEnemy(e, px, py, bullets) {
       e.y += e.vy;
       break;
     case 'side_r':   // enter from right edge, fly diagonally left-downward
+      const FLATTEN_START_X = W * 0.6;       // x position where easing begins
+      const FLATTEN_END_X   = W * 0.15;      // x position where vy reaches 0
+
       e.x -= 2.6;
-      e.y += e.vy;
+
+      if (e.x > FLATTEN_START_X) {
+        // still in entry arc — use full vy
+        e.y += e.vy;
+      } else if (e.x > FLATTEN_END_X) {
+        // easing zone — linearly interpolate vy down to 0
+        const t = (e.x - FLATTEN_END_X) / (FLATTEN_START_X - FLATTEN_END_X); // 1→0
+        e.y += e.vy * t;
+      }
+      // if e.x <= FLATTEN_END_X: add nothing to y → perfectly flat
       break;
     case 'hover_mid':  // descend to mid-screen, hover & fire, then retreat up
       if (e.phase === 0) {
@@ -676,6 +740,28 @@ function updateEnemy(e, px, py, bullets) {
     }
   }
 
+  //Experiment: Tank burst
+  if (e.type === 'tank' && e.y < H * 0.95) {
+
+    const cycle = e.timer % 120;
+
+    if (cycle === 45) {
+      xTarget = structuredClone(px);
+      yTarget = structuredClone(py);
+    }
+
+    if (cycle >= 45 && cycle < 55 && e.timer % 3 === 0) {
+      let ca = Math.atan2(yTarget - e.y, xTarget - e.x);
+      let dy = py - e.y;
+      let dx = px - e.x;
+      var theta = Math.atan2(dy, dx);
+      let turretX = e.x + 60 * Math.cos(theta);
+      let turretY = e.y + 60 * Math.sin(theta);
+      //console.log(theta);
+      spread(turretX, turretY, 2, ca, 0.38, e.bspd * 3.5, '#6beeff').forEach(b => bullets.push(b));
+    }
+  }
+
   // Shooting — only fire while in the top 95% of the screen
   if (e.fireTimer < e.fireRate) return;
   if (e.y > H * 0.95) return;
@@ -690,7 +776,7 @@ function updateEnemy(e, px, py, bullets) {
     }
     case 'fighter': {
       const ca = Math.atan2(py - e.y, px - e.x);
-      spread(e.x, e.y, 3, ca, 0.38, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      spread(e.x, e.y, 5, ca, 0.38, e.bspd, '#ffee00').forEach(b => bullets.push(b));
       break;
     }
     case 'bomber': {
@@ -698,6 +784,15 @@ function updateEnemy(e, px, py, bullets) {
       [-16, 0, 16].forEach(dx => {
         [0, 10, 20].forEach(dy => {
           bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#ffaa00'));
+        });
+      });
+      break;
+    }
+    case 'tank': {
+      // loose 3×3 cluster, all fired straight down, + aimed burst
+      [-16, 0, 16].forEach(dx => {
+        [0, 10, 20].forEach(dy => {
+          bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#6BEEFF'));
         });
       });
       break;
@@ -751,49 +846,53 @@ function updateEnemy(e, px, py, bullets) {
 const WAVES = [
   // 0: Opener — 24 grunts, right side first then left side
   [
-    { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
-    { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at:  55, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at:  55, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+    { at:  0, type:'tank',  x: 120, sy: 15, pat:'straight', vy:0.4 },
 
-    { at:  85, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
-    { at:  85, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+    //{ at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+    //{ at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    //{ at:  55, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    //{ at:  55, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-    { at: 140, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
-    { at: 140, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 165, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 165, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+    //{ at:  85, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+    //{ at:  85, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    //{ at: 110, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    //{ at: 110, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-    { at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
-    { at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+    //{ at: 140, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+    //{ at: 140, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    //{ at: 165, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    // { at: 165, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
-    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+//    { at: 270, type:'tank', x: 360, sy: 15, pat:'straight', vy:0.4 },
 
-    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
-    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+    { at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+
+    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+
+    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
   ],
   // 1: 4 fighters + 12 grunts (sides), right side first then left
   [
     { at:   0, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
 
-    { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
-    { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at:  55, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at:  55, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+    { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:3.2 },
+    { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+    { at:  55, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+    { at:  55, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:3.2 },
 
-    { at:  85, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
-    { at:  85, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+    { at:  85, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:3.2 },
+    { at:  85, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+    { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+    { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:3.2 },
 
     { at: 120, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
@@ -801,15 +900,15 @@ const WAVES = [
 
     { at: 300, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
 
-    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
-    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
-    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
   ],
   // 2: 2 bombers + 16 grunts (hover_mid)
   [
@@ -852,15 +951,15 @@ const WAVES = [
     { at: 230, type:'fighter', x:100, pat:'zigzag',    vy:1.5 },
     { at: 230, type:'fighter', x:380, pat:'zigzag',    vy:1.5 },
 
-    { at: 255, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:1.6 },
-    { at: 255, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 280, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 280, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:1.6 },
+    { at: 255, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 255, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 280, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 280, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-    { at: 300, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:1.6 },
-    { at: 300, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 325, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:1.6 },
-    { at: 325, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:1.6 },
+    { at: 300, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:3.2 },
+    { at: 300, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+    { at: 325, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+    { at: 325, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:3.2 },
 
     { at: 360, type:'fighter', x:100, pat:'curve_r',  vy:1.3 },
     { at: 360, type:'fighter', x:380, pat:'curve_l',  vy:1.3 },
@@ -870,17 +969,17 @@ const WAVES = [
     { at:   0, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
     { at:   0, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
 
-    { at:  50, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at:  50, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+    { at:  50, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at:  50, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
 
-    { at:  90, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at:  90, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+    { at:  90, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at:  90, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
 
-    { at: 120, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 120, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+    { at: 120, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 120, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
 
-    { at: 150, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:1.6 },
-    { at: 150, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:1.6 },
+    { at: 150, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 150, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
 
     { at: 165, type:'grunt',  x: 80, pat:'hover_mid', vy:2.5 },
     { at: 165, type:'grunt',  x:400, pat:'hover_mid', vy:2.5 },
@@ -1324,7 +1423,7 @@ export default function Game() {
       }
 
       // ── Update enemies ────────────────────────────────────────────────────
-      s.enemies.forEach(e => updateEnemy(e, pl.x, pl.y, s.enemyBullets));
+      s.enemies.forEach(e => updateEnemy(ctx, e, pl.x, pl.y, s.enemyBullets));
 
       // Boss transition — ongoing explosions during freeze stage, shake during charge
       s.enemies.forEach(en => {
@@ -1411,8 +1510,8 @@ export default function Game() {
                 s.bossDeathTimer = 180;
                 s.flashTimer = 20;
                 // Convert every enemy bullet on screen into a collectable pickup
-                s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
-                s.enemyBullets = [];
+                // s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
+                // s.enemyBullets = [];
                 // Initial burst: several big explosions scattered around the boss
                 for (let i = 0; i < 8; i++) {
                   const ox = (Math.random() - 0.5) * 130;
@@ -1690,7 +1789,7 @@ export default function Game() {
       s.collectables.forEach(c => drawCollectable(ctx, c, s.frame));
 
       // Enemies
-      s.enemies.forEach(e => drawEnemy(ctx, e, s.frame));
+      s.enemies.forEach(e => drawEnemy(ctx, e, s.frame, pl.x, pl.y));
 
       // Explosion rings (above enemies, under bullets)
       s.explosions.forEach(ex => drawExplosion(ctx, ex));

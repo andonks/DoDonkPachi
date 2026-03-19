@@ -9,11 +9,13 @@ const ship1 = '#003A8A';
 const ship2 = '#9FA7B7';
 const ship3 = '#D383D3';
 
-let xTarget;
-let yTarget;
+var xTarget;
+var yTarget;
 
-let turret1;
-
+var turret1 = 0;
+var turret2;
+var theta;
+const maxTurn = 0.01;
 
 // ─── Fancy Title Animation ───────────────────────────────────────────────────
 
@@ -208,16 +210,48 @@ function drawPlayer(ctx, x, y, frame, focused) {
 // Posted by Christian Mann, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-03-16, License - CC BY-SA 3.0
 
-// function turretAngle(cx, cy, ex, ey) {
-//  var dy = ey - cy;
-//  var dx = ex - cx;
-//  var theta = Math.atan2(dy, dx); // range (-PI, PI]
-//  theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
-  // if (theta < 0) theta = 360 + theta; // range [0, 360)
 
-//  console.log(theta);
-//  return theta;
-//}
+
+
+// calculate new angle and convert back to radians
+function getTheta(a, b) {
+
+  let diff = (b - a) % (2 * Math.PI);
+  if (diff > Math.PI) {
+      diff -= 2 * Math.PI;
+  } else if (diff < -Math.PI) {
+      diff += 2 * Math.PI;
+  }
+  console.log(diff);
+
+  //console.log(a);
+  //console.log(b);
+
+  if (Math.abs(diff) > maxTurn) {
+    if (diff > 0) {
+    theta = a + maxTurn;
+    }
+    else if (diff < 0) {
+    theta = a - maxTurn;
+    }
+  }
+  else {
+    theta = b;
+  }
+
+  if (theta > Math.PI) {
+    theta -= 2 * Math.PI
+  }
+  if (theta < -Math.PI) {
+    theta += 2 * Math.PI
+  }
+
+  turret1 = theta;
+  console.log(theta);
+  return theta;
+
+  }
+
 
 function drawEnemy(ctx, e, frame, playerX, playerY) {
   const { x, y, type, hp, maxHp } = e;
@@ -273,27 +307,31 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.closePath();
     ctx.fill();
     // turret
-
     ctx.fillStyle = 'purple';
     ctx.beginPath();
     ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
+    // calculate target angle (between turret & player)
     const dy = playerY - e.y;
     const dx = playerX - e.x;
-    var theta = Math.atan2(dy, dx);
+    turret2 = Math.atan2(dy, dx);
+    console.log(turret2);
+
+    // calculate new angle (limited by turning radius)
+    getTheta(turret1,turret2);
+
     ctx.lineWidth = 10;
     ctx.strokeStyle = 'orange';
     ctx.beginPath();
     ctx.moveTo(0,0);
+
+    // calculate new x,y position for turret muzzle and draw line
     ctx.lineTo(60 * Math.cos(theta), 60 * Math.sin(theta));
     ctx.closePath();
     ctx.stroke();
     ctx.fillStyle = 'orange';
     ctx.beginPath();
     ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
-    turret1 = theta;
-    console.log(turret1);
 
   } else if (type === 'boss') {
     // ── Scaled body (2× base size) ─────────────────────────────────────────
@@ -750,14 +788,14 @@ function updateEnemy(ctx, e, px, py, bullets) {
       yTarget = structuredClone(py);
     }
 
-    if (cycle >= 45 && cycle < 55 && e.timer % 3 === 0) {
+    // turned off for testing by setting cycle start and finish to same time (45)
+    if (cycle >= 45 && cycle < 45 && e.timer % 3 === 0) {
       let ca = Math.atan2(yTarget - e.y, xTarget - e.x);
       let dy = py - e.y;
       let dx = px - e.x;
       var theta = Math.atan2(dy, dx);
       let turretX = e.x + 60 * Math.cos(theta);
       let turretY = e.y + 60 * Math.sin(theta);
-      //console.log(theta);
       spread(turretX, turretY, 2, ca, 0.38, e.bspd * 3.5, '#6beeff').forEach(b => bullets.push(b));
     }
   }
@@ -792,7 +830,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
       // loose 3×3 cluster, all fired straight down, + aimed burst
       [-16, 0, 16].forEach(dx => {
         [0, 10, 20].forEach(dy => {
-          bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#6BEEFF'));
+        //  bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#6BEEFF'));
         });
       });
       break;
@@ -846,7 +884,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
 const WAVES = [
   // 0: Opener — 24 grunts, right side first then left side
   [
-    { at:  0, type:'tank',  x: 120, sy: 15, pat:'straight', vy:0.4 },
+    { at:  0, type:'tank',  x: W/2, sy: H/2, pat:'straight', vy:0.0 },
 
     //{ at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
     //{ at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
@@ -865,20 +903,20 @@ const WAVES = [
 
 //    { at: 270, type:'tank', x: 360, sy: 15, pat:'straight', vy:0.4 },
 
-    { at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+    //{ at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    //{ at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    //{ at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    //{ at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+    //{ at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    //{ at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    //{ at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    //{ at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+    //{ at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    //{ at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    //{ at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    //{ at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
   ],
   // 1: 4 fighters + 12 grunts (sides), right side first then left
   [

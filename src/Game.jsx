@@ -11,6 +11,8 @@ const ship3 = '#D383D3';
 
 var xTarget;
 var yTarget;
+var turretX;
+var turretY;
 
 var turret1 = 0;
 var turret2;
@@ -206,14 +208,8 @@ function drawPlayer(ctx, x, y, frame, focused) {
   ctx.restore();
 }
 
-// Source - https://stackoverflow.com/a/9614122
-// Posted by Christian Mann, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-03-16, License - CC BY-SA 3.0
 
-
-
-
-// calculate new angle and convert back to radians
+// calculate new angle
 function getTheta(a, b) {
 
   let diff = (b - a) % (2 * Math.PI);
@@ -222,10 +218,6 @@ function getTheta(a, b) {
   } else if (diff < -Math.PI) {
       diff += 2 * Math.PI;
   }
-  console.log(diff);
-
-  //console.log(a);
-  //console.log(b);
 
   if (Math.abs(diff) > maxTurn) {
     if (diff > 0) {
@@ -247,9 +239,7 @@ function getTheta(a, b) {
   }
 
   turret1 = theta;
-  console.log(theta);
   return theta;
-
   }
 
 
@@ -315,7 +305,6 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     const dy = playerY - e.y;
     const dx = playerX - e.x;
     turret2 = Math.atan2(dy, dx);
-    console.log(turret2);
 
     // calculate new angle (limited by turning radius)
     getTheta(turret1,turret2);
@@ -326,7 +315,9 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.moveTo(0,0);
 
     // calculate new x,y position for turret muzzle and draw line
-    ctx.lineTo(60 * Math.cos(theta), 60 * Math.sin(theta));
+    turretX = (60 * Math.cos(theta));
+    turretY = (60 * Math.sin(theta));
+    ctx.lineTo(turretX, turretY);
     ctx.closePath();
     ctx.stroke();
     ctx.fillStyle = 'orange';
@@ -778,27 +769,52 @@ function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
-  //Experiment: Tank burst
+  // "Seeking" burst fire (adjusts to player movement)
+  if (e.type === 'bomber' && e.y < H * 0.95) {
+
+    const cycle = e.timer % 120;
+    const ca = Math.atan2(py - e.y, px - e.x);
+
+    if (cycle >= 25 && cycle < 45 && e.timer % 3 === 0) {
+      spread(e.x, e.y, 5, ca, 0.38, e.bspd *3.5, '#ffee00').forEach(b => bullets.push(b));
+    }
+  }
+
+  // Stationary burst fire (aim once, fire continuously at the same point)
+  if (e.type === 'control' && e.y < H * 0.95) {
+
+    const cycle = e.timer % 120;
+    if (cycle === 25) {
+          xTarget = structuredClone(px);
+          yTarget = structuredClone(py);
+        }
+
+    if (cycle >= 25 && cycle < 90 && e.timer % 10 === 0) {
+    const ca = Math.atan2(yTarget - e.y, xTarget - e.x);
+
+    spread(e.x, e.y, 3, ca, 0.38, e.bspd * 3.5, '#ffee00').forEach(b => bullets.push(b));
+    }
+  }
+
+  // Turret fire
   if (e.type === 'tank' && e.y < H * 0.95) {
 
     const cycle = e.timer % 120;
+    if (cycle === 25) {
+          xTarget = structuredClone(px);
+          yTarget = structuredClone(py);
+        }
 
-    if (cycle === 45) {
-      xTarget = structuredClone(px);
-      yTarget = structuredClone(py);
-    }
+    if (cycle >= 25 && cycle < 90 && e.timer % 10 === 0) {
+    const ca = turret1;
 
-    // turned off for testing by setting cycle start and finish to same time (45)
-    if (cycle >= 45 && cycle < 45 && e.timer % 3 === 0) {
-      let ca = Math.atan2(yTarget - e.y, xTarget - e.x);
-      let dy = py - e.y;
-      let dx = px - e.x;
-      var theta = Math.atan2(dy, dx);
-      let turretX = e.x + 60 * Math.cos(theta);
-      let turretY = e.y + 60 * Math.sin(theta);
-      spread(turretX, turretY, 2, ca, 0.38, e.bspd * 3.5, '#6beeff').forEach(b => bullets.push(b));
+    turretX = e.x + (60 * Math.cos(turret1));
+    turretY = e.y + (60 * Math.sin(turret1));
+    bullets.push(mkBullet(turretX, turretY, Math.cos(ca) * e.bspd * 3.5, Math.sin(ca) * e.bspd * 3.5, 'enemy', '#000000'));
+    //spread(turretX, turretY, 3, ca, 0.38, e.bspd * 3.5, '#ffee00').forEach(b => bullets.push(b));
     }
   }
+
 
   // Shooting — only fire while in the top 95% of the screen
   if (e.fireTimer < e.fireRate) return;
@@ -830,7 +846,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
       // loose 3×3 cluster, all fired straight down, + aimed burst
       [-16, 0, 16].forEach(dx => {
         [0, 10, 20].forEach(dy => {
-        //  bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#6BEEFF'));
+        // bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#6BEEFF'));
         });
       });
       break;
@@ -885,7 +901,6 @@ const WAVES = [
   // 0: Opener — 24 grunts, right side first then left side
   [
     { at:  0, type:'tank',  x: W/2, sy: H/2, pat:'straight', vy:0.0 },
-
     //{ at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
     //{ at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
     //{ at:  55, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },

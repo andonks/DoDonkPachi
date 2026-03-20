@@ -9,15 +9,13 @@ const ship1 = '#003A8A';
 const ship2 = '#9FA7B7';
 const ship3 = '#D383D3';
 
-var xTarget;
-var yTarget;
-var turretX;
-var turretY;
-
-var turret1 = 0;
-var turret2;
-var theta;
 const maxTurn = 0.01;
+var theta;
+
+// move to enemy array with default value
+
+// var turret1 = -Math.PI/2;
+
 
 // ─── Fancy Title Animation ───────────────────────────────────────────────────
 
@@ -211,14 +209,12 @@ function drawPlayer(ctx, x, y, frame, focused) {
 
 // calculate new angle
 function getTheta(a, b) {
-
   let diff = (b - a) % (2 * Math.PI);
   if (diff > Math.PI) {
       diff -= 2 * Math.PI;
   } else if (diff < -Math.PI) {
       diff += 2 * Math.PI;
   }
-
   if (Math.abs(diff) > maxTurn) {
     if (diff > 0) {
     theta = a + maxTurn;
@@ -230,15 +226,12 @@ function getTheta(a, b) {
   else {
     theta = b;
   }
-
   if (theta > Math.PI) {
     theta -= 2 * Math.PI
   }
   if (theta < -Math.PI) {
     theta += 2 * Math.PI
   }
-
-  turret1 = theta;
   return theta;
   }
 
@@ -289,14 +282,21 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.fillStyle = cg;
     ctx.beginPath(); ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
 
-  } else if (type === 'tank') {
-    // body
-    ctx.fillStyle = `hotpink`;
+  } else if (type === 'vette') {
+    ctx.fillStyle = 'hotpink';
     ctx.beginPath();
-    ctx.rect(-30,-30,60,60);
-    ctx.closePath();
-    ctx.fill();
-    // turret
+    ctx.moveTo(-75, -200);
+    ctx.lineTo(-75, 15);
+    ctx.lineTo(-25, 40);
+    ctx.lineTo(-25, 0);
+    ctx.lineTo(25, 0)
+    ctx.lineTo(25, 40);
+    ctx.lineTo(75, 15);
+    ctx.lineTo(75, -200);
+    ctx.lineTo(0, -250);
+    ctx.closePath(); ctx.fill();
+
+  } else if (type === 'turret') {
     ctx.fillStyle = 'purple';
     ctx.beginPath();
     ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
@@ -304,10 +304,11 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     // calculate target angle (between turret & player)
     const dy = playerY - e.y;
     const dx = playerX - e.x;
-    turret2 = Math.atan2(dy, dx);
+    const turret2 = Math.atan2(dy, dx);
 
     // calculate new angle (limited by turning radius)
-    getTheta(turret1,turret2);
+    getTheta(e.turret1,turret2);
+    e.turret1 = theta;
 
     ctx.lineWidth = 8;
     ctx.strokeStyle = 'purple';
@@ -315,16 +316,15 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.moveTo(0,0);
 
     // calculate new x,y position for turret muzzle and draw line
-    turretX = (60 * Math.cos(theta));
-    turretY = (60 * Math.sin(theta));
+    const turretX = (60 * Math.cos(e.turret1));
+    const turretY = (60 * Math.sin(e.turret1));
     ctx.lineTo(turretX, turretY);
     ctx.closePath();
     ctx.stroke();
-
     ctx.lineWidth = 20;
     ctx.beginPath();
     ctx.moveTo(0,0);
-    ctx.lineTo((27 * Math.cos(theta)),(27 * Math.sin(theta)));
+    ctx.lineTo((27 * Math.cos(e.turret1)),(27 * Math.sin(e.turret1)));
     ctx.closePath();
     ctx.stroke();
 
@@ -480,6 +480,9 @@ function spawnExplosionRings(s, x, y, type) {
     push(0, 0, 80, 38, '#ff5500');
     push(0, 0, 50, 28, '#ffcc00', 6);
     push(0, 0, 26, 18, '#ffffff', 12);
+  } else if (type == 'turret') {
+    push(0, 0, 52, 28, '#ffaa00');
+    push(0, 0, 28, 18, '#ffffff', 6);
   } else if (type === 'player') {
     push(0, 0, 130, 48, '#ffffff');
     push(0, 0,  95, 40, '#aaddff',  7);
@@ -640,10 +643,11 @@ function explode(s, x, y, sz = 1) {
 // (hitbox w/h, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
   grunt:   { w: 48, h: 40, maxHp: 8,    score: 500,   fireRate: 120, bspd: 1.75 },
-  fighter: { w: 72, h: 60, maxHp: 16,    score: 2000,   fireRate: 140, bspd: 2    },
-  bomber:  { w: 108,h: 84, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4  },
-  tank:    { w: 30,h: 30, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4  },
-  boss:    { w: 240,h: 180, maxHp: 2000, score: 200000, fireRate: 36,  bspd: 1.75 },
+  fighter: { w: 72, h: 60, maxHp: 16,    score: 2000,   fireRate: 140, bspd: 2 },
+  bomber:  { w: 108, h: 84, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4 },
+  vette:   { w: 40, h: 80, maxHp: 120, score: 12000, fireRate: 76, bspd: 2.5 },
+  turret:  { w: 30, h: 30, maxHp: 60, score: 6000, fireRate: 76, bspd: 1.4 , turret1: 0 },
+  boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
 };
 
 function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
@@ -656,6 +660,7 @@ function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
     score: d.score,
     fireRate: d.fireRate,
     bspd: d.bspd,
+    turret1: d.turret1,
     vy,
     timer: 0,
     fireTimer: Math.floor(Math.random() * 50),
@@ -803,8 +808,8 @@ function updateEnemy(ctx, e, px, py, bullets) {
 
     const cycle = e.timer % 120;
     if (cycle === 25) {
-          xTarget = structuredClone(px);
-          yTarget = structuredClone(py);
+          const xTarget = structuredClone(px);
+          const yTarget = structuredClone(py);
         }
 
     if (cycle >= 25 && cycle < 90 && e.timer % 10 === 0) {
@@ -814,15 +819,15 @@ function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
-  // Turret fire - big sinle projectiles
-  if (e.type === 'tank' && e.y < H * 0.95) {
+  // Turret fire - big single projectiles
+  if (e.type === 'turret' && e.y < H * 0.95) {
     const cycle = e.timer % 120;
 
     if (cycle >= 25 && cycle < 90 && e.timer % 20 === 0) {
-    const ca = turret1;
+    const ca = e.turret1;
 
-    turretX = e.x + (60 * Math.cos(turret1));
-    turretY = e.y + (60 * Math.sin(turret1));
+    const turretX = e.x + (60 * Math.cos(e.turret1));
+    const turretY = e.y + (60 * Math.sin(e.turret1));
     const b = mkBullet(turretX, turretY, Math.cos(ca) * e.bspd * 3.5, Math.sin(ca) * e.bspd * 3.5, 'enemy', 'black');
     b.chonk = true;
     bullets.push(b);
@@ -856,7 +861,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
       });
       break;
     }
-    case 'tank': {
+    case 'turret': {
       // loose 3×3 cluster, all fired straight down, + aimed burst
       [-16, 0, 16].forEach(dx => {
         [0, 10, 20].forEach(dy => {
@@ -910,11 +915,15 @@ function updateEnemy(ctx, e, px, py, bullets) {
 
 // ─── Wave scripts ─────────────────────────────────────────────────────────────
 // Each entry: { at: frameOffset, type, x, pattern, vy }
+// Lanes at x = 120, 180, 240, 300, 360
 
 const WAVES = [
   // 0: Opener — 24 grunts, right side first then left side
   [
-    { at:  0, type:'tank',  x: W/2, sy: H/2, pat:'straight', vy:0.0 },
+    { at:  0, type:'vette',   x: 130, sy: 15, pat:'straight', vy:0.8 },
+    { at:  0, type:'turret',  x:  80, sy: 15, pat:'straight', vy:0.8 },
+    { at:  0, type:'turret',  x: 180, sy: 15, pat:'straight', vy:0.8 },
+
     //{ at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
     //{ at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
     //{ at:  55, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
@@ -930,7 +939,7 @@ const WAVES = [
     //{ at: 165, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
     // { at: 165, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-//    { at: 270, type:'tank', x: 360, sy: 15, pat:'straight', vy:0.4 },
+//    { at: 270, type:'turret', x: 360, sy: 15, pat:'straight', vy:0.4 },
 
     //{ at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
     //{ at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
@@ -1600,7 +1609,7 @@ export default function Game() {
         // Enemy bullets
         for (const b of s.enemyBullets) {
           if (b.chonk) {
-            if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 32, 32)) {
+            if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 12, 12)) {
               playerHit = true;
               break;
             }
@@ -1902,10 +1911,10 @@ export default function Game() {
 
       ctx.restore();
 
-      // White flash (player/boss death)
+      // White full screen flash (player/boss death)
       if (s.flashTimer > 0) {
         ctx.save();
-        ctx.globalAlpha = (s.flashTimer / 14) * 0.85;
+        ctx.globalAlpha = (s.flashTimer / 8) * 0.85;
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, W, H);
         ctx.restore();

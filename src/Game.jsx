@@ -309,8 +309,8 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     // calculate new angle (limited by turning radius)
     getTheta(turret1,turret2);
 
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = 'orange';
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = 'purple';
     ctx.beginPath();
     ctx.moveTo(0,0);
 
@@ -320,6 +320,14 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(turretX, turretY);
     ctx.closePath();
     ctx.stroke();
+
+    ctx.lineWidth = 20;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo((27 * Math.cos(theta)),(27 * Math.sin(theta)));
+    ctx.closePath();
+    ctx.stroke();
+
     ctx.fillStyle = 'orange';
     ctx.beginPath();
     ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
@@ -386,6 +394,15 @@ function drawBullet(ctx, b, frame) {
     ctx.beginPath(); ctx.ellipse(b.x, b.y, 4, 20, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#cc88ff';
     ctx.beginPath(); ctx.ellipse(b.x, b.y, 2, 12, 0, 0, Math.PI * 2); ctx.fill();
+  } else if (b.chonk) {
+    // Turret projectiles - big and chonky!
+    const p = 0.8 + Math.sin(frame * 0.1 + b.id * 1.1) * 0.1;
+    const g = ctx.createRadialGradient(b.x, b.y, 6, b.x, b.y, 36 * p);
+      g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, '#ff00cc'); g.addColorStop(1, 'rgba(255,0,180,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(b.x, b.y, 36 * p, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#lightblue';
+    ctx.beginPath(); ctx.arc(b.x, b.y, 18 * p, 0, Math.PI * 2); ctx.fill();
   } else {
     // default enemy bullets?
     const p = 0.8 + Math.sin(frame * 0.22 + b.id * 1.7) * 0.2;
@@ -619,12 +636,13 @@ function explode(s, x, y, sz = 1) {
 
 // ─── Enemy definitions ────────────────────────────────────────────────────────
 
-// Stats and base kill scores
+// Default stats
+// (hitbox w/h, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
   grunt:   { w: 48, h: 40, maxHp: 8,    score: 500,   fireRate: 120, bspd: 1.75 },
   fighter: { w: 72, h: 60, maxHp: 16,    score: 2000,   fireRate: 140, bspd: 2    },
   bomber:  { w: 108,h: 84, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4  },
-  tank:    { w: 108,h: 84, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4  },
+  tank:    { w: 30,h: 30, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4  },
   boss:    { w: 240,h: 180, maxHp: 2000, score: 200000, fireRate: 36,  bspd: 1.75 },
 };
 
@@ -796,22 +814,18 @@ function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
-  // Turret fire
+  // Turret fire - big sinle projectiles
   if (e.type === 'tank' && e.y < H * 0.95) {
-
     const cycle = e.timer % 120;
-    if (cycle === 25) {
-          xTarget = structuredClone(px);
-          yTarget = structuredClone(py);
-        }
 
-    if (cycle >= 25 && cycle < 90 && e.timer % 10 === 0) {
+    if (cycle >= 25 && cycle < 90 && e.timer % 20 === 0) {
     const ca = turret1;
 
     turretX = e.x + (60 * Math.cos(turret1));
     turretY = e.y + (60 * Math.sin(turret1));
-    bullets.push(mkBullet(turretX, turretY, Math.cos(ca) * e.bspd * 3.5, Math.sin(ca) * e.bspd * 3.5, 'enemy', '#000000'));
-    //spread(turretX, turretY, 3, ca, 0.38, e.bspd * 3.5, '#ffee00').forEach(b => bullets.push(b));
+    const b = mkBullet(turretX, turretY, Math.cos(ca) * e.bspd * 3.5, Math.sin(ca) * e.bspd * 3.5, 'enemy', 'black');
+    b.chonk = true;
+    bullets.push(b);
     }
   }
 
@@ -1585,7 +1599,13 @@ export default function Game() {
 
         // Enemy bullets
         for (const b of s.enemyBullets) {
-          if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 5, 5)) {
+          if (b.chonk) {
+            if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 32, 32)) {
+              playerHit = true;
+              break;
+            }
+          }
+          else if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 5, 5)) {
             playerHit = true;
             break;
           }

@@ -296,8 +296,27 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(0, -250);
     ctx.closePath(); ctx.fill();
 
+  } else if (type === 'tank') {
+    ctx.scale(.8, .8);
+    ctx.fillStyle = 'orange';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 48, 9, Math.PI / 6, 0, Math.PI * 2);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'orange';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 48, 9, Math.PI / -6, 0, Math.PI * 2);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'hotpink';
+    ctx.beginPath();
+    ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'brown';
+    ctx.beginPath();
+    ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+
   } else if (type === 'turret') {
-    ctx.fillStyle = 'purple';
+    ctx.scale(.8, .8);
+    ctx.fillStyle = 'red';
     ctx.beginPath();
     ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
@@ -311,7 +330,7 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     e.turret1 = theta;
 
     ctx.lineWidth = 8;
-    ctx.strokeStyle = 'purple';
+    ctx.strokeStyle = 'red';
     ctx.beginPath();
     ctx.moveTo(0,0);
 
@@ -480,9 +499,6 @@ function spawnExplosionRings(s, x, y, type) {
     push(0, 0, 80, 38, '#ff5500');
     push(0, 0, 50, 28, '#ffcc00', 6);
     push(0, 0, 26, 18, '#ffffff', 12);
-  } else if (type == 'turret') {
-    push(0, 0, 52, 28, '#ffaa00');
-    push(0, 0, 28, 18, '#ffffff', 6);
   } else if (type === 'player') {
     push(0, 0, 130, 48, '#ffffff');
     push(0, 0,  95, 40, '#aaddff',  7);
@@ -498,6 +514,10 @@ function spawnExplosionRings(s, x, y, type) {
   } else if (type === 'player') {
     push(0, 0, 58, 32, '#00ffff');
     push(0, 0, 32, 22, '#ffffff', 5);
+  }
+  else { // default explosion pattern
+    push(0, 0, 52, 28, '#ffaa00');
+    push(0, 0, 28, 18, '#ffffff', 4);
   }
 }
 
@@ -642,11 +662,12 @@ function explode(s, x, y, sz = 1) {
 // Default stats
 // (hitbox w/h, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
-  grunt:   { w: 48, h: 40, maxHp: 8,    score: 500,   fireRate: 120, bspd: 1.75 },
-  fighter: { w: 72, h: 60, maxHp: 16,    score: 2000,   fireRate: 140, bspd: 2 },
-  bomber:  { w: 108, h: 84, maxHp: 60,   score: 6000,  fireRate: 76,  bspd: 1.4 },
+  grunt:   { w: 48, h: 40, maxHp: 5, score: 500, fireRate: 120, bspd: 1.75 },
+  fighter: { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
+  bomber:  { w: 108, h: 84, maxHp: 80, score: 6000, fireRate: 76,  bspd: 1.4 },
   vette:   { w: 40, h: 80, maxHp: 120, score: 12000, fireRate: 76, bspd: 2.5 },
-  turret:  { w: 30, h: 30, maxHp: 60, score: 6000, fireRate: 76, bspd: 1.4 , turret1: 0 },
+  tank:    { w: 25, h: 25, maxHp: 15, score: 3000, fireRate: 76, bspd: 1.4 },
+  turret:  { w: 40, h: 40, maxHp: 5, score: 3000, fireRate: 76, bspd: 1.4 , turret1: 0 },
   boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
 };
 
@@ -689,6 +710,20 @@ function updateEnemy(ctx, e, px, py, bullets) {
     case 'curve_l':
       e.y += e.vy;
       e.x -= Math.sin(e.timer * 0.025) * 1.2;
+      break;
+    case 'wobble_l':
+      if (e.timer <= 200) {
+      e.y += Math.sin(e.timer * 0.02 ) * 1;
+      e.x -= e.vy;
+      console.log(e.timer);
+      } else {
+      e.y += 1;
+      }
+      break;
+    case 'diag_r': // enter top, move diagonally left-downward
+      // DDP wave 1 tank platoons
+      e.y += e.vy;
+      e.x -= e.vy / 3;
       break;
     case 'zigzag':
       e.y += e.vy;
@@ -769,6 +804,14 @@ function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
+  // *--- SHOOTING —--*
+  // only fire while in the top 95% of the screen & visible
+  if (e.y > H * 0.95) return;
+  if (e.x > 470) return;
+  if (e.x < 10) return;
+
+  // Special firing patterns
+
   // Boss timed burst: last 60 frames of every 120-frame cycle.
   // Fire only during the first 20 of those 60 frames (cycle 60–79).
   // Skip firing (but still suppress normal fire) on the first burst
@@ -820,7 +863,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
   }
 
   // Turret fire - big single projectiles
-  if (e.type === 'turret' && e.y < H * 0.95) {
+  if (e.type === 'turret1' && e.y < H * 0.95) {
     const cycle = e.timer % 120;
 
     if (cycle >= 25 && cycle < 90 && e.timer % 20 === 0) {
@@ -834,10 +877,19 @@ function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
+  // Delayed turret fire - wait 300 frames, then fire only once
+  if (e.type === 'turret' && e.y < H * 0.95 && e.timer === 300) {
+    const ca = e.turret1;
+    const turretX = e.x + (60 * Math.cos(e.turret1));
+    const turretY = e.y + (60 * Math.sin(e.turret1));
+    const b = mkBullet(turretX, turretY, Math.cos(ca) * e.bspd * 3.5, Math.sin(ca) * e.bspd * 3.5, 'enemy', 'black');
+    b.chonk = true;
+    bullets.push(b);
+  }
 
-  // Shooting — only fire while in the top 95% of the screen
+  // default periodic firing patterns
   if (e.fireTimer < e.fireRate) return;
-  if (e.y > H * 0.95) return;
+
   e.fireTimer = 0;
   if (e.type === 'boss' && e.transitionTimer > 0) return; // no fire during transition
 
@@ -857,15 +909,6 @@ function updateEnemy(ctx, e, px, py, bullets) {
       [-16, 0, 16].forEach(dx => {
         [0, 10, 20].forEach(dy => {
           bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#ffaa00'));
-        });
-      });
-      break;
-    }
-    case 'turret': {
-      // loose 3×3 cluster, all fired straight down, + aimed burst
-      [-16, 0, 16].forEach(dx => {
-        [0, 10, 20].forEach(dy => {
-        // bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#6BEEFF'));
         });
       });
       break;
@@ -916,13 +959,48 @@ function updateEnemy(ctx, e, px, py, bullets) {
 // ─── Wave scripts ─────────────────────────────────────────────────────────────
 // Each entry: { at: frameOffset, type, x, pattern, vy }
 // Lanes at x = 120, 180, 240, 300, 360
+// full screen W = 480 (-15 => 495), H = 640 (-15 => 655)
+
 
 const WAVES = [
+// Diagonal tank column
+  [
+    { at:  0, type:'tank',   x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  0, type:'turret',  x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  30, type:'tank',   x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  30, type:'turret',  x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  50, type:'tank',   x: 285, sy: -15, pat:'diag_r', vy:1 },
+    { at:  50, type:'turret',  x: 285, sy: -15, pat:'diag_r', vy:1 },
+    { at:  57, type:'tank',   x: 465, sy: -15, pat:'diag_r', vy:1 },
+    { at:  57, type:'turret',  x: 465, sy: -15, pat:'diag_r', vy:1 },
+    { at:  63, type:'tank',   x: 205, sy: -15, pat:'diag_r', vy:1 },
+    { at:  63, type:'turret',  x: 205, sy: -15, pat:'diag_r', vy:1 },
+    { at:  74, type:'tank',   x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  74, type:'turret',  x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  75, type:'tank',   x: 370, sy: -15, pat:'diag_r', vy:1 },
+    { at:  75, type:'turret',  x: 370, sy: -15, pat:'diag_r', vy:1 },
+    { at:  87, type:'tank',   x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  87, type:'turret',  x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  99, type:'tank',   x: 300, sy: -15, pat:'diag_r', vy:1 },
+    { at:  99, type:'turret',  x: 300, sy: -15, pat:'diag_r', vy:1 },
+    { at:  117, type:'tank',   x: 220, sy: -15, pat:'diag_r', vy:1 },
+    { at:  117, type:'turret',  x: 220, sy: -15, pat:'diag_r', vy:1 },
+    { at:  122, type:'tank',   x: 435, sy: -15, pat:'diag_r', vy:1 },
+    { at:  122, type:'turret',  x: 435, sy: -15, pat:'diag_r', vy:1 },
+    { at:  180, type:'tank',   x: 495, sy: 100, pat:'diag_r', vy:1 },
+    { at:  180, type:'turret',  x: 495, sy: 100, pat:'diag_r', vy:1 },
+    { at:  250, type:'tank',   x: 495, sy: 120, pat:'diag_r', vy:1 },
+    { at:  250, type:'turret',  x: 495, sy: 120, pat:'diag_r', vy:1 },
+  ],
+
   // 0: Opener — 24 grunts, right side first then left side
   [
-    { at:  0, type:'vette',   x: 130, sy: 15, pat:'straight', vy:0.8 },
-    { at:  0, type:'turret',  x:  80, sy: 15, pat:'straight', vy:0.8 },
-    { at:  0, type:'turret',  x: 180, sy: 15, pat:'straight', vy:0.8 },
+    //{ at:  0, type:'vette',   x: 130, sy: 15, pat:'straight', vy:0.8 },
+    //{ at:  0, type:'turret',  x:  80, sy: 15, pat:'straight', vy:0.8 },
+    //{ at:  0, type:'turret',  x: 180, sy: 15, pat:'straight', vy:0.8 },
+
+    //{ at:  0, type:'grunt',  x:  495, sy: 75, pat:'wobble_l', vy:2.0  },
+    //{ at:  75, type:'grunt',  x:  495, sy: 75, pat:'wobble_l', vy:2.0  },
 
     //{ at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
     //{ at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },

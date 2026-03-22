@@ -282,7 +282,7 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.fillStyle = cg;
     ctx.beginPath(); ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
 
-  } else if (type === 'vette') {
+  } else if (type === 'vette') { // ugly
     ctx.fillStyle = 'hotpink';
     ctx.beginPath();
     ctx.moveTo(-75, -200);
@@ -312,7 +312,6 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.fillStyle = 'brown';
     ctx.beginPath();
     ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
 
   } else if (type === 'turret') {
     ctx.scale(.8, .8);
@@ -350,6 +349,187 @@ function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.fillStyle = 'orange';
     ctx.beginPath();
     ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+  } else if (type === 'daitank') {
+    ctx.scale(4,4);
+
+    //wings
+    ctx.fillStyle = '#00634A';
+    ctx.beginPath();
+    ctx.moveTo(-6, -9);
+    ctx.lineTo(-14, -12);
+    ctx.lineTo(-15, -15);
+    ctx.lineTo(-15, -11);
+    ctx.lineTo(-7, -5)
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(6, -9);
+    ctx.lineTo(14, -12);
+    ctx.lineTo(15, -15);
+    ctx.lineTo(15, -11);
+    ctx.lineTo(7, -5)
+    ctx.closePath(); ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-13, -7);
+    ctx.lineTo(-8, -3);
+    ctx.lineTo(-11, -3);
+    ctx.lineTo(-13, -5);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(13, -7);
+    ctx.lineTo(8, -3);
+    ctx.lineTo(11, -3);
+    ctx.lineTo(13, -5);
+    ctx.closePath(); ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-12, -1);
+    ctx.lineTo(-13, 0);
+    ctx.lineTo(-13, 5);
+    ctx.lineTo(-11, 7);
+    ctx.lineTo(-9, 7);
+    ctx.lineTo(-9, 4);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(12, -1);
+    ctx.lineTo(13, 0);
+    ctx.lineTo(13, 5);
+    ctx.lineTo(11, 7);
+    ctx.lineTo(9, 7);
+    ctx.lineTo(9, 4);
+    ctx.closePath(); ctx.fill();
+
+    //metal
+    ctx.strokeStyle = 'grey';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-2, -10);
+    ctx.lineTo(-5, -7);
+    ctx.closePath(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(2, -10);
+    ctx.lineTo(5, -7);
+    ctx.closePath(); ctx.stroke();
+
+    ctx.fillStyle = 'grey';
+    ctx.beginPath();
+    ctx.moveTo(-9, 5);
+    ctx.lineTo(-12, 2);
+    ctx.lineTo(-12, -3);
+    ctx.lineTo(-9, -5);
+    ctx.lineTo(-3, -5);
+    ctx.lineTo(-3, -12);
+    ctx.lineTo(-1, -12);
+    ctx.lineTo(-1, -7);
+    ctx.lineTo(1, -7);
+    ctx.lineTo(1, -12);
+    ctx.lineTo(3, -12);
+    ctx.lineTo(3, -5);
+    ctx.lineTo(9,-5);
+    ctx.lineTo(12, -3);
+    ctx.lineTo(12, 2);
+    ctx.lineTo(9, 5);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = 'orange';
+    ctx.beginPath();
+    ctx.moveTo(-12, 0);
+    ctx.lineTo(-12, 2);
+    ctx.lineTo(-9, 5);
+    ctx.lineTo(-9, 3);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(12, 0);
+    ctx.lineTo(12, 2);
+    ctx.lineTo(9, 5);
+    ctx.lineTo(9, 3);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = 'grey';
+    ctx.beginPath();
+    ctx.arc(-2, -12, 1, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'grey';
+    ctx.beginPath();
+    ctx.arc(2, -12, 1, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(-10, 8, 0.5, 2, 0, 0, 2 * Math.PI);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(10, 8, 0.5, 2, 0, 0, 2 * Math.PI);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = '#73C6AD';
+    ctx.beginPath();
+    ctx.moveTo(0, -11);
+    ctx.lineTo(1, -7);
+    ctx.lineTo(-1, -7);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = 'orange';
+    ctx.beginPath();
+    ctx.arc(0, -7, 1, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    //body
+    ctx.fillStyle = '#003118';
+    ctx.beginPath();
+    ctx.moveTo(0, -5);
+    ctx.lineTo(-2, -7);
+    ctx.lineTo(-9, -2);
+    ctx.lineTo(-9, 9);
+    ctx.lineTo(-6, 12);
+    ctx.lineTo(-3, 12);
+    ctx.lineTo(3, 12);
+    ctx.lineTo(6, 12);
+    ctx.lineTo(9, 9);
+    ctx.lineTo(9, -2);
+    ctx.lineTo(2, -7);
+    ctx.moveTo(0, -5);
+    ctx.closePath();
+    ctx.fill();
+
+    //balls
+    ctx.fillStyle = '#73C6AD';
+    ctx.beginPath();
+    ctx.arc(-7, -6, 3, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(7, -6, 3, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    //center
+    ctx.fillStyle = '#00634A';
+    ctx.beginPath();
+    ctx.moveTo(-6, 0);
+    ctx.lineTo(-6, 8);
+    ctx.lineTo(-1, 13);
+    ctx.lineTo(1, 13);
+    ctx.lineTo(0, 14);
+    ctx.lineTo(6, 8);
+    ctx.lineTo(6, 0);
+    ctx.lineTo(0, -4);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = '#003118';
+    ctx.beginPath();
+    ctx.moveTo(-5, 0);
+    ctx.lineTo(-5, 5);
+    ctx.lineTo(-2, 8);
+    ctx.lineTo(2, 8);
+    ctx.lineTo(5, 5);
+    ctx.lineTo(5, 0);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = '#00634A';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = '#73C6AD';
+    ctx.beginPath();
+    ctx.arc(0, -1, 4, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = 'grey';
+    ctx.beginPath();
+    ctx.arc(0, 10, 2, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
   } else if (type === 'boss') {
     // ── Scaled body (2× base size) ─────────────────────────────────────────
@@ -668,6 +848,7 @@ const EDEFS = {
   vette:   { w: 40, h: 80, maxHp: 120, score: 12000, fireRate: 76, bspd: 2.5 },
   tank:    { w: 25, h: 25, maxHp: 15, score: 3000, fireRate: 76, bspd: 1.4 },
   turret:  { w: 40, h: 40, maxHp: 5, score: 3000, fireRate: 76, bspd: 1.4 , turret1: 0 },
+  daitank: { w: 180, h: 180, maxHp: 150, score: 12000, fireRate: 76,  bspd: 0.2 },
   boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
 };
 
@@ -887,7 +1068,42 @@ function updateEnemy(ctx, e, px, py, bullets) {
     bullets.push(b);
   }
 
-  // default periodic firing patterns
+    // Shotgun cluster - accelerating bullets aimed at a single point
+    if (e.type === 'daitank' && e.y < H * 0.95) {
+      const cycle = e.timer % 120;
+      if (cycle === 11) {
+        e.bspd = 6;
+        const xTarget = structuredClone(px);
+        const yTarget = structuredClone(py);
+    //    const v = aim(e.x, e.y, xTarget, yTarget, e.bspd);
+      }
+
+      if (cycle >= 112 && cycle <= 116 && cycle % 4 === 0) {
+      const ca = Math.atan2(py - e.y, px - e.x);
+
+      [-40, 40].forEach(dx => {
+          spread(e.x + dx, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+          spread(e.x + dx + 11, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+          spread(e.x + dx + 6, e.y + 30 + 9,  3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+        });
+      e.bspd += 0.5;
+      }
+
+      if (cycle === 114) {
+      const ca = Math.atan2(py - e.y, px - e.x);
+
+      [-40, 40].forEach(dx => {
+          spread(e.x + dx, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+          spread(e.x + dx + 11, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+          spread(e.x + dx + 6, e.y + 30 + 9,  4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+        });
+      e.bspd += 0.5;
+      }
+
+      //break; ???
+    }
+
+  // --- default periodic firing patterns ---
   if (e.fireTimer < e.fireRate) return;
 
   e.fireTimer = 0;
@@ -963,45 +1179,14 @@ function updateEnemy(ctx, e, px, py, bullets) {
 
 
 const WAVES = [
-// Diagonal tank column
+  // Daitank test - eventually, sandwich between 2 diag popcorns
   [
-    { at:  0, type:'tank',   x: 60, sy: -15, pat:'diag_r', vy:1 },
-    { at:  0, type:'turret',  x: 60, sy: -15, pat:'diag_r', vy:1 },
-    { at:  30, type:'tank',   x: 130, sy: -15, pat:'diag_r', vy:1 },
-    { at:  30, type:'turret',  x: 130, sy: -15, pat:'diag_r', vy:1 },
-    { at:  50, type:'tank',   x: 285, sy: -15, pat:'diag_r', vy:1 },
-    { at:  50, type:'turret',  x: 285, sy: -15, pat:'diag_r', vy:1 },
-    { at:  57, type:'tank',   x: 465, sy: -15, pat:'diag_r', vy:1 },
-    { at:  57, type:'turret',  x: 465, sy: -15, pat:'diag_r', vy:1 },
-    { at:  63, type:'tank',   x: 205, sy: -15, pat:'diag_r', vy:1 },
-    { at:  63, type:'turret',  x: 205, sy: -15, pat:'diag_r', vy:1 },
-    { at:  74, type:'tank',   x: 60, sy: -15, pat:'diag_r', vy:1 },
-    { at:  74, type:'turret',  x: 60, sy: -15, pat:'diag_r', vy:1 },
-    { at:  75, type:'tank',   x: 370, sy: -15, pat:'diag_r', vy:1 },
-    { at:  75, type:'turret',  x: 370, sy: -15, pat:'diag_r', vy:1 },
-    { at:  87, type:'tank',   x: 130, sy: -15, pat:'diag_r', vy:1 },
-    { at:  87, type:'turret',  x: 130, sy: -15, pat:'diag_r', vy:1 },
-    { at:  99, type:'tank',   x: 300, sy: -15, pat:'diag_r', vy:1 },
-    { at:  99, type:'turret',  x: 300, sy: -15, pat:'diag_r', vy:1 },
-    { at:  117, type:'tank',   x: 220, sy: -15, pat:'diag_r', vy:1 },
-    { at:  117, type:'turret',  x: 220, sy: -15, pat:'diag_r', vy:1 },
-    { at:  122, type:'tank',   x: 435, sy: -15, pat:'diag_r', vy:1 },
-    { at:  122, type:'turret',  x: 435, sy: -15, pat:'diag_r', vy:1 },
-    { at:  180, type:'tank',   x: 495, sy: 100, pat:'diag_r', vy:1 },
-    { at:  180, type:'turret',  x: 495, sy: 100, pat:'diag_r', vy:1 },
-    { at:  250, type:'tank',   x: 495, sy: 120, pat:'diag_r', vy:1 },
-    { at:  250, type:'turret',  x: 495, sy: 120, pat:'diag_r', vy:1 },
+    { at:  0, type:'daitank', x: W/2, sy:  100, pat:'diag_r', vy:0 },
+    //{ at:  0, type:'daitank', x: 430, sy:  15, pat:'diag_r', vy:0.5 },
   ],
 
   // 0: Opener — 24 grunts, right side first then left side
-  [
-    //{ at:  0, type:'vette',   x: 130, sy: 15, pat:'straight', vy:0.8 },
-    //{ at:  0, type:'turret',  x:  80, sy: 15, pat:'straight', vy:0.8 },
-    //{ at:  0, type:'turret',  x: 180, sy: 15, pat:'straight', vy:0.8 },
-
-    //{ at:  0, type:'grunt',  x:  495, sy: 75, pat:'wobble_l', vy:2.0  },
-    //{ at:  75, type:'grunt',  x:  495, sy: 75, pat:'wobble_l', vy:2.0  },
-
+  //[
     //{ at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
     //{ at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
     //{ at:  55, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
@@ -1017,8 +1202,6 @@ const WAVES = [
     //{ at: 165, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
     // { at: 165, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-//    { at: 270, type:'turret', x: 360, sy: 15, pat:'straight', vy:0.4 },
-
     //{ at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
     //{ at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     //{ at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
@@ -1033,7 +1216,7 @@ const WAVES = [
     //{ at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     //{ at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     //{ at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-  ],
+  //],
   // 1: 4 fighters + 12 grunts (sides), right side first then left
   [
     { at:   0, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },

@@ -1,0 +1,33 @@
+// Wave logic backups & notes on patterns I like
+
+
+
+// Diagonal tank column
+  [
+    { at:  0, type:'tank',   x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  0, type:'turret',  x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  30, type:'tank',   x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  30, type:'turret',  x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  50, type:'tank',   x: 285, sy: -15, pat:'diag_r', vy:1 },
+    { at:  50, type:'turret',  x: 285, sy: -15, pat:'diag_r', vy:1 },
+    { at:  57, type:'tank',   x: 465, sy: -15, pat:'diag_r', vy:1 },
+    { at:  57, type:'turret',  x: 465, sy: -15, pat:'diag_r', vy:1 },
+    { at:  63, type:'tank',   x: 205, sy: -15, pat:'diag_r', vy:1 },
+    { at:  63, type:'turret',  x: 205, sy: -15, pat:'diag_r', vy:1 },
+    { at:  74, type:'tank',   x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  74, type:'turret',  x: 60, sy: -15, pat:'diag_r', vy:1 },
+    { at:  75, type:'tank',   x: 370, sy: -15, pat:'diag_r', vy:1 },
+    { at:  75, type:'turret',  x: 370, sy: -15, pat:'diag_r', vy:1 },
+    { at:  87, type:'tank',   x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  87, type:'turret',  x: 130, sy: -15, pat:'diag_r', vy:1 },
+    { at:  99, type:'tank',   x: 300, sy: -15, pat:'diag_r', vy:1 },
+    { at:  99, type:'turret',  x: 300, sy: -15, pat:'diag_r', vy:1 },
+    { at:  117, type:'tank',   x: 220, sy: -15, pat:'diag_r', vy:1 },
+    { at:  117, type:'turret',  x: 220, sy: -15, pat:'diag_r', vy:1 },
+    { at:  122, type:'tank',   x: 435, sy: -15, pat:'diag_r', vy:1 },
+    { at:  122, type:'turret',  x: 435, sy: -15, pat:'diag_r', vy:1 },
+    { at:  180, type:'tank',   x: 495, sy: 100, pat:'diag_r', vy:1 },
+    { at:  180, type:'turret',  x: 495, sy: 100, pat:'diag_r', vy:1 },
+    { at:  250, type:'tank',   x: 495, sy: 120, pat:'diag_r', vy:1 },
+    { at:  250, type:'turret',  x: 495, sy: 120, pat:'diag_r', vy:1 },
+  ],

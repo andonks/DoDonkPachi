@@ -1,6 +1,13 @@
 // Wave logic backups & notes on patterns I like
 
+Move functions to UTIL files --
+export function []
 
+In main JS file, import {name of function} from ./file
+
+// Early big enemies fire less often or less intensely
+// Early copters hover and retreat, later fly toward player or keep going downward
+// "Popcorn strings" with big enemies in between
 
 // Diagonal tank column
   [

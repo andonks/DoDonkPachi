@@ -1081,7 +1081,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
       if (cycle >= 112 && cycle <= 116 && cycle % 4 === 0) {
       const ca = Math.atan2(py - e.y, px - e.x);
 
-      [-40, 40].forEach(dx => {
+      [-45, 40].forEach(dx => {
           spread(e.x + dx, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
           spread(e.x + dx + 11, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
           spread(e.x + dx + 6, e.y + 30 + 9,  3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
@@ -1092,7 +1092,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
       if (cycle === 114) {
       const ca = Math.atan2(py - e.y, px - e.x);
 
-      [-40, 40].forEach(dx => {
+      [-45, 40].forEach(dx => {
           spread(e.x + dx, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
           spread(e.x + dx + 11, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
           spread(e.x + dx + 6, e.y + 30 + 9,  4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
@@ -1181,7 +1181,7 @@ function updateEnemy(ctx, e, px, py, bullets) {
 const WAVES = [
   // Daitank test - eventually, sandwich between 2 diag popcorns
   [
-    { at:  0, type:'daitank', x: W/2, sy:  100, pat:'diag_r', vy:0 },
+    { at:  50, type:'daitank', x: W/2, sy:  100, pat:'diag_r', vy:0 },
     //{ at:  0, type:'daitank', x: 430, sy:  15, pat:'diag_r', vy:0.5 },
   ],
 
@@ -1694,17 +1694,17 @@ export default function Game() {
           });
         }
       } else if (keys['KeyZ']) {
-        // SHOOT (Z): 7-bullet fan, 45° total (±22.5°), speed 20px/frame
+        // SHOOT (Z): 7-bullet spread fan, 45° total (±22.5°), speed 20px/frame
         if (pl.shootTimer >= 10) {
           pl.shootTimer = 0;
           Audio.sfxShoot();
-          s.playerBullets.push(mkBullet(pl.x - 20, pl.y - 10, -7.65, -18.5, 'player'));
-          s.playerBullets.push(mkBullet(pl.x - 12, pl.y - 14, -5.18, -19.3, 'player'));
-          s.playerBullets.push(mkBullet(pl.x -  5, pl.y - 17, -2.61, -19.8, 'player'));
+          s.playerBullets.push(mkBullet(pl.x - 15, pl.y - 10, -4.65, -18.9, 'player'));
+          s.playerBullets.push(mkBullet(pl.x - 10, pl.y - 14, -2.18, -19.8, 'player'));
+          s.playerBullets.push(mkBullet(pl.x -  5, pl.y - 17, -0.61, -19.9, 'player'));
           s.playerBullets.push(mkBullet(pl.x,      pl.y - 18,  0,    -20,   'player'));
-          s.playerBullets.push(mkBullet(pl.x +  5, pl.y - 17,  2.61, -19.8, 'player'));
-          s.playerBullets.push(mkBullet(pl.x + 12, pl.y - 14,  5.18, -19.3, 'player'));
-          s.playerBullets.push(mkBullet(pl.x + 20, pl.y - 10,  7.65, -18.5, 'player'));
+          s.playerBullets.push(mkBullet(pl.x +  5, pl.y - 17,  0.61, -19.8, 'player'));
+          s.playerBullets.push(mkBullet(pl.x + 10, pl.y - 14,  2.18, -19.3, 'player'));
+          s.playerBullets.push(mkBullet(pl.x + 15, pl.y - 10,  4.65, -18.5, 'player'));
         }
       }
 
@@ -1867,15 +1867,15 @@ export default function Game() {
       if (pl.invTimer <= 0 && !debugMode) {
         let playerHit = false;
 
-        // Enemy bullets
+        // Enemy bullets (player hitbox)
         for (const b of s.enemyBullets) {
           if (b.chonk) {
-            if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 12, 12)) {
+            if (overlaps(pl.x, pl.y, pl.w * 0.2, pl.h * 0.2, b.x, b.y, 12, 12)) {
               playerHit = true;
               break;
             }
           }
-          else if (overlaps(pl.x, pl.y, pl.w * 0.38, pl.h * 0.38, b.x, b.y, 5, 5)) {
+          else if (overlaps(pl.x, pl.y, pl.w * 0.2, pl.h * 0.2, b.x, b.y, 5, 5)) {
             playerHit = true;
             break;
           }
@@ -1885,7 +1885,7 @@ export default function Game() {
         if (!playerHit) {
           for (const e of s.enemies) {
             if (e.dead) continue;
-            if (overlaps(pl.x, pl.y, pl.w * 0.5, pl.h * 0.5, e.x, e.y, e.w * 0.6, e.h * 0.6)) {
+            if (overlaps(pl.x, pl.y, pl.w * 0.2, pl.h * 0.2, e.x, e.y, e.w * 0.6, e.h * 0.6)) {
               playerHit = true;
               // small ships get rammed apart; bombers/boss shrug it off
               if (e.type === 'grunt' || e.type === 'fighter') {
@@ -2063,7 +2063,7 @@ export default function Game() {
         c.x += c.vx;
         c.y += c.vy;
         c.vx *= 0.97;
-        if (overlaps(pl.x, pl.y, pl.w * 0.8, pl.h * 0.8, c.x, c.y, 30, 30)) {
+        if (overlaps(pl.x, pl.y, pl.w * 1.2, pl.h * 1.2, c.x, c.y, 30, 30)) {
           s.score += COLLECT_PTS;
           s.medalCount++;
           spawnParticles(s.particles, c.x, c.y, 6,
@@ -2137,9 +2137,6 @@ export default function Game() {
       // Explosion rings (above enemies, under bullets)
       s.explosions.forEach(ex => drawExplosion(ctx, ex));
 
-      // Enemy bullets
-      s.enemyBullets.forEach(b => drawBullet(ctx, b, s.frame));
-
       // Player (hidden during death window; flash when invincible)
       if (pl.deathTimer <= 0 && (pl.invTimer <= 0 || Math.floor(pl.invTimer / 5) % 2 === 0)) {
         drawPlayer(ctx, pl.x, pl.y, s.frame, focused);
@@ -2163,6 +2160,9 @@ export default function Game() {
 
         }
       }
+
+      // Enemy bullets
+      s.enemyBullets.forEach(b => drawBullet(ctx, b, s.frame));
 
       // Player bullets
       s.playerBullets.forEach(b => drawBullet(ctx, b, s.frame));

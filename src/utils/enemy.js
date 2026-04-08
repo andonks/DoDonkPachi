@@ -10,9 +10,9 @@ const EDEFS = {
   fighter: { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
   bomber:  { w: 108, h: 84, maxHp: 80, score: 6000, fireRate: 76,  bspd: 1.4 },
   vette:   { w: 40, h: 80, maxHp: 120, score: 12000, fireRate: 76, bspd: 2.5 },
-  tank:    { w: 25, h: 25, maxHp: 15, score: 3000, fireRate: 76, bspd: 1.4 },
+  tank:    { w: 60, h: 50, maxHp: 15, score: 3000, fireRate: 76, bspd: 1.4 },
   turret:  { w: 40, h: 40, maxHp: 5, score: 3000, fireRate: 76, bspd: 1.4 , turret1: 0 },
-  daitank: { w: 180, h: 180, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
+  daitank: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
   boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
 };
 
@@ -281,7 +281,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     }
     case 'fighter': {
       const ca = Math.atan2(py - e.y, px - e.x);
-      spread(e.x, e.y, 5, ca, 0.38, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      spread(e.x, e.y, 5, ca, 0.38, e.bspd * 3, '#ffee00').forEach(b => bullets.push(b));
       break;
     }
     case 'bomber': {

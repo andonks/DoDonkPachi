@@ -8,12 +8,6 @@ const W = 480;
 const H = 640;
 
 
-
-// move to enemy array with default value
-
-// var turret1 = -Math.PI/2;
-
-
 // ─── Fancy Title Animation ───────────────────────────────────────────────────
 
 export function FancyText({ text }) {
@@ -112,7 +106,7 @@ function drawExplosion(ctx, ex) {
   // Inner fireball glow (only in first ~60% of life)
   if (t > 0.4) {
     const ft = (t - 0.4) / 0.6;
-    const gr = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, r * 0.75 + 6);
+    const gr = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, r * 75 + 6);
     gr.addColorStop(0,   `rgba(255,255,255,${ft * 0.9})`);
     gr.addColorStop(0.3, `rgba(255,210,80,${ft * 0.65})`);
     gr.addColorStop(1,   'rgba(255,60,0,0)');
@@ -146,15 +140,17 @@ function spawnExplosionRings(s, x, y, type) {
   const push = (dx, dy, maxR, life, color, delay = 0) =>
     arr.push({ x: x + dx, y: y + dy, maxR, life, maxLife: life, color, delay });
 
-  if (type === 'grunt') {
-    push(0, 0, 34, 22, '#ff8800');
-  } else if (type === 'fighter') {
-    push(0, 0, 52, 28, '#ffaa00');
-    push(0, 0, 28, 18, '#ffffff', 4);
+  if (type === 'fighter') {
+    push(0, 0, 72, 28, '#ffaa00');
+    push(0, 0, 58, 18, '#ffffff', 4);
   } else if (type === 'bomber') {
     push(0, 0, 80, 38, '#ff5500');
     push(0, 0, 50, 28, '#ffcc00', 6);
     push(0, 0, 26, 18, '#ffffff', 12);
+  } else if (type === 'daitank') {
+    push(0, 0, 120, 40, '#ff5500');
+    push(0, 0, 105, 35, '#ffcc00', 6);
+    push(0, 0, 90, 30, '#ffffff', 12);
   } else if (type === 'player') {
     push(0, 0, 130, 48, '#ffffff');
     push(0, 0,  95, 40, '#aaddff',  7);
@@ -167,13 +163,10 @@ function spawnExplosionRings(s, x, y, type) {
       const dy = (Math.random() - 0.5) * 40;
       push(dx, dy, 65 + i * 18, 42 + i * 7, colors[i], i * 7);
     }
-  } else if (type === 'player') {
-    push(0, 0, 58, 32, '#00ffff');
-    push(0, 0, 32, 22, '#ffffff', 5);
   }
   else { // default explosion pattern
-    push(0, 0, 52, 28, '#ffaa00');
-    push(0, 0, 28, 18, '#ffffff', 4);
+    push(0, 0, 72, 48, '#ffaa00');
+    push(0, 0, 58, 38, '#ffffff', 4);
   }
 }
 
@@ -250,44 +243,37 @@ function explode(s, x, y, sz = 1) {
 // full screen W = 480 (-15 => 495), H = 640 (-15 => 655)
 
 const WAVES = [
-  // Daitank test - eventually, sandwich between 2 diag popcorns
-  [
-    //{ at:  0, type:'turret', x: 430, sy:  15, pat:'diag_r', vy:0 },
-    { at:  0, type:'daitank', x: 300, sy:  100, pat:'diag_r', vy:0.4 },
-    { at:  100, type:'daitank', x: 430, sy:  15, pat:'diag_r', vy:0.4 },
-  ],
-
   // 0: Opener — 24 grunts, right side first then left side
   [
     { at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    //{ at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    //{ at:  55, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    //{ at:  55, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
+    { at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at:  55, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at:  55, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-    { at:  85, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    //{ at:  85, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    //{ at: 110, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    //{ at: 110, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
+    { at:  85, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at:  85, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 110, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 110, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
     { at: 140, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    //{ at: 140, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    //{ at: 165, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    // { at: 165, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
+    { at: 140, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 165, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 165, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
     { at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    //{ at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    //{ at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    //{ at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+    { at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    //{ at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    //{ at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    //{ at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+    { at: 355, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+    { at: 355, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 380, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 380, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
     { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    //{ at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    //{ at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    //{ at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
   ],
   // 1: 4 fighters + 12 grunts (sides), right side first then left
   [
@@ -373,31 +359,30 @@ const WAVES = [
     { at: 360, type:'fighter', x:100, pat:'curve_r',  vy:1.3 },
     { at: 360, type:'fighter', x:380, pat:'curve_l',  vy:1.3 },
   ],
-  // 4: 4 bombers in 2 pairs + 12 grunts (hover_mid) + crisscross
+  // 4: 4 bombers + 12 grunts (hover_mid) + crisscross
   [
     { at:   0, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
-    { at:   0, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
 
     { at:  50, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     { at:  50, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-
     { at:  90, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     { at:  90, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
 
+    { at: 120, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
+
     { at: 120, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     { at: 120, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-
     { at: 150, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     { at: 150, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
 
+    { at: 165, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
+
     { at: 165, type:'grunt',  x: 80, pat:'hover_mid', vy:2.5 },
     { at: 165, type:'grunt',  x:400, pat:'hover_mid', vy:2.5 },
-
-    { at: 200, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
-    { at: 200, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
-
     { at: 215, type:'grunt',  x: 80, pat:'hover_mid', vy:2.5 },
     { at: 215, type:'grunt',  x:400, pat:'hover_mid', vy:2.5 },
+
+    { at: 200, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
   ],
   // 5: BOSS
   [
@@ -656,7 +641,7 @@ export default function Game() {
         // }
         // return;
       }
-      // if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
+      //if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
       keysRef.current[e.code] = true;
       // Bomb on Shift press
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -849,6 +834,7 @@ export default function Game() {
         }
       });
 
+      // Enemy death logic
       s.enemies = s.enemies.filter(e => {
         if (e.dead) return false;
         if (e.y > H + 120 || e.y < -300 || e.x < -200 || e.x > W + 200) return false;
@@ -859,20 +845,22 @@ export default function Game() {
       s.enemies.forEach(en => {
         s.playerBullets.forEach(b => {
           if (b.hit) return;
-          const hw = en.w * 0.6, hh = en.h * 0.6;
+          const hw = en.w, hh = en.h;
           if (overlaps(b.x, b.y, 6, 10, en.x, en.y, hw, hh)) {
-            b.hit = true;
-            const dmg = b.pw ? 3 : 1;
-            en.hp -= dmg;
-            spawnParticles(s.particles, b.x, b.y, 3, ['#ffff00','#ffffff','#ffaa00'], [1,5],[1,3]);
-            // Boss chain — refresh display on any hit; increment once per 2 s
-            if (en.type === 'boss' && en.hp > 0) {
-              s.chainBossHitThisSecond = true;
-              s.chainTimer = 200; // keep counter visible while hitting the boss
-              if (s.chainBossHitCooldown === 0) {
-                s.chain++;
-                s.chainTextScale += 0.01;
-                s.chainBossHitCooldown = 120;
+            if (en.y > 15) { // deadzone
+              b.hit = true;
+              const dmg = b.pw ? 3 : 1;
+              en.hp -= dmg;
+              spawnParticles(s.particles, b.x, b.y, 3, ['#ffff00','#ffffff','#ffaa00'], [1,5],[1,3]);
+              // Boss chain — refresh display on any hit; increment once per 2 s
+              if (en.type === 'boss' && en.hp > 0) {
+                s.chainBossHitThisSecond = true;
+                s.chainTimer = 200; // keep counter visible while hitting the boss
+                if (s.chainBossHitCooldown === 0) {
+                  s.chain++;
+                  s.chainTextScale += 0.01;
+                  s.chainBossHitCooldown = 120;
+                }
               }
             }
             // Boss phase transition trigger
@@ -918,9 +906,9 @@ export default function Game() {
                 s.bossDeathY = en.y;
                 s.bossDeathTimer = 180;
                 s.flashTimer = 20;
-                // Convert every enemy bullet on screen into a collectable pickup
-                // s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
-                // s.enemyBullets = [];
+                // Bullet cancel - Convert every enemy bullet on screen into a collectable pickup
+                s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
+                s.enemyBullets = [];
                 // Initial burst: several big explosions scattered around the boss
                 for (let i = 0; i < 8; i++) {
                   const ox = (Math.random() - 0.5) * 130;
@@ -1475,7 +1463,7 @@ export default function Game() {
 
     const run = async () => {
       let runningScore = finalScore;
-      await wait(600);                               // initial pause before first line
+      await wait(600);         // initial pause before first line
 
       for (let i = 0; i < calcBonuses.length; i++) {
         if (cancelled) return;
@@ -1726,7 +1714,7 @@ export default function Game() {
             <div>&copy; Andy Krueger 2026</div>
             <div>Music by DavidKBD, licenced under CC By 4.0 (https://creativecommons.org/licenses/by/4.0/)</div>
           </div>
-          <div style={{ ...STYLES.controls, fontSize: 10, marginTop: 9, marginBottom: 0 }}>version 0.1.0</div>
+          <div style={{ ...STYLES.controls, fontSize: 10, marginTop: 9, marginBottom: 0 }}>version 0.1.1</div>
         </div>
       )}
 

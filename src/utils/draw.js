@@ -187,6 +187,7 @@ export function getTheta(a, b) {
   return theta;
   }
 
+// ---- DRAW ENEMIES -----
 
 export function drawEnemy(ctx, e, frame, playerX, playerY) {
   const { x, y, type, hp, maxHp } = e;

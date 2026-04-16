@@ -135,6 +135,7 @@ function drawExplosion(ctx, ex) {
 }
 
 // Spawn one or more explosion rings appropriate for the given type
+// push variables: x, y, max radius, life, color, delay
 function spawnExplosionRings(s, x, y, type) {
   const arr = s.explosions;
   const push = (dx, dy, maxR, life, color, delay = 0) =>
@@ -156,6 +157,85 @@ function spawnExplosionRings(s, x, y, type) {
     push(0, 0,  95, 40, '#aaddff',  7);
     push(0, 0,  60, 30, '#0088ff', 14);
     push(0, 0,  30, 20, '#ffffff', 20);
+  } else if (type === 'dummy1') {
+    push(0, 0, 130, 8, 'white');
+    push(15, 15, 95, 40, '#aaddff', 7);
+    push(15, 15, 60, 30, '#0088ff', 14);
+    push(15, 15,  30, 20, '#ffffff', 20);
+    push(25, 25, 50, 23, '#aaddff', 10);
+    push(25, 25, 40, 30, '#0088ff', 17);
+    push(25, 25,  20, 20, '#ffffff', 23);
+    push(30, 30, 36, 20, '#aaddff', 17);
+    push(30, 30, 24, 30, '#0088ff', 21);
+    push(30, 30,  12, 20, '#ffffff', 26);
+    push(33, 33, 29, 18, '#aaddff', 23);
+    push(33, 33, 19, 30, '#0088ff', 14);
+    push(33, 33,  9, 20, '#ffffff', 29);
+
+    push(-15, -15, 95, 40, '#aaddff', 7);
+    push(-15, -15, 60, 30, '#0088ff', 14);
+    push(-15, -15,  30, 20, '#ffffff', 20);
+    push(-25, -25, 50, 23, '#aaddff', 10);
+    push(-25, -25, 40, 30, '#0088ff', 17);
+    push(-25, -25,  20, 20, '#ffffff', 23);
+    push(-30, -30, 36, 20, '#aaddff', 17);
+    push(-30, -30, 24, 30, '#0088ff', 21);
+    push(-30, -30,  12, 20, '#ffffff', 26);
+    push(-33, -33, 29, 18, '#aaddff', 23);
+    push(-33, -33, 19, 30, '#0088ff', 14);
+    push(-33, -33,  9, 20, '#ffffff', 29);
+
+    push(-15, 15, 95, 40, '#aaddff', 7);
+    push(-15, 15, 60, 30, '#0088ff', 14);
+    push(-15, 15,  30, 20, '#ffffff', 20);
+    push(-25, 25, 50, 23, '#aaddff', 10);
+    push(-25, 25, 40, 30, '#0088ff', 17);
+    push(-25, 25,  20, 20, '#ffffff', 23);
+    push(-30, 30, 36, 20, '#aaddff', 17);
+    push(-30, 30, 24, 30, '#0088ff', 21);
+    push(-30, 30,  12, 20, '#ffffff', 26);
+    push(-33, 33, 29, 18, '#aaddff', 23);
+    push(-33, 33, 19, 30, '#0088ff', 14);
+    push(-33, 33,  9, 20, '#ffffff', 29);
+
+    push(15, -15, 95, 40, '#aaddff', 7);
+    push(15, -15, 60, 30, '#0088ff', 14);
+    push(15, -15,  30, 20, '#ffffff', 20);
+    push(25, -25, 50, 23, '#aaddff', 10);
+    push(25, -25, 40, 30, '#0088ff', 17);
+    push(25, -25,  20, 20, '#ffffff', 23);
+    push(30, -30, 36, 20, '#aaddff', 17);
+    push(30, -30, 24, 30, '#0088ff', 21);
+    push(30, -30,  12, 20, '#ffffff', 26);
+    push(33, -33, 29, 18, '#aaddff', 23);
+    push(33, -33, 19, 30, '#0088ff', 14);
+    push(33, -33,  9, 20, '#ffffff', 29);
+
+  } else if (type === 'dummy2') {
+    push(0, 0, 80, 38, '#ff5500');
+    push(0, 0, 50, 28, '#ffcc00', 6);
+    push(0, 0, 26, 18, '#ffffff', 12);
+  } else if (type === 'dummy3') {
+    push(0, 0, 130, 48, '#ffffff');
+    push(0, 0,  95, 40, '#aaddff',  7);
+    push(0, 0,  60, 30, '#0088ff', 14);
+    push(0, 0,  30, 20, '#ffffff', 20);
+    push(10, 10, 50, 48, '#ffffff', 7);
+    push(10, 10,  35, 40, '#aaddff', 14);
+    push(10, 10,  30, 30, '#0088ff', 21);
+    push(10, 10,  20, 20, '#ffffff', 28);
+    push(-10, -10, 50, 48, '#ffffff', 14);
+    push(-10, -10,  35, 40, '#aaddff',  21);
+    push(-10, -10,  30, 30, '#0088ff', 28);
+    push(-10, -10,  20, 20, '#ffffff', 35);
+    push(-10, 10, 50, 48, '#ffffff', 21);
+    push(-10, 10,  35, 40, '#aaddff',  28);
+    push(-10, 10,  30, 30, '#0088ff', 35);
+    push(-10, 10,  20, 20, '#ffffff', 42);
+    push(10, -10, 50, 48, '#ffffff', 21);
+    push(10, -10,  35, 40, '#aaddff',  28);
+    push(10, -10,  30, 30, '#0088ff', 35);
+    push(10, -10,  20, 20, '#ffffff', 42);
   } else if (type === 'boss') {
     const colors = ['#ff4400', '#ff8800', '#ffcc00', '#ffffff', '#ff2200'];
     for (let i = 0; i < 5; i++) {
@@ -243,7 +323,68 @@ function explode(s, x, y, sz = 1) {
 // full screen W = 480 (-15 => 495), H = 640 (-15 => 655)
 
 const WAVES = [
+  // ---------------- SPRITE SHEET -----------------
+  [
+  { at: 0, type:'beetle', x: 240, sy: 190, pat:'straight', vy: 0 },
+  { at: 0, type:'daitank', x: 340, sy: 320, pat:'straight', vy: 0 },
+  { at: 0, type:'jet', x: 440, sy: 320, pat:'straight', vy: 0 },
+  { at: 0, type:'moth', x: 120, sy: 190, pat:'straight', vy: 0 },
+  { at: 0, type:'xwing', x: 180, sy: 320, pat:'straight', vy: 0 },
+  ],
+
+  // ---------- EXPLOSION TEST --------------
+  [
+  { at: 0, type:'dummy1', x: 140, sy: 190, pat:'straight', vy: 0 },
+  { at: 0, type:'dummy1', x: 240, sy: 190, pat:'straight', vy: 0 },
+  { at: 0, type:'dummy3', x: 340, sy: 190, pat:'straight', vy: 0 },
+  { at: 500, type:'dummy1', x: 140, sy: 190, pat:'straight', vy: 0 },
+  ],
+
+  // ---------------- FPS TEST -----------------
+  [
+    { at:   0, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
+    { at:   0, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
+    { at:   0, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
+    { at:   0, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
+    { at:   0, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
+    { at:   0, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
+    { at:   0, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
+    { at:  10, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
+    { at:  10, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
+    { at:  10, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
+    { at:  10, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
+    { at:  10, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
+    { at:  10, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
+    { at:  20, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
+    { at:  20, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
+    { at:  20, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
+    { at:  20, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
+    { at:  20, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
+    { at:  20, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
+    { at:  20, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
+    { at:  30, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
+    { at:  30, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
+    { at:  30, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
+    { at:  30, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
+    { at:  30, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
+    { at:  30, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
+    { at:  40, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
+    { at:  40, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
+    { at:  40, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
+    { at:  40, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
+    { at:  40, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
+    { at:  40, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
+    { at:  40, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
+    { at:  50, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
+    { at:  50, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
+    { at:  50, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
+    { at:  50, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
+    { at:  50, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
+    { at:  50, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
+  ],
+
   // 0: Opener — 24 grunts, right side first then left side
+
   [
     { at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
     { at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },

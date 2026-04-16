@@ -6,14 +6,21 @@ const H = 640;
 // Default stats
 // (hitbox w/h, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
-  grunt:   { w: 48, h: 40, maxHp: 5, score: 500, fireRate: 120, bspd: 1.75 },
+  grunt:   { w: 48, h: 40, maxHp: 5, score: 500, fireRate: 20, bspd: 1.75 },
   fighter: { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
   bomber:  { w: 108, h: 84, maxHp: 80, score: 6000, fireRate: 76,  bspd: 1.4 },
   vette:   { w: 40, h: 80, maxHp: 120, score: 12000, fireRate: 76, bspd: 2.5 },
   tank:    { w: 60, h: 50, maxHp: 15, score: 3000, fireRate: 76, bspd: 1.4 },
   turret:  { w: 40, h: 40, maxHp: 5, score: 3000, fireRate: 76, bspd: 1.4 , turret1: 0 },
+  beetle:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
   daitank: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
+  jet:     { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
+  moth:    { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
+  xwing:   { w: 170,  h: 150, maxHp: 100000, score: 1, fireRate: 1, bspd: 1 },
   boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
+  dummy1:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
+  dummy2:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
+  dummy3:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
 };
 
 export function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
@@ -233,7 +240,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   }
 
     // Shotgun cluster - accelerating bullets aimed at a single point
-    if (e.type === 'daitank' && e.y < H * 0.95) {
+    if (e.type === 'daitank-disabled' && e.y < H * 0.95) {
       const cycle = e.timer % 120;
       if (cycle === 11) {
         e.bspd = 6;

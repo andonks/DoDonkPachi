@@ -2,6 +2,26 @@ const ship1 = '#003A8A';
 const ship2 = '#9FA7B7';
 const ship3 = '#D383D3';
 
+const xwing1 = '#89A5BE'; // light blue
+const xwing2 = '#454A6F'; // dark blue
+const xwing3 = '#F1E07C'; // yellow
+
+const neonBlue = '#5DCBED';
+const neonPink = '#EE5BE5';
+const neonPurp = '#A239F3';
+
+const blue0 = '#BCEEFD';
+const blue1 = '#5DCBED';
+const blue2 = '#0A99C5';
+
+const pink0 = '#FFB3FA';
+const pink1 = '#EE5BE5';
+const pink2 = '#BC09B0';
+
+const purp0 = '#C074FA';
+const purp1 = '#A239F3';
+const purp2 = '#7008C0';
+
 const maxTurn = 0.01;
 var theta;
 
@@ -195,115 +215,7 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
   ctx.save();
   ctx.translate(x, y);
 
-  if (type === 'grunt') {
-    ctx.scale(2, 2);
-    ctx.fillStyle = '#ff9999';
-    ctx.beginPath(); ctx.ellipse(0, 5, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = `hsl(${t * 18},90%,55%)`;
-    ctx.beginPath();
-    ctx.moveTo(-9, 14); ctx.lineTo(-2, 2); ctx.lineTo(-6, -4); ctx.lineTo(-11, 0);
-    ctx.closePath(); ctx.fill();
-    ctx.moveTo(9, 14); ctx.lineTo(2, 2); ctx.lineTo(6, -4); ctx.lineTo(11, 0);
-    ctx.closePath(); ctx.fill();
-
-  } else if (type === 'fighter') {
-    ctx.scale(2, 2);
-    ctx.fillStyle = '#cc5500';
-    ctx.fillRect(-15, -5, 5, 20); ctx.fillRect(10, -5, 5, 20);
-    ctx.fillStyle = `hsl(${20 + t * 18},90%,55%)`;
-    ctx.beginPath();
-    ctx.moveTo(0, 19); ctx.lineTo(-20, -2); ctx.lineTo(-13, -17);
-    ctx.lineTo(0, -9); ctx.lineTo(13, -17); ctx.lineTo(20, -2);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#ffbb66';
-    ctx.beginPath(); ctx.ellipse(0, 2, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
-
-  } else if (type === 'bomber') {
-    const pulse = 1 + Math.sin(frame * 0.09) * 0.04;
-    ctx.scale(2 * pulse, 2 * pulse);
-    ctx.fillStyle = `hsl(${t * 10},90%,38%)`;
-    ctx.beginPath(); ctx.ellipse(0, 0, 26, 18, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = `hsl(${t * 10},90%,52%)`;
-    ctx.beginPath();
-    ctx.moveTo(0, 24); ctx.lineTo(-36, 4); ctx.lineTo(-32, -10);
-    ctx.lineTo(32, -10); ctx.lineTo(36, 4);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#660000';
-    [-9, 0, 9].forEach(ox => ctx.fillRect(ox - 3, 14, 6, 14));
-    const cg = ctx.createRadialGradient(0, 0, 0, 0, 0, 10);
-    cg.addColorStop(0, '#ff4444'); cg.addColorStop(1, 'transparent');
-    ctx.fillStyle = cg;
-    ctx.beginPath(); ctx.ellipse(0, 0, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
-
-  } else if (type === 'vette') { // ugly
-    ctx.fillStyle = 'hotpink';
-    ctx.beginPath();
-    ctx.moveTo(-75, -200);
-    ctx.lineTo(-75, 15);
-    ctx.lineTo(-25, 40);
-    ctx.lineTo(-25, 0);
-    ctx.lineTo(25, 0)
-    ctx.lineTo(25, 40);
-    ctx.lineTo(75, 15);
-    ctx.lineTo(75, -200);
-    ctx.lineTo(0, -250);
-    ctx.closePath(); ctx.fill();
-
-  } else if (type === 'tank') {
-    ctx.scale(.8, .8);
-    ctx.fillStyle = 'orange';
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 48, 9, Math.PI / 6, 0, Math.PI * 2);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'orange';
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 48, 9, Math.PI / -6, 0, Math.PI * 2);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'hotpink';
-    ctx.beginPath();
-    ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'brown';
-    ctx.beginPath();
-    ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
-  } else if (type === 'turret') {
-    ctx.scale(.8, .8);
-    ctx.fillStyle = 'red';
-    ctx.beginPath();
-    ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
-    // calculate target angle (between turret & player)
-    const dy = playerY - e.y;
-    const dx = playerX - e.x;
-    const turret2 = Math.atan2(dy, dx);
-
-    // calculate new angle (limited by turning radius)
-    getTheta(e.turret1,turret2);
-    e.turret1 = theta;
-
-    ctx.lineWidth = 8;
-    ctx.strokeStyle = 'red';
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-
-    // calculate new x,y position for turret muzzle and draw line
-    const turretX = (60 * Math.cos(e.turret1));
-    const turretY = (60 * Math.sin(e.turret1));
-    ctx.lineTo(turretX, turretY);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.lineWidth = 20;
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-    ctx.lineTo((27 * Math.cos(e.turret1)),(27 * Math.sin(e.turret1)));
-    ctx.closePath();
-    ctx.stroke();
-
-    ctx.fillStyle = 'orange';
-    ctx.beginPath();
-    ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
-  } else if (type === 'daitank') {
+  if (type === 'daitank') { // THE BIG OL TANK
     ctx.scale(4,4);
 
     //wings
@@ -483,6 +395,913 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.fillStyle = 'grey';
     ctx.beginPath();
     ctx.arc(0, 10, 2, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+  } else if (type === 'xwing') { // X-WING BUT NOT REALLY
+    ctx.scale(4,4);
+
+    // missiles
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.ellipse(16, -6, 1, 6, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.ellipse(18, -8, 1, 6, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.ellipse(6.5, 4.25, 1.5, 4, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.ellipse(-16, -6, 1, 6, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.ellipse(-18, -8, 1, 6, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.ellipse(-6.5, 4.25, 1.5, 4, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    // engine area
+    ctx.fillStyle = xwing2;
+    ctx.beginPath();
+    ctx.moveTo(-3, -14);
+    ctx.lineTo(-3, -9);
+    ctx.lineTo(3, -9);
+    ctx.lineTo(3, -14);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.moveTo(0, -16);
+    ctx.lineTo(-1, -15);
+    ctx.lineTo(-2, -16);
+    ctx.lineTo(-4, -14);
+    ctx.lineTo(-3, -13);
+    ctx.lineTo(-2, -14);
+    ctx.lineTo(-1, -13);
+    ctx.lineTo(0, -14);
+    ctx.lineTo(1, -13);
+    ctx.lineTo(2, -14);
+    ctx.lineTo(3, -13);
+    ctx.lineTo(4, -14);
+    ctx.lineTo(2, -16);
+    ctx.lineTo(1, -15);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = xwing3;
+    ctx.beginPath();
+    ctx.moveTo(0, -14);
+    ctx.lineTo(-2, -12);
+    ctx.lineTo(-2, -11);
+    ctx.lineTo(0, -12);
+    ctx.lineTo(2, -11);
+    ctx.lineTo(2, -12);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 0.2;
+    ctx.stroke();
+
+    // body
+    ctx.fillStyle = xwing2;
+    ctx.beginPath();
+    ctx.moveTo(-5, -3);
+    ctx.lineTo(-7, -1);
+    ctx.lineTo(-7, 3.5);
+    ctx.lineTo(-5, 3.5);
+    ctx.lineTo(-5, -1);
+    ctx.lineTo(-5, 7);
+    ctx.lineTo(5, 7);
+    ctx.lineTo(5, -1);
+    ctx.lineTo(5, 3.5);
+    ctx.lineTo(7, 3.5);
+    ctx.lineTo(7, -1);
+    ctx.lineTo(5, -3);
+    ctx.lineTo(3, -9);
+    ctx.closePath(); ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = xwing1;
+    ctx.beginPath();
+    ctx.moveTo(-5, -15);
+    ctx.lineTo(-5, -5);
+    ctx.lineTo(5, -5);
+    ctx.lineTo(5, -15);
+    ctx.lineTo(3, -13);
+    ctx.lineTo(3, -5);
+    ctx.lineTo(-3, -5);
+    ctx.lineTo(-3, -13);
+    ctx.closePath(); ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(0, 6, 5, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = xwing2;
+    ctx.beginPath();
+    ctx.ellipse(0, 7, 5, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.ellipse(0, 7, 3, 1, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    // turret
+    ctx.fillStyle = xwing1;
+    ctx.beginPath();
+    ctx.arc(0, -5, 5, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(0, -6, 4.5, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = xwing1;
+    ctx.beginPath();
+    ctx.arc(0, -6, 3, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    // cockpit
+    ctx.fillStyle = xwing1;
+    ctx.beginPath();
+    ctx.moveTo(-2, -1);
+    ctx.lineTo(-2, 5);
+    ctx.lineTo(2, 5);
+    ctx.lineTo(2, -1);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = xwing3;
+    ctx.beginPath();
+    ctx.ellipse(0, 2, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    // side bits
+    ctx.fillStyle = xwing3;
+    ctx.beginPath();
+    ctx.moveTo(5, -5);
+    ctx.lineTo(5, -3);
+    ctx.lineTo(7, -1);
+    ctx.lineTo(7, -3);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-5, -5);
+    ctx.lineTo(-5, -3);
+    ctx.lineTo(-7, -1);
+    ctx.lineTo(-7, -3);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = xwing1;
+    ctx.beginPath();
+    ctx.moveTo(5, -7);
+    ctx.lineTo(5, -5);
+    ctx.lineTo(7, -3);
+    ctx.lineTo(7, -5);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-5, -7);
+    ctx.lineTo(-5, -5);
+    ctx.lineTo(-7, -3);
+    ctx.lineTo(-7, -5);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = xwing2;
+    ctx.beginPath();
+    ctx.moveTo(7, -1);
+    ctx.lineTo(7, 5);
+    ctx.lineTo(9, 7);
+    ctx.lineTo(9, -3);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-7, -1);
+    ctx.lineTo(-7, 5);
+    ctx.lineTo(-9, 7);
+    ctx.lineTo(-9, -3);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.moveTo(3, -3);
+    ctx.lineTo(9, 3);
+    ctx.lineTo(9, 1);
+    ctx.lineTo(3, -5);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-3, -3);
+    ctx.lineTo(-9, 3);
+    ctx.lineTo(-9, 1);
+    ctx.lineTo(-3, -5);
+    ctx.closePath(); ctx.fill();
+
+    // wings
+    ctx.fillStyle = xwing1;
+    ctx.beginPath();
+    ctx.moveTo(9, -7);
+    ctx.lineTo(9, 11);
+    ctx.lineTo(11, 9);
+    ctx.lineTo(11, 3);
+    ctx.lineTo(16, -2);
+    ctx.lineTo(16, -4);
+    ctx.lineTo(19, -7);
+    ctx.lineTo(19, -13);
+    ctx.lineTo(11, -5);
+    ctx.lineTo(11, -7);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9, -7);
+    ctx.lineTo(-9, 11);
+    ctx.lineTo(-11, 9);
+    ctx.lineTo(-11, 3);
+    ctx.lineTo(-16, -2);
+    ctx.lineTo(-16, -4);
+    ctx.lineTo(-19, -7);
+    ctx.lineTo(-19, -13);
+    ctx.lineTo(-11, -5);
+    ctx.lineTo(-11, -7);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = xwing2;
+    ctx.beginPath();
+    ctx.moveTo(9, 11);
+    ctx.lineTo(9, 15);
+    ctx.lineTo(12, 17);
+    ctx.lineTo(15, 15);
+    ctx.lineTo(19, 17);
+    ctx.lineTo(19, 11);
+    ctx.lineTo(13, 5);
+    ctx.lineTo(13, 9);
+    ctx.lineTo(11, 7);
+    ctx.lineTo(11, 9);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9, 11);
+    ctx.lineTo(-9, 15);
+    ctx.lineTo(-12, 17);
+    ctx.lineTo(-15, 15);
+    ctx.lineTo(-19, 17);
+    ctx.lineTo(-19, 11);
+    ctx.lineTo(-13, 5);
+    ctx.lineTo(-13, 9);
+    ctx.lineTo(-11, 7);
+    ctx.lineTo(-11, 9);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = xwing3;
+    ctx.beginPath();
+    ctx.moveTo(11, 3);
+    ctx.lineTo(11, 7);
+    ctx.lineTo(13, 9);
+    ctx.lineTo(13, 5);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(19, -13);
+    ctx.lineTo(19, -7);
+    ctx.lineTo(21, -9);
+    ctx.lineTo(21, -15);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(9, -7);
+    ctx.lineTo(9, -6);
+    ctx.lineTo(11, -6);
+    ctx.lineTo(11, -7);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-11, 3);
+    ctx.lineTo(-11, 7);
+    ctx.lineTo(-13, 9);
+    ctx.lineTo(-13, 5);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-19, -13);
+    ctx.lineTo(-19, -7);
+    ctx.lineTo(-21, -9);
+    ctx.lineTo(-21, -15);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9, -7);
+    ctx.lineTo(-9, -6);
+    ctx.lineTo(-11, -6);
+    ctx.lineTo(-11, -7);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.moveTo(9.5, 15);
+    ctx.lineTo(12, 16.5);
+    ctx.lineTo(14.5, 15);
+    ctx.lineTo(12, 13.5);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9.5, 15);
+    ctx.lineTo(-12, 16.5);
+    ctx.lineTo(-14.5, 15);
+    ctx.lineTo(-12, 13.5);
+    ctx.closePath(); ctx.fill();
+
+  } else if (type === 'moth') { // ---------- MOTH --------------
+    ctx.scale(2.5,2.5);
+
+    // bottom wing
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(7, 8);
+    ctx.lineTo(13, 14);
+    ctx.lineTo(15, 14);
+    ctx.lineTo(15, 13);
+    ctx.lineTo(14, 12);
+    ctx.lineTo(14, 11);
+    ctx.lineTo(9, 6);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(7, 9);
+    ctx.lineTo(13, 15);
+    ctx.lineTo(15, 15);
+    ctx.lineTo(15, 14);
+    ctx.lineTo(13, 14);
+    ctx.lineTo(7, 8);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink0; //maybe white
+    ctx.beginPath();
+    ctx.moveTo(12, 9);
+    ctx.lineTo(14, 11);
+    ctx.lineTo(14, 10);
+    ctx.lineTo(13, 9);
+    ctx.closePath(); ctx.fill();
+
+
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(-7, 8);
+    ctx.lineTo(-13, 14);
+    ctx.lineTo(-15, 14);
+    ctx.lineTo(-15, 13);
+    ctx.lineTo(-14, 12);
+    ctx.lineTo(-14, 11);
+    ctx.lineTo(-9, 6);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(-7, 9);
+    ctx.lineTo(-13, 15);
+    ctx.lineTo(-15, 15);
+    ctx.lineTo(-15, 14);
+    ctx.lineTo(-13, 14);
+    ctx.lineTo(-7, 8);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink0; //maybe white
+    ctx.beginPath();
+    ctx.moveTo(-12, 9);
+    ctx.lineTo(-14, 11);
+    ctx.lineTo(-14, 10);
+    ctx.lineTo(-13, 9);
+    ctx.closePath(); ctx.fill();
+
+    // top wing
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(0, 6);
+    ctx.lineTo(8, -2);
+    ctx.lineTo(8, -6);
+    ctx.lineTo(14, -12);
+    ctx.lineTo(14, -16);
+    ctx.lineTo(16, -8);
+    ctx.lineTo(14, -6);
+    ctx.lineTo(14, 0);
+    ctx.lineTo(9, 4);
+    ctx.lineTo(7, 4);
+    ctx.lineTo(5, 6);
+    ctx.lineTo(0, 6);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(2, 0);
+    ctx.lineTo(2, 4);
+    ctx.lineTo(8, -2);
+    ctx.lineTo(8, -3);
+    ctx.lineTo(5, 0);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(9, -5);
+    ctx.lineTo(9, -3);
+    ctx.lineTo(13, -7);
+    ctx.lineTo(13, -9);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(2, 6);
+    ctx.lineTo(5, 6);
+    ctx.lineTo(7, 4);
+    ctx.lineTo(10, 4);
+    ctx.lineTo(10, 6);
+    ctx.lineTo(7, 9);
+    ctx.lineTo(1, 9);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(14, -6);
+    ctx.lineTo(14, 0);
+    ctx.lineTo(9, 4);
+    ctx.lineTo(10, 4);
+    ctx.lineTo(16, -1);
+    ctx.lineTo(16, -8);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = pink1; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(5, 6);
+    ctx.lineTo(7, 4);
+    ctx.lineTo(10, 4);
+    ctx.stroke();
+    ctx.fillStyle = pink0;
+    ctx.beginPath();
+    ctx.moveTo(8, -7);
+    ctx.lineTo(8, -6);
+    ctx.lineTo(14, -12);
+    ctx.lineTo(14, -13);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(7, -4);
+    ctx.lineTo(7, -2);
+    ctx.lineTo(8, -3);
+    ctx.lineTo(8, -5);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(0, 6);
+    ctx.lineTo(-8, -2);
+    ctx.lineTo(-8, -6);
+    ctx.lineTo(-14, -12);
+    ctx.lineTo(-14, -16);
+    ctx.lineTo(-16, -8);
+    ctx.lineTo(-14, -6);
+    ctx.lineTo(-14, 0);
+    ctx.lineTo(-9, 4);
+    ctx.lineTo(-7, 4);
+    ctx.lineTo(-5, 6);
+    ctx.lineTo(0, 6);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(-2, 0);
+    ctx.lineTo(-2, 4);
+    ctx.lineTo(-8, -2);
+    ctx.lineTo(-8, -3);
+    ctx.lineTo(-5, 0);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9, -5);
+    ctx.lineTo(-9, -3);
+    ctx.lineTo(-13, -7);
+    ctx.lineTo(-13, -9);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-2, 6);
+    ctx.lineTo(-5, 6);
+    ctx.lineTo(-7, 4);
+    ctx.lineTo(-10, 4);
+    ctx.lineTo(-10, 6);
+    ctx.lineTo(-7, 9);
+    ctx.lineTo(-1, 9);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(-14, -6);
+    ctx.lineTo(-14, 0);
+    ctx.lineTo(-9, 4);
+    ctx.lineTo(-10, 4);
+    ctx.lineTo(-16, -1);
+    ctx.lineTo(-16, -8);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = pink1; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(-5, 6);
+    ctx.lineTo(-7, 4);
+    ctx.lineTo(-10, 4);
+    ctx.stroke();
+    ctx.fillStyle = pink0;
+    ctx.beginPath();
+    ctx.moveTo(-8, -7);
+    ctx.lineTo(-8, -6);
+    ctx.lineTo(-14, -12);
+    ctx.lineTo(-14, -13);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-7, -4);
+    ctx.lineTo(-7, -2);
+    ctx.lineTo(-8, -3);
+    ctx.lineTo(-8, -5);
+    ctx.closePath(); ctx.fill();
+
+    // body
+    ctx.fillStyle = blue1;
+    ctx.strokeStyle = blue2; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.ellipse(0, 3, 3, 7, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = pink0; ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(-3, 0);
+    ctx.lineTo(0, 4);
+    ctx.lineTo(3, 0);
+    ctx.stroke();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.ellipse(0, 4.5, 1.5, 2.5, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink0; //maybe white
+    ctx.beginPath();
+    ctx.ellipse(3.5, -1, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-3.5, -1, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    // mouth guns
+    ctx.fillStyle = blue0;
+    ctx.beginPath();
+    ctx.ellipse(4, 9, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-4, 9, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+  } else if (type === 'jet' || type === 'dummy1' || type === 'dummy2' || type === 'dummy3') { // JET FIGHTER
+    ctx.scale(4,4);
+
+    // STYLE
+    ctx.strokeStyle = neonBlue;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(-6.7, 4.5);
+    ctx.lineTo(-6.7, 3.2);
+    ctx.lineTo(6.7, 3.2);
+    ctx.lineTo(6.7, 4.5);
+    ctx.stroke();
+
+    // triangle
+    ctx.fillStyle = neonPink;
+    ctx.beginPath();
+    ctx.moveTo(-7, 3);
+    ctx.lineTo(7, 3);
+    ctx.lineTo(0, -3);
+    ctx.closePath(); ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(4, 2.5, 1.2, 3, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-4, 2.5, 1.2, 3, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(0, -2, 1.2, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    //rear engines
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.ellipse(1.5, -1.75, 0.5, 1, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-1.5, -1.75, 0.5, 1, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    //front engines
+    ctx.beginPath();
+    ctx.ellipse(4, 4.5, 1, 1, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-4, 4.5, 1, 1, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    //outlines
+    ctx.strokeStyle = neonPurp;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(5, 1);
+    ctx.lineTo(5, 4.9);
+    ctx.lineTo(4, 5.9);
+    ctx.lineTo(3, 4.9);
+    ctx.lineTo(3, 1);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(-5, 1);
+    ctx.lineTo(-5, 4.9);
+    ctx.lineTo(-4, 5.9);
+    ctx.lineTo(-3, 4.9);
+    ctx.lineTo(-3, 1);
+    ctx.stroke();
+
+    ctx.fillStyle = neonPurp;
+    ctx.beginPath();
+    ctx.moveTo(-3, 2.5);
+    ctx.lineTo(-3, 4);
+    ctx.lineTo(3, 4);
+    ctx.lineTo(3, 2.5);
+    ctx.lineTo(1.5, 2.5);
+    ctx.lineTo(1.5, 0);
+    ctx.lineTo(0.5, -1);
+    ctx.lineTo(0.5, -6);
+    ctx.lineTo(2, -6);
+    ctx.lineTo(2, -7);
+    ctx.lineTo(-2, -7);
+    ctx.lineTo(-2, -6);
+    ctx.lineTo(-0.5, -6);
+    ctx.lineTo(-0.5, -1);
+    ctx.lineTo(-1.5, 0);
+    ctx.lineTo(-1.5, 2.5);
+    ctx.lineTo(-3, 2.5);
+    ctx.lineTo(-3, 4);
+    ctx.closePath(); ctx.fill();
+
+    // spoiler
+    ctx.beginPath();
+    ctx.moveTo(-2, -7.5); ctx.lineTo(-2, -5.5); ctx.stroke();
+    ctx.moveTo(2, -7.5); ctx.lineTo(2, -5.5); ctx.stroke();
+
+    //cockpit
+    ctx.fillStyle = neonBlue;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.ellipse(0, 3, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  } else if (type === 'beetle') { // ------------- BEETLE BUM -----------------
+    ctx.scale(3, 3);
+
+    //center
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(-2, 3);
+    ctx.lineTo(-5, 6);
+    ctx.lineTo(-5, 9);
+    ctx.lineTo(5, 9);
+    ctx.lineTo(5, 6);
+    ctx.lineTo(2, 3);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = blue0;
+    ctx.beginPath(); ctx.arc(0, 9, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = pink0; ctx.strokeStyle = blue2; ctx.lineWidth = 0.75;
+    ctx.beginPath(); ctx.arc(0, 9.5, 2.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = blue0;
+    ctx.beginPath();
+    ctx.moveTo(-1, -6);
+    ctx.lineTo(-2, -5);
+    ctx.lineTo(-2, -1);
+    ctx.lineTo(-3, 0);
+    ctx.lineTo(0, 3);
+    ctx.lineTo(3, 0);
+    ctx.lineTo(2, -1);
+    ctx.lineTo(2, -5);
+    ctx.lineTo(1, -6);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = pink0;
+    ctx.beginPath(); ctx.arc(0, -1.5, 1.2, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(-1, -5);
+    ctx.lineTo(-2, -4);
+    ctx.lineTo(-2, -3);
+    ctx.lineTo(-1, -4);
+    ctx.lineTo(1, -4);
+    ctx.lineTo(2, -3);
+    ctx.lineTo(2, -4);
+    ctx.lineTo(1, -5);
+    ctx.closePath(); ctx.fill();
+
+    // wings (on bottom)
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(9, 10);
+    ctx.lineTo(14, 15);
+    ctx.lineTo(16, 15);
+    ctx.lineTo(16, 11);
+    ctx.lineTo(12, 7);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9, 10);
+    ctx.lineTo(-14, 15);
+    ctx.lineTo(-16, 15);
+    ctx.lineTo(-16, 11);
+    ctx.lineTo(-12, 7);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(9, 10);
+    ctx.lineTo(10.25, 11.25);
+    ctx.lineTo(14, 9);
+    ctx.lineTo(12, 7);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-9, 10);
+    ctx.lineTo(-10.25, 11.25);
+    ctx.lineTo(-14, 9);
+    ctx.lineTo(-12, 7);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(16, 12);
+    ctx.lineTo(16, 15);
+    ctx.lineTo(17, 16);
+    ctx.lineTo(17, 13);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-16, 12);
+    ctx.lineTo(-16, 15);
+    ctx.lineTo(-17, 16);
+    ctx.lineTo(-17, 13);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue0;
+    ctx.beginPath();
+    ctx.moveTo(17, 13);
+    ctx.lineTo(17, 16);
+    ctx.lineTo(18, 17);
+    ctx.lineTo(18, 14);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-17, 13);
+    ctx.lineTo(-17, 16);
+    ctx.lineTo(-18, 17);
+    ctx.lineTo(-18, 14);
+    ctx.closePath(); ctx.fill();
+
+    // center sides
+    ctx.fillStyle = blue1; ctx.strokeStyle = blue2; ctx.lineWidth = 0.75;
+    ctx.beginPath();
+    ctx.moveTo(0, 3);
+    ctx.lineTo(2, 3);
+    ctx.lineTo(5, 6);
+    ctx.lineTo(5, 9);
+    ctx.lineTo(6, 9);
+    ctx.lineTo(6, 3);
+    ctx.lineTo(3, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, 3);
+    ctx.lineTo(-2, 3);
+    ctx.lineTo(-5, 6);
+    ctx.lineTo(-5, 9);
+    ctx.lineTo(-6, 9);
+    ctx.lineTo(-6, 3);
+    ctx.lineTo(-3, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(3, -4);
+    ctx.lineTo(2, -3);
+    ctx.lineTo(2, -1);
+    ctx.lineTo(6, 3);
+    ctx.lineTo(6, 7);
+    ctx.lineTo(10, 3);
+    ctx.lineTo(12, 3);
+    ctx.lineTo(14, 5);
+    ctx.lineTo(14, 3);
+    ctx.lineTo(12, 1);
+    ctx.lineTo(10, 1);
+    ctx.lineTo(5, -4);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-3, -4);
+    ctx.lineTo(-2, -3);
+    ctx.lineTo(-2, -1);
+    ctx.lineTo(-6, 3);
+    ctx.lineTo(-6, 7);
+    ctx.lineTo(-10, 3);
+    ctx.lineTo(-12, 3);
+    ctx.lineTo(-14, 5);
+    ctx.lineTo(-14, 3);
+    ctx.lineTo(-12, 1);
+    ctx.lineTo(-10, 1);
+    ctx.lineTo(-5, -4);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = pink1; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(3, -1);
+    ctx.lineTo(5, -1);
+    ctx.lineTo(8, 2);
+    ctx.lineTo(8, 3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-3, -1);
+    ctx.lineTo(-5, -1);
+    ctx.lineTo(-8, 2);
+    ctx.lineTo(-8, 3);
+    ctx.stroke();
+
+    // top chunk + fin
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(10, -11);
+    ctx.lineTo(10, -9);
+    ctx.lineTo(8, -9);
+    ctx.lineTo(6, -7);
+    ctx.lineTo(6, -5);
+    ctx.lineTo(10, -9);
+    ctx.lineTo(11, -9);
+    ctx.lineTo(16, -14);
+    ctx.lineTo(16, -17);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-10, -11);
+    ctx.lineTo(-10, -9);
+    ctx.lineTo(-8, -9);
+    ctx.lineTo(-6, -7);
+    ctx.lineTo(-6, -5);
+    ctx.lineTo(-10, -9);
+    ctx.lineTo(-11, -9);
+    ctx.lineTo(-16, -14);
+    ctx.lineTo(-16, -17);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.moveTo(10, -9);
+    ctx.lineTo(6, -5);
+    ctx.lineTo(6, -4);
+    ctx.lineTo(10, -8);
+    ctx.lineTo(12, -8);
+    ctx.lineTo(12, -9);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-10, -9);
+    ctx.lineTo(-6, -5);
+    ctx.lineTo(-6, -4);
+    ctx.lineTo(-10, -8);
+    ctx.lineTo(-12, -8);
+    ctx.lineTo(-12, -9);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(10, -8);
+    ctx.lineTo(6, -4);
+    ctx.lineTo(6, -3);
+    ctx.lineTo(8, -1);
+    ctx.lineTo(8, -3);
+    ctx.lineTo(10, -5);
+    ctx.lineTo(12, -5);
+    ctx.lineTo(12, -8);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-10, -8);
+    ctx.lineTo(-6, -4);
+    ctx.lineTo(-6, -3);
+    ctx.lineTo(-8, -1);
+    ctx.lineTo(-8, -3);
+    ctx.lineTo(-10, -5);
+    ctx.lineTo(-12, -5);
+    ctx.lineTo(-12, -8);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue0; ctx.strokeStyle = blue2; ctx.lineWidth = 0.5;    ctx.beginPath();
+    ctx.beginPath();
+    ctx.moveTo(8, -3);
+    ctx.lineTo(8, -1);
+    ctx.lineTo(10, -1);
+    ctx.lineTo(12, -3);
+    ctx.lineTo(12, -5);
+    ctx.lineTo(10, -5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-8, -3);
+    ctx.lineTo(-8, -1);
+    ctx.lineTo(-10, -1);
+    ctx.lineTo(-12, -3);
+    ctx.lineTo(-12, -5);
+    ctx.lineTo(-10, -5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // middle chunk
+    ctx.fillStyle = blue0;
+    ctx.beginPath();
+    ctx.moveTo(14, -1);
+    ctx.lineTo(12, 0);
+    ctx.lineTo(12, 1);
+    ctx.lineTo(14, 1);
+    ctx.lineTo(16, 3);
+    ctx.lineTo(16, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-14, -1);
+    ctx.lineTo(-12, 0);
+    ctx.lineTo(-12, 1);
+    ctx.lineTo(-14, 1);
+    ctx.lineTo(-16, 3);
+    ctx.lineTo(-16, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(12, 1);
+    ctx.lineTo(14, 3);
+    ctx.lineTo(14, 5);
+    ctx.lineTo(16, 3);
+    ctx.lineTo(14, 1);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-12, 1);
+    ctx.lineTo(-14, 3);
+    ctx.lineTo(-14, 5);
+    ctx.lineTo(-16, 3);
+    ctx.lineTo(-14, 1);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // bottom chunk
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(10, 3);
+    ctx.lineTo(6, 7);
+    ctx.lineTo(6, 9);
+    ctx.lineTo(8, 11);
+    ctx.lineTo(8, 9);
+    ctx.lineTo(12, 5);
+    ctx.lineTo(14, 5);
+    ctx.lineTo(12, 3);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-10, 3);
+    ctx.lineTo(-6, 7);
+    ctx.lineTo(-6, 9);
+    ctx.lineTo(-8, 11);
+    ctx.lineTo(-8, 9);
+    ctx.lineTo(-12, 5);
+    ctx.lineTo(-14, 5);
+    ctx.lineTo(-12, 3);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink2; ctx.strokeStyle = pink1; ctx.lineWidth = 0.75;
+    ctx.beginPath();
+    ctx.moveTo(8, 9);
+    ctx.lineTo(8, 10.5);
+    ctx.lineTo(9.5, 10.5);
+    ctx.lineTo(13.5, 6.5);
+    ctx.lineTo(13.5, 5);
+    ctx.lineTo(12, 5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-8, 9);
+    ctx.lineTo(-8, 10.5);
+    ctx.lineTo(-9.5, 10.5);
+    ctx.lineTo(-13.5, 6.5);
+    ctx.lineTo(-13.5, 5);
+    ctx.lineTo(-12, 5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
 
   } else if (type === 'boss') {
     // ── Scaled body (2× base size) ─────────────────────────────────────────

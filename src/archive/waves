@@ -9,6 +9,68 @@ In main JS file, import {name of function} from ./file
 // Early copters hover and retreat, later fly toward player or keep going downward
 // "Popcorn strings" with big enemies in between
 
+WAVES:
+
+// ---------------- SPRITE SHEET -----------------
+[
+{ at: 0, type:'beetle', x: 240, sy: 190, pat:'straight', vy: 0 },
+{ at: 0, type:'daitank', x: 340, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'jet', x: 440, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'moth', x: 120, sy: 190, pat:'straight', vy: 0 },
+{ at: 0, type:'xwing', x: 180, sy: 320, pat:'straight', vy: 0 },
+],
+
+// ---------- EXPLOSION TEST --------------
+[
+{ at: 0, type:'dummy1', x: 140, sy: 190, pat:'straight', vy: 0 },
+{ at: 0, type:'dummy1', x: 240, sy: 190, pat:'straight', vy: 0 },
+{ at: 0, type:'dummy3', x: 340, sy: 190, pat:'straight', vy: 0 },
+{ at: 500, type:'dummy1', x: 140, sy: 190, pat:'straight', vy: 0 },
+],
+
+// ---------------- FPS TEST -----------------
+[
+  { at:   0, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
+  { at:   0, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
+  { at:   0, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
+  { at:   0, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
+  { at:   0, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
+  { at:   0, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
+  { at:   0, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
+  { at:  10, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
+  { at:  10, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
+  { at:  10, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
+  { at:  10, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
+  { at:  10, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
+  { at:  10, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
+  { at:  20, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
+  { at:  20, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
+  { at:  20, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
+  { at:  20, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
+  { at:  20, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
+  { at:  20, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
+  { at:  20, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
+  { at:  30, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
+  { at:  30, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
+  { at:  30, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
+  { at:  30, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
+  { at:  30, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
+  { at:  30, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
+  { at:  40, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
+  { at:  40, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
+  { at:  40, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
+  { at:  40, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
+  { at:  40, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
+  { at:  40, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
+  { at:  40, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
+  { at:  50, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
+  { at:  50, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
+  { at:  50, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
+  { at:  50, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
+  { at:  50, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
+  { at:  50, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
+],
+
 // Diagonal tank column
   [
     { at:  0, type:'tank',   x: 60, sy: -15, pat:'diag_r', vy:1 },

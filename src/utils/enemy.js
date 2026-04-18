@@ -14,13 +14,19 @@ const EDEFS = {
   turret:  { w: 40, h: 40, maxHp: 5, score: 3000, fireRate: 76, bspd: 1.4 , turret1: 0 },
   beetle:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
   daitank: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
-  jet:     { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
+  jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 140, bspd: 2 },
   moth:    { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
   xwing:   { w: 170,  h: 150, maxHp: 100000, score: 1, fireRate: 1, bspd: 1 },
-  boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
+  boss:    { w: 240, h: 180, maxHp: 2.000, score: 200000, fireRate: 36, bspd: 1.75 },
   dummy1:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
   dummy2:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
   dummy3:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
+  //sprites
+  beetleSprite:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
+  daitankSprite: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
+  jetSprite:     { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
+  mothSprite:    { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
+  xwingSprite:   { w: 170,  h: 150, maxHp: 100000, score: 1, fireRate: 1, bspd: 1 },
 };
 
 export function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
@@ -240,7 +246,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   }
 
     // Shotgun cluster - accelerating bullets aimed at a single point
-    if (e.type === 'daitank-disabled' && e.y < H * 0.95) {
+    if (e.type === 'moth' && e.y < H * 0.95) {
       const cycle = e.timer % 120;
       if (cycle === 11) {
         e.bspd = 6;
@@ -266,7 +272,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
       [-45, 40].forEach(dx => {
           spread(e.x + dx, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
           spread(e.x + dx + 11, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-          spread(e.x + dx + 6, e.y + 30 + 9,  4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+          spread(e.x + dx + 6, e.y + 30 + 9, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
         });
       e.bspd += 0.5;
       }
@@ -281,7 +287,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   if (e.type === 'boss' && e.transitionTimer > 0) return; // no fire during transition
 
   switch (e.type) {
-    case 'grunt': {
+    case 'jet': {
       const v = aim(e.x, e.y, px, py, e.bspd);
       bullets.push(mkBullet(e.x, e.y, v.vx, v.vy));
       break;

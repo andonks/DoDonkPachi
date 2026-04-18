@@ -47,8 +47,7 @@
   }
 }
 
-/* cyan scanline */
-/* diffuse cyan flash */
+/* diffuse flash */
 .fancy::after {
   content: "";
   position: absolute;
@@ -58,10 +57,10 @@
 
   background: radial-gradient(
     ellipse at center,
-    rgba(0,255,255,0.45) 0%,
-    rgba(0,255,255,0.25) 25%,
-    rgba(0,255,255,0.10) 45%,
-    rgba(0,255,255,0.04) 60%,
+    rgba(225,179,250,0.45) 0%,
+    rgba(225,179,250,0.25) 25%,
+    rgba(225,179,250,0.10) 45%,
+    rgba(225,179,250,0.04) 60%,
     transparent 75%
   );
 
@@ -88,9 +87,9 @@
 
 /* flash glow during scan */
 .fancy.flash span {
-  color: #00ffff;
+  color: #EE5BE5;
   text-shadow:
-    0 0 6px #00ffff,
-    0 0 12px #00ffff,
-    0 0 24px #00ffff;
+    0 0 6px #EE5BE5,
+    0 0 12px #EE5BE5,
+    0 0 24px #EE5BE5;
 }

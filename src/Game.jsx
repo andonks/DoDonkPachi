@@ -7,6 +7,13 @@ import './index.css';
 const W = 480;
 const H = 640;
 
+const blue0 = '#BCEEFD';
+const blue1 = '#5DCBED';
+const blue2 = '#0A99C5';
+
+const pink0 = '#FFB3FA';
+const pink1 = '#EE5BE5';
+const pink2 = '#BC09B0';
 
 // ─── Fancy Title Animation ───────────────────────────────────────────────────
 
@@ -50,7 +57,7 @@ function drawBullet(ctx, b, frame) {
     // Rotate ellipse to align with bullet velocity direction
     const angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
     const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 14);
-    g.addColorStop(0, '#ffffcc'); g.addColorStop(0.4, '#ffff00'); g.addColorStop(1, 'rgba(255,180,0,0)');
+    g.addColorStop(0, '#ffffcc'); g.addColorStop(0.4, pink1); g.addColorStop(1, 'rgba(255,180,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 5 : 3, b.pw ? 24 : 20, angle, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#ffffff';
@@ -141,7 +148,7 @@ function spawnExplosionRings(s, x, y, type) {
   const push = (dx, dy, maxR, life, color, delay = 0) =>
     arr.push({ x: x + dx, y: y + dy, maxR, life, maxLife: life, color, delay });
 
-  if (type === 'fighter') {
+  if (type === 'moth') {
     push(0, 0, 72, 28, '#ffaa00');
     push(0, 0, 58, 18, '#ffffff', 4);
   } else if (type === 'bomber') {
@@ -152,92 +159,23 @@ function spawnExplosionRings(s, x, y, type) {
     push(0, 0, 120, 40, '#ff5500');
     push(0, 0, 105, 35, '#ffcc00', 6);
     push(0, 0, 90, 30, '#ffffff', 12);
+
+  } else if (type === 'jet') {
+    const colors = [pink2, pink1, pink0, 'white', pink2];
+    for (let i = 0; i < 5; i++) {
+      const dx = (Math.random() - 0.5) * 60;
+      const dy = (Math.random() - 0.5) * 40;
+      push(dx, dy, 140 - i * 18, 60, colors[i], 0);
+    }
   } else if (type === 'player') {
-    push(0, 0, 130, 48, '#ffffff');
-    push(0, 0,  95, 40, '#aaddff',  7);
-    push(0, 0,  60, 30, '#0088ff', 14);
-    push(0, 0,  30, 20, '#ffffff', 20);
-  } else if (type === 'dummy1') {
-    push(0, 0, 130, 8, 'white');
-    push(15, 15, 95, 40, '#aaddff', 7);
-    push(15, 15, 60, 30, '#0088ff', 14);
-    push(15, 15,  30, 20, '#ffffff', 20);
-    push(25, 25, 50, 23, '#aaddff', 10);
-    push(25, 25, 40, 30, '#0088ff', 17);
-    push(25, 25,  20, 20, '#ffffff', 23);
-    push(30, 30, 36, 20, '#aaddff', 17);
-    push(30, 30, 24, 30, '#0088ff', 21);
-    push(30, 30,  12, 20, '#ffffff', 26);
-    push(33, 33, 29, 18, '#aaddff', 23);
-    push(33, 33, 19, 30, '#0088ff', 14);
-    push(33, 33,  9, 20, '#ffffff', 29);
-
-    push(-15, -15, 95, 40, '#aaddff', 7);
-    push(-15, -15, 60, 30, '#0088ff', 14);
-    push(-15, -15,  30, 20, '#ffffff', 20);
-    push(-25, -25, 50, 23, '#aaddff', 10);
-    push(-25, -25, 40, 30, '#0088ff', 17);
-    push(-25, -25,  20, 20, '#ffffff', 23);
-    push(-30, -30, 36, 20, '#aaddff', 17);
-    push(-30, -30, 24, 30, '#0088ff', 21);
-    push(-30, -30,  12, 20, '#ffffff', 26);
-    push(-33, -33, 29, 18, '#aaddff', 23);
-    push(-33, -33, 19, 30, '#0088ff', 14);
-    push(-33, -33,  9, 20, '#ffffff', 29);
-
-    push(-15, 15, 95, 40, '#aaddff', 7);
-    push(-15, 15, 60, 30, '#0088ff', 14);
-    push(-15, 15,  30, 20, '#ffffff', 20);
-    push(-25, 25, 50, 23, '#aaddff', 10);
-    push(-25, 25, 40, 30, '#0088ff', 17);
-    push(-25, 25,  20, 20, '#ffffff', 23);
-    push(-30, 30, 36, 20, '#aaddff', 17);
-    push(-30, 30, 24, 30, '#0088ff', 21);
-    push(-30, 30,  12, 20, '#ffffff', 26);
-    push(-33, 33, 29, 18, '#aaddff', 23);
-    push(-33, 33, 19, 30, '#0088ff', 14);
-    push(-33, 33,  9, 20, '#ffffff', 29);
-
-    push(15, -15, 95, 40, '#aaddff', 7);
-    push(15, -15, 60, 30, '#0088ff', 14);
-    push(15, -15,  30, 20, '#ffffff', 20);
-    push(25, -25, 50, 23, '#aaddff', 10);
-    push(25, -25, 40, 30, '#0088ff', 17);
-    push(25, -25,  20, 20, '#ffffff', 23);
-    push(30, -30, 36, 20, '#aaddff', 17);
-    push(30, -30, 24, 30, '#0088ff', 21);
-    push(30, -30,  12, 20, '#ffffff', 26);
-    push(33, -33, 29, 18, '#aaddff', 23);
-    push(33, -33, 19, 30, '#0088ff', 14);
-    push(33, -33,  9, 20, '#ffffff', 29);
-
-  } else if (type === 'dummy2') {
-    push(0, 0, 80, 38, '#ff5500');
-    push(0, 0, 50, 28, '#ffcc00', 6);
-    push(0, 0, 26, 18, '#ffffff', 12);
-  } else if (type === 'dummy3') {
-    push(0, 0, 130, 48, '#ffffff');
-    push(0, 0,  95, 40, '#aaddff',  7);
-    push(0, 0,  60, 30, '#0088ff', 14);
-    push(0, 0,  30, 20, '#ffffff', 20);
-    push(10, 10, 50, 48, '#ffffff', 7);
-    push(10, 10,  35, 40, '#aaddff', 14);
-    push(10, 10,  30, 30, '#0088ff', 21);
-    push(10, 10,  20, 20, '#ffffff', 28);
-    push(-10, -10, 50, 48, '#ffffff', 14);
-    push(-10, -10,  35, 40, '#aaddff',  21);
-    push(-10, -10,  30, 30, '#0088ff', 28);
-    push(-10, -10,  20, 20, '#ffffff', 35);
-    push(-10, 10, 50, 48, '#ffffff', 21);
-    push(-10, 10,  35, 40, '#aaddff',  28);
-    push(-10, 10,  30, 30, '#0088ff', 35);
-    push(-10, 10,  20, 20, '#ffffff', 42);
-    push(10, -10, 50, 48, '#ffffff', 21);
-    push(10, -10,  35, 40, '#aaddff',  28);
-    push(10, -10,  30, 30, '#0088ff', 35);
-    push(10, -10,  20, 20, '#ffffff', 42);
+    const colors = [pink2, pink1, pink0, 'white', pink2];
+    for (let i = 0; i < 5; i++) {
+      const dx = (Math.random() - 0.5) * 60;
+      const dy = (Math.random() - 0.5) * 40;
+      push(dx, dy, 165 - i * 18, 60, colors[i], 0);
+    }
   } else if (type === 'boss') {
-    const colors = ['#ff4400', '#ff8800', '#ffcc00', '#ffffff', '#ff2200'];
+    const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 5; i++) {
       const dx = (Math.random() - 0.5) * 60;
       const dy = (Math.random() - 0.5) * 40;
@@ -245,8 +183,10 @@ function spawnExplosionRings(s, x, y, type) {
     }
   }
   else { // default explosion pattern
-    push(0, 0, 72, 48, '#ffaa00');
-    push(0, 0, 58, 38, '#ffffff', 4);
+    push(0, 0, 260, 8, 'white');
+    push(0, 0, 190, 40, blue0, 7);
+    push(0, 0, 120, 30, blue2, 14);
+    push(0, 0,  90, 20, '#ffffff', 20);
   }
 }
 
@@ -255,8 +195,8 @@ function spawnExplosionRings(s, x, y, type) {
 let _cid = 0;
 function mkCollectable(x, y) {
   return {
-    x: x + (Math.random() - 0.5) * 20,
-    y: y + (Math.random() - 0.5) * 10,
+    x: x + (Math.random()) * 20,
+    y: y + (Math.random()) * 10,
     vy: 1.2,
     vx: (Math.random() - 0.5) * 0.8,
     age: 0,
@@ -264,7 +204,7 @@ function mkCollectable(x, y) {
   };
 }
 
-const DROP_COUNT = { grunt: 1, fighter: 2, bomber: 5 };
+const DROP_COUNT = { jet: 1, moth: 2, beetle: 5, xwing: 10 };
 const COLLECT_PTS = 300;
 
 function spawnParticles(arr, x, y, n, colors, spdRange, rRange) {
@@ -294,7 +234,7 @@ function explode(s, x, y, sz = 1) {
     const life = 18 + Math.random() * 22;
     p.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
       r: 2 + Math.random() * 2, life, maxLife: life,
-      color: ['#ffff00','#ff8800','#ff4400'][Math.floor(Math.random() * 3)] });
+      color: ['pink1','#ff8800','#ff4400'][Math.floor(Math.random() * 3)] });
   }
   // debris
   for (let i = 0; i < Math.round(10 * sz); i++) {
@@ -323,207 +263,41 @@ function explode(s, x, y, sz = 1) {
 // full screen W = 480 (-15 => 495), H = 640 (-15 => 655)
 
 const WAVES = [
-  // ---------------- SPRITE SHEET -----------------
+  // 0: Opener — 24 jets, right side first then left side
   [
-  { at: 0, type:'beetle', x: 240, sy: 190, pat:'straight', vy: 0 },
-  { at: 0, type:'daitank', x: 340, sy: 320, pat:'straight', vy: 0 },
-  { at: 0, type:'jet', x: 440, sy: 320, pat:'straight', vy: 0 },
-  { at: 0, type:'moth', x: 120, sy: 190, pat:'straight', vy: 0 },
-  { at: 0, type:'xwing', x: 180, sy: 320, pat:'straight', vy: 0 },
-  ],
+    { at:  30, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+    { at:  30, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at:  55, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at:  55, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-  // ---------- EXPLOSION TEST --------------
-  [
-  { at: 0, type:'dummy1', x: 140, sy: 190, pat:'straight', vy: 0 },
-  { at: 0, type:'dummy1', x: 240, sy: 190, pat:'straight', vy: 0 },
-  { at: 0, type:'dummy3', x: 340, sy: 190, pat:'straight', vy: 0 },
-  { at: 500, type:'dummy1', x: 140, sy: 190, pat:'straight', vy: 0 },
-  ],
+    { at:  85, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at:  85, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 110, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 110, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-  // ---------------- FPS TEST -----------------
-  [
-    { at:   0, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
-    { at:   0, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
-    { at:   0, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
-    { at:   0, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
-    { at:   0, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
-    { at:   0, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
-    { at:   0, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
-    { at:  10, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
-    { at:  10, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
-    { at:  10, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
-    { at:  10, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
-    { at:  10, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
-    { at:  10, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
-    { at:  20, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
-    { at:  20, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
-    { at:  20, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
-    { at:  20, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
-    { at:  20, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
-    { at:  20, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
-    { at:  20, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
-    { at:  30, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
-    { at:  30, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
-    { at:  30, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
-    { at:  30, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
-    { at:  30, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
-    { at:  30, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
-    { at:  40, type:'grunt', x:  60, sy: -15, pat:'straight', vy:3.2 },
-    { at:  40, type:'grunt', x: 120, sy: -15, pat:'straight', vy:3.2 },
-    { at:  40, type:'grunt', x: 180, sy: -15, pat:'straight', vy:3.2 },
-    { at:  40, type:'grunt', x: 240, sy: -15, pat:'straight', vy:3.2 },
-    { at:  40, type:'grunt', x: 300, sy: -15, pat:'straight', vy:3.2 },
-    { at:  40, type:'grunt', x: 360, sy: -15, pat:'straight', vy:3.2 },
-    { at:  40, type:'grunt', x: 420, sy: -15, pat:'straight', vy:3.2 },
-    { at:  50, type:'grunt', x:  90, sy: -15, pat:'straight', vy:3.2 },
-    { at:  50, type:'grunt', x: 150, sy: -15, pat:'straight', vy:3.2 },
-    { at:  50, type:'grunt', x: 210, sy: -15, pat:'straight', vy:3.2 },
-    { at:  50, type:'grunt', x: 270, sy: -15, pat:'straight', vy:3.2 },
-    { at:  50, type:'grunt', x: 330, sy: -15, pat:'straight', vy:3.2 },
-    { at:  50, type:'grunt', x: 390, sy: -15, pat:'straight', vy:3.2 },
-  ],
+    { at: 125, type:'moth', x: 120, pat:'curve_r',  vy:1.2 },
 
-  // 0: Opener — 24 grunts, right side first then left side
+    { at: 140, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+    { at: 140, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 165, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 165, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-  [
-    { at:  30, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    { at:  30, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at:  55, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at:  55, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
+    { at: 300, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 300, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 325, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 325, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-    { at:  85, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at:  85, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 110, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 110, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+    { at: 340, type:'moth', x: 360, pat:'curve_l',  vy:1.2 },
 
-    { at: 140, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    { at: 140, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 165, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 165, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
+    { at: 355, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+    { at: 355, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 380, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+    { at: 380, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-    { at: 300, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 300, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 325, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 325, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-
-    { at: 355, type:'grunt', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    { at: 355, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 380, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 380, type:'grunt', x: 495, sy: 135, pat:'side_r', vy:3.2 },
-
-    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-  ],
-  // 1: 4 fighters + 12 grunts (sides), right side first then left
-  [
-    { at:   0, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
-
-    { at:  30, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:3.2 },
-    { at:  30, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
-    { at:  55, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
-    { at:  55, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:3.2 },
-
-    { at:  85, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:3.2 },
-    { at:  85, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
-    { at: 110, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
-    { at: 110, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:3.2 },
-
-    { at: 120, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
-
-    { at: 200, type:'fighter', x:100, pat:'curve_r',  vy:1.2 },
-
-    { at: 300, type:'fighter', x:380, pat:'curve_l',  vy:1.2 },
-
-    { at: 355, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 355, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 380, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 380, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-
-    { at: 410, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 410, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-  ],
-  // 2: 2 bombers + 16 grunts (hover_mid)
-  [
-    { at:   0, type:'grunt',   x:30, pat:'hover_mid', vy:2.2 },
-    { at:   0, type:'grunt',  x:450, pat:'hover_mid', vy:2.2 },
-    { at:  30, type:'grunt',   x:80, pat:'hover_mid', vy:2.2 },
-    { at:  30, type:'grunt',  x:400, pat:'hover_mid', vy:2.2 },
-    { at:  60, type:'grunt',  x:130, pat:'hover_mid', vy:2.2 },
-    { at:  60, type:'grunt',  x:350, pat:'hover_mid', vy:2.2 },
-    { at:  90, type:'grunt',  x:180, pat:'hover_mid', vy:2.2 },
-    { at:  90, type:'grunt',  x:300, pat:'hover_mid', vy:2.2 },
-
-    { at: 100, type:'bomber', x:160, pat:'hover_l',   vy:0.9 },
-
-    { at: 220, type:'bomber', x:320, pat:'hover_r',   vy:0.9 },
-
-    { at: 225, type:'grunt',   x:30, pat:'hover_mid', vy:2.2 },
-    { at: 225, type:'grunt',  x:450, pat:'hover_mid', vy:2.2 },
-    { at: 255, type:'grunt',   x:80, pat:'hover_mid', vy:2.2 },
-    { at: 255, type:'grunt',  x:400, pat:'hover_mid', vy:2.2 },
-    { at: 285, type:'grunt',  x:130, pat:'hover_mid', vy:2.2 },
-    { at: 285, type:'grunt',  x:350, pat:'hover_mid', vy:2.2 },
-    { at: 315, type:'grunt',  x:180, pat:'hover_mid', vy:2.2 },
-    { at: 315, type:'grunt',  x:300, pat:'hover_mid', vy:2.2 },
-  ],
-  // 3: 8 fighters + 12 grunts (hover_mid) + left & right entry
-  [
-    { at:   0, type:'fighter', x:100, pat:'zigzag',    vy:1.5 },
-    { at:   0, type:'fighter', x:380, pat:'zigzag',    vy:1.5 },
-
-    { at:  65, type:'grunt',   x:120, pat:'hover_mid', vy:2.5 },
-    { at:  65, type:'grunt',   x:360, pat:'hover_mid', vy:2.5 },
-
-    { at: 135, type:'fighter', x:100, pat:'curve_r',   vy:1.3 },
-    { at: 135, type:'fighter', x:380, pat:'curve_l',   vy:1.3 },
-
-    { at: 165, type:'grunt',   x: 80, pat:'hover_mid', vy:2.5 },
-    { at: 165, type:'grunt',   x:400, pat:'hover_mid', vy:2.5 },
-
-    { at: 230, type:'fighter', x:100, pat:'zigzag',    vy:1.5 },
-    { at: 230, type:'fighter', x:380, pat:'zigzag',    vy:1.5 },
-
-    { at: 255, type:'grunt', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 255, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 280, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 280, type:'grunt', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-
-    { at: 300, type:'grunt', x: 495, sy:  35, pat:'side_r', vy:3.2 },
-    { at: 300, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
-    { at: 325, type:'grunt', x: 495, sy:  95, pat:'side_r', vy:3.2 },
-    { at: 325, type:'grunt', x: 495, sy: 155, pat:'side_r', vy:3.2 },
-
-    { at: 360, type:'fighter', x:100, pat:'curve_r',  vy:1.3 },
-    { at: 360, type:'fighter', x:380, pat:'curve_l',  vy:1.3 },
-  ],
-  // 4: 4 bombers + 12 grunts (hover_mid) + crisscross
-  [
-    { at:   0, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
-
-    { at:  50, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at:  50, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at:  90, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at:  90, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-
-    { at: 120, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
-
-    { at: 120, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 120, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 150, type:'grunt', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 150, type:'grunt', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-
-    { at: 165, type:'bomber', x:130, pat:'hover_l',   vy:1.0 },
-
-    { at: 165, type:'grunt',  x: 80, pat:'hover_mid', vy:2.5 },
-    { at: 165, type:'grunt',  x:400, pat:'hover_mid', vy:2.5 },
-    { at: 215, type:'grunt',  x: 80, pat:'hover_mid', vy:2.5 },
-    { at: 215, type:'grunt',  x:400, pat:'hover_mid', vy:2.5 },
-
-    { at: 200, type:'bomber', x:350, pat:'hover_r',   vy:1.0 },
+    { at: 410, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+    { at: 410, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+    { at: 435, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
   ],
   // 5: BOSS
   [
@@ -719,15 +493,15 @@ const STYLES = {
     textAlign: 'center',
     gap: 18,
   },
-  title: { fontSize: 50, color: '#00ffff', textShadow: '0 0 20px #00ffff, 0 0 40px #0088ff', letterSpacing: 4 },
-  sub: { fontSize: 24, color: '#aaeeff', letterSpacing: 2 },
-  controls: { fontFamily: 'monospace', fontSize: 16, color: '#E2DED7', lineHeight: 1.8 },
-  score: { fontFamily: 'Sixtyfour', fontSize: 54, color: '#ffff00' },
+  title: { fontSize: 50, color: pink1, textShadow: '0 0 20px pink0, 0 0 40px blue2', letterSpacing: 4 },
+  sub: { fontSize: 24, color: blue1, letterSpacing: 2 },
+  controls: { fontFamily: 'monospace', fontSize: 16, color: blue0, lineHeight: 1.8 },
+  score: { fontFamily: 'Sixtyfour', fontSize: 54, color: 'pink1' },
   btn: {
     padding: '8px 20px',
     fontSize: 20,
     fontFamily: 'PixelifySans',
-    background: '#00ffff',
+    background: pink1,
     color: '#000',
     border: 'none',
     cursor: 'pointer',
@@ -798,7 +572,7 @@ export default function Game() {
             // All other ships instantly destroyed
             en.dead = true;
             s.score += en.score;
-            const sz = en.type === 'bomber' ? 2.2 : en.type === 'fighter' ? 1.5 : 1;
+            const sz = en.type === 'beetle' ? 2.2 : en.type === 'moth' ? 1.5 : 1;
             explode(s, en.x, en.y, sz);
             spawnExplosionRings(s, en.x, en.y, en.type);
             const drops = DROP_COUNT[en.type] ?? 1;
@@ -817,7 +591,7 @@ export default function Game() {
             x: W/2, y: H/2,
             vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
             r: 2 + Math.random() * 4, life, maxLife: life,
-            color: ['#00ffff','#ffffff','#aaffff'][Math.floor(Math.random() * 3)],
+            color: [pink1,'#ffffff',blue0][Math.floor(Math.random() * 3)],
           });
         }
       }
@@ -842,10 +616,10 @@ export default function Game() {
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.fillRect(0, 0, W, H);
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#00ffff';
+        ctx.fillStyle = pink1;
         ctx.font = 'bold 30px Sixtyfour';
         ctx.fillText('PAUSED', W / 2, H / 2 - 10);
-        ctx.fillStyle = '#E2DED7';
+        ctx.fillStyle = pink0;
         ctx.font = '24px PixelifySans';
         ctx.fillText('SPACE  or  ESC  to  resume', W / 2, H / 2 + 22);
         ctx.restore();
@@ -874,7 +648,7 @@ export default function Game() {
         if (keys['ArrowDown'] || keys['KeyS']) pl.y = Math.min(H - pl.h / 2, pl.y + spd);
       }
 
-      // ── Shoot ─────────────────────────────────────────────────────────────
+      // ── Shooting: player firing logic ──────────────────────────────────────
       pl.shootTimer++;
       if (pl.deathTimer > 0) { /* no shooting during death window */ }
       else if (focused) {
@@ -966,7 +740,7 @@ export default function Game() {
         if (en.transitionTimer > 80 && s.frame % 9 === 0) {
           const ox = (Math.random() - 0.5) * en.w * 0.55;
           const oy = (Math.random() - 0.5) * en.h * 0.4;
-          spawnExplosionRings(s, en.x + ox, en.y + oy, 'bomber');
+          spawnExplosionRings(s, en.x + ox, en.y + oy, 'beetle');
           explode(s, en.x + ox, en.y + oy, 1.6);
           Audio.sfxEnemyDie();
         }
@@ -992,7 +766,7 @@ export default function Game() {
               b.hit = true;
               const dmg = b.pw ? 3 : 1;
               en.hp -= dmg;
-              spawnParticles(s.particles, b.x, b.y, 3, ['#ffff00','#ffffff','#ffaa00'], [1,5],[1,3]);
+              spawnParticles(s.particles, b.x, b.y, 3, ['pink1','#ffffff','#ffaa00'], [1,5],[1,3]);
               // Boss chain — refresh display on any hit; increment once per 2 s
               if (en.type === 'boss' && en.hp > 0) {
                 s.chainBossHitThisSecond = true;
@@ -1017,7 +791,7 @@ export default function Game() {
                 for (let i = 0; i < 6; i++) {
                   const ox = (Math.random() - 0.5) * en.w * 0.55;
                   const oy = (Math.random() - 0.5) * en.h * 0.4;
-                  spawnExplosionRings(s, en.x + ox, en.y + oy, 'bomber');
+                  spawnExplosionRings(s, en.x + ox, en.y + oy, 'beetle');
                   explode(s, en.x + ox, en.y + oy, 1.8);
                 }
                 Audio.sfxBigExplosion();
@@ -1031,10 +805,10 @@ export default function Game() {
               s.chain++;
               s.chainTextScale += 0.01;
               s.chainTimer = 200;
-              const sz = en.type === 'boss' ? 3 : en.type === 'bomber' ? 2.2 : en.type === 'fighter' ? 1.5 : 1;
+              const sz = en.type === 'boss' ? 3 : en.type === 'beetle' ? 2.2 : en.type === 'moth' ? 1.5 : 1;
               explode(s, en.x, en.y, sz);
               spawnExplosionRings(s, en.x, en.y, en.type);
-              if (en.type === 'boss' || en.type === 'bomber') {
+              if (en.type === 'boss' || en.type === 'beetle') {
                 Audio.sfxBigExplosion();
               } else {
                 Audio.sfxEnemyDie();
@@ -1082,18 +856,18 @@ export default function Game() {
           }
         }
 
-        // Enemy bodies — grunts/fighters also destroyed on impact
+        // Enemy bodies — jets/moths also destroyed on impact
         if (!playerHit) {
           for (const e of s.enemies) {
             if (e.dead) continue;
             if (overlaps(pl.x, pl.y, pl.w * 0.2, pl.h * 0.2, e.x, e.y, e.w * 0.6, e.h * 0.6)) {
               playerHit = true;
-              // small ships get rammed apart; bombers/boss shrug it off
-              if (e.type === 'grunt' || e.type === 'fighter') {
+              // small ships get rammed apart; beetles/boss shrug it off
+              if (e.type === 'jet' || e.type === 'moth') {
                 e.dead = true;
                 //s.score += EDEFS[e.type].score;
                 spawnExplosionRings(s, e.x, e.y, e.type);
-                explode(s, e.x, e.y, e.type === 'fighter' ? 1.2 : 0.9);
+                explode(s, e.x, e.y, e.type === 'moth' ? 1.2 : 0.9);
                 Audio.sfxEnemyDie();
                 const drops = DROP_COUNT[e.type] ?? 1;
                 for (let d = 0; d < drops; d++) s.collectables.push(mkCollectable(e.x, e.y));
@@ -1182,7 +956,7 @@ export default function Game() {
         if (s.frame % 7 === 0) {
           const ox = (Math.random() - 0.5) * 140;
           const oy = (Math.random() - 0.5) * 90;
-          spawnExplosionRings(s, s.bossDeathX + ox, s.bossDeathY + oy, 'bomber');
+          spawnExplosionRings(s, s.bossDeathX + ox, s.bossDeathY + oy, 'beetle');
           explode(s, s.bossDeathX + ox, s.bossDeathY + oy, 1.8);
         }
         if (s.frame % 20 === 0) Audio.sfxBigExplosion();
@@ -1268,7 +1042,7 @@ export default function Game() {
           s.score += COLLECT_PTS;
           s.medalCount++;
           spawnParticles(s.particles, c.x, c.y, 6,
-            ['#00ff88', '#aaffcc', '#ffffff'], [1, 4], [1, 3]);
+            [pink1, pink0, '#ffffff'], [1, 4], [1, 3]);
           return false;
         }
         return c.y < H + 20;
@@ -1342,22 +1116,22 @@ export default function Game() {
       if (pl.deathTimer <= 0 && (pl.invTimer <= 0 || Math.floor(pl.invTimer / 5) % 2 === 0)) {
         drawPlayer(ctx, pl.x, pl.y, s.frame, focused);
 
-        // focus gem glow
+        // crystal gem glow: bright light when holding down focus fire
         if (focused) {
-          const gradient = ctx.createRadialGradient(pl.x, pl.y+4, 3, pl.x, pl.y+4, 12);
-          gradient.addColorStop(0, "yellow");
+          const gradient = ctx.createRadialGradient(pl.x, pl.y, 4, pl.x, pl.y, 10);
+          gradient.addColorStop(0, pink1);
           gradient.addColorStop(1, "transparent");
           ctx.fillStyle = gradient;
-          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 12, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(pl.x, pl.y, 12, 0, Math.PI * 2); ctx.fill();
         }
         else {
           ctx.fillStyle = "black";
-          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 5, 0, Math.PI * 2); ctx.fill();
-          const gradient = ctx.createRadialGradient(pl.x, pl.y+4, 1, pl.x, pl.y+4, 6);
-          gradient.addColorStop(0, "yellow");
+          ctx.beginPath(); ctx.arc(pl.x, pl.y, 5, 0, Math.PI * 2); ctx.fill();
+          const gradient = ctx.createRadialGradient(pl.x, pl.y, 2, pl.x, pl.y, 6);
+          gradient.addColorStop(0, pink1);
           gradient.addColorStop(1, "transparent");
           ctx.fillStyle = gradient;
-          ctx.beginPath(); ctx.arc(pl.x, pl.y+4, 6, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(pl.x, pl.y, 6, 0, Math.PI * 2); ctx.fill();
 
         }
       }
@@ -1392,22 +1166,22 @@ export default function Game() {
 
       // Player current score (top left)
       ctx.font = '18px "Sixtyfour", monospace';
-      ctx.fillStyle = '#00ffff';
+      ctx.fillStyle = pink1;
       ctx.textAlign = 'left';
       ctx.fillText(`${String(s.score).padStart(1,'0')}`, 8, 22);
 
       // Hi-score (top center)
       const hi = hiScoreRef.current;
       ctx.textAlign = 'center';
-      ctx.fillStyle = s.score >= hi && hi > 0 ? '#ffff00' : 'rgba(0,220,220,0.65)';
+      ctx.fillStyle = s.score >= hi && hi > 0 ? pink1 : 'rgba(238,91,229,100)';
       ctx.fillText(`${String(Math.max(hi, s.score)).padStart(1,'0')}`, W / 2, 22);
 
       ctx.textAlign = 'right';
       // Ship count
       for (let i = 0; i < s.lives; i++) {
         const lx = W - 16 - i * 26;
-        ctx.fillStyle = '#00ffff';
-        ctx.strokeStyle = '#00ffff';
+        ctx.fillStyle = pink1;
+        ctx.strokeStyle = pink1;
         ctx.beginPath();
         ctx.moveTo(lx, 4);
         ctx.lineTo(lx-5, 18);
@@ -1435,25 +1209,25 @@ export default function Game() {
 
       // Bomb count
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#ffff44';
+      ctx.fillStyle = pink1;
       ctx.font = '12px monospace';
       for (let i = 0; i < s.player.bombs; i++) {
-        const b2b = i*22;
+        const b2b = i*20;
         ctx.beginPath();
         // body
-        ctx.arc(10 + b2b, H - 20, 5, 0, Math.PI * 2);
-        ctx.moveTo(15+b2b,H-20);
-        ctx.lineTo(15+b2b,H-12);
-        ctx.lineTo(5+b2b,H-12);
-        ctx.lineTo(5+b2b,H-20);
+        ctx.arc(15+b2b, H - 20, 5, 0, Math.PI * 2);
+        ctx.moveTo(20+b2b,H-20);
+        ctx.lineTo(20+b2b,H-12);
+        ctx.lineTo(10+b2b,H-12);
+        ctx.lineTo(10+b2b,H-20);
         // fins
-        ctx.moveTo(10+b2b,H-13);
+        ctx.moveTo(15+b2b,H-13);
+        ctx.lineTo(20+b2b,H-8);
+        ctx.lineTo(20+b2b,H-3);
         ctx.lineTo(15+b2b,H-8);
-        ctx.lineTo(15+b2b,H-3);
+        ctx.lineTo(10+b2b,H-3);
         ctx.lineTo(10+b2b,H-8);
-        ctx.lineTo(5+b2b,H-3);
-        ctx.lineTo(5+b2b,H-8);
-        ctx.lineTo(10+b2b,H-13);
+        ctx.lineTo(15+b2b,H-13);
         ctx.fill();
       }
 
@@ -1461,7 +1235,7 @@ export default function Game() {
       if (s.chain > 0) {
         const ca = Math.min(1, s.chainTimer / 80);
         ctx.globalAlpha = ca;
-        ctx.fillStyle = '#ffff00';
+        ctx.fillStyle = pink0;
         const chainPx = Math.round(10 * s.chainTextScale);
         ctx.font = `${chainPx}px Sixtyfour`;
         ctx.textAlign = 'center';
@@ -1513,12 +1287,12 @@ export default function Game() {
         ctx.save();
         ctx.textAlign = 'center';
 
-        // Red glow behind text
+        // Pink glow behind text
         ctx.globalAlpha = fadeIn * (blink ? 0.95 : 0.22);
-        ctx.shadowColor = '#ff0000';
+        ctx.shadowColor = pink2;
         ctx.shadowBlur  = 40;
         ctx.font = `bold ${Math.round(46 * pulse)}px monospace`;
-        ctx.fillStyle = '#ff1100';
+        ctx.fillStyle = pink2;
         ctx.fillText('///WARNING///', W / 2, H / 2 - 14);
 
         // Secondary glow pass for extra intensity
@@ -1529,7 +1303,7 @@ export default function Game() {
         ctx.shadowBlur  = 0;
         ctx.globalAlpha = fadeIn * (blink ? 0.88 : 0.18);
         ctx.font = '15px monospace';
-        ctx.fillStyle = '#ffaa00';
+        ctx.fillStyle = pink1;
         ctx.fillText('BOSS  APPROACHING', W / 2, H / 2 + 22);
 
         ctx.restore();
@@ -1684,7 +1458,7 @@ export default function Game() {
     function drawTitle() {
       if (!running) return;
 
-      ctx.fillStyle = '#00000e';
+      ctx.fillStyle = blue2;
       ctx.fillRect(0, 0, W, H);
 
       buildings.forEach(b => {
@@ -1804,7 +1578,8 @@ export default function Game() {
     keysRef.current = {};
     setNewInitials('');
     Audio.initAudio();
-    Audio.startMusic(selectedTrackRef.current);
+  // music disabled for SFX testing
+  //  Audio.startMusic(selectedTrackRef.current);
     setScreen('playing');
   };
 
@@ -1821,7 +1596,7 @@ export default function Game() {
         <div style={STYLES.overlay}>
           <div><FancyText text="DoDonkPACHI" /></div>
           <div style={{ ...STYLES.sub, fontSize: 30, marginTop: -14, marginBottom: 18 }}>DATA STORM</div>
-          <div style={{ fontSize: 24, color: '#aaeeff', letterSpacing: 3, opacity: 0.7, textDecoration: 'underline' }}>
+          <div style={{ fontSize: 24, color: blue1, letterSpacing: 3, opacity: 0.7, textDecoration: 'underline' }}>
             CONTROLS
           </div>
           <div style={{ ...STYLES.controls, marginTop: -8, marginBottom: 18 }}>
@@ -1836,7 +1611,7 @@ export default function Game() {
               PLAY
             </button>
             <button
-              style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
+              style={{ ...STYLES.btn, background: 'black', color: pink1, border: '1px solid pink1' }}
               onClick={() => {
                 setIsWin(null);
                 setLeaderboardTab('global');
@@ -1861,7 +1636,7 @@ export default function Game() {
 
       {screen === 'score_calc' && (
         <div style={STYLES.overlay}>
-          <div style={{ ...STYLES.title, color: '#ffff00', textShadow: '0 0 20px #ffaa00, 0 0 50px #ff8800' }}>
+          <div style={{ ...STYLES.title, color: pink1, textShadow: '0 0 20px pink0, 0 0 50px pink0' }}>
             ALL CLEAR!
           </div>
           <div style={STYLES.score}>{String(calcDisplayScore).padStart(1, '0')}</div>
@@ -1885,11 +1660,11 @@ export default function Game() {
                   }}
                 >
                   {/* Label */}
-                  <span style={{ color: '#aaeeff', minWidth: 160 }}>{bonus.label}</span>
+                  <span style={{ color: blue1, minWidth: 160 }}>{bonus.label}</span>
 
                   {/* Detail */}
                   <span style={{
-                    color: '#667788', margin: '0 12px', minWidth: 110, textAlign: 'right',
+                    color: 'blue2', margin: '0 12px', minWidth: 110, textAlign: 'right',
                     opacity: line.detailVis ? 1 : 0, transition: 'opacity 0.15s ease',
                   }}>
                     {bonus.detailCount != null
@@ -1899,7 +1674,7 @@ export default function Game() {
 
                   {/* Points */}
                   <span style={{
-                    color: bonus.pts > 0 ? '#ffff00' : '#445566',
+                    color: bonus.pts > 0 ? 'pink1' : 'blue2',
                     minWidth: 100, textAlign: 'right',
                     opacity: line.ptsVis ? 1 : 0, transition: 'opacity 0.15s ease',
                   }}>
@@ -1916,8 +1691,8 @@ export default function Game() {
         <div style={STYLES.overlay}>
           <div style={{
             ...STYLES.title,
-            color: isWin ? '#ffff00' : '#ff4444',
-            textShadow: isWin ? '0 0 20px #ffaa00' : '0 0 20px #ff0000',
+            color: isWin ? 'pink1' : 'pink2',
+            textShadow: isWin ? '0 0 20px pink1' : '0 0 20px pink1',
           }}>
             {isWin ? 'ALL CLEAR!' : 'GAME OVER'}
           </div>
@@ -1930,7 +1705,7 @@ export default function Game() {
               return (
                 <div key={i} style={{
                   width: 48, height: 60,
-                  border: `2px solid ${active ? '#00ffff' : '#2a4455'}`,
+                  border: `2px solid ${active ? pink1 : blue2}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 34, fontFamily: 'Sixtyfour', color: '#fff', fontWeight: 'bold',
                   background: active ? 'rgba(0,255,255,0.08)' : 'rgba(0,0,0,0.3)',
@@ -1953,7 +1728,7 @@ export default function Game() {
           {/* Header */}
           <div style={{
             ...STYLES.title, fontSize: 28,
-            color: isWin === null ? '#00ffff' : isWin ? '#ffff00' : '#ff4444',
+            color: isWin === null ? pink1 : isWin ? 'pink1' : '#ff4444',
             textShadow: isWin === null ? '0 0 16px #00ffff' : isWin ? '0 0 16px #ffaa00' : '0 0 16px #ff0000',
           }}>
             {isWin === null ? '— LEADERBOARD —' : isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
@@ -1985,7 +1760,7 @@ export default function Game() {
           {/* Score list */}
           <div style={{ fontFamily: 'PixelifySans', width: 400 }}>
             <div style={{
-              color: '#00ffff', fontSize: 13, letterSpacing: 3,
+              color: pink0, fontSize: 13, letterSpacing: 3,
               textAlign: 'center', marginBottom: 6, opacity: 0.8,
             }}>
               ── TOP PILOTS ──
@@ -1993,7 +1768,7 @@ export default function Game() {
 
             {leaderboardTab === 'global' ? (
               globalLoading ? (
-                <div style={{ color: '#445566', textAlign: 'center', fontSize: 14, padding: '12px 0' }}>
+                <div style={{ color: 'blue2', textAlign: 'center', fontSize: 14, padding: '12px 0' }}>
                   LOADING...
                 </div>
               ) : globalError ? (
@@ -2020,7 +1795,7 @@ export default function Game() {
                   </button>
                 </div>
               ) : globalScores.length === 0 ? (
-                <div style={{ color: '#445566', textAlign: 'center', fontSize: 14 }}>
+                <div style={{ color: 'blue2', textAlign: 'center', fontSize: 14 }}>
                   NO RECORDS YET
                 </div>
               ) : (
@@ -2040,8 +1815,8 @@ export default function Game() {
                       gridTemplateColumns: '80px auto auto',
                       padding: '7px 0px',
                       background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
-                      borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
-                      color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
+                      borderLeft: isPlayer ? '2px solid pink0' : '2px solid transparent',
+                      color: isPlayer ? 'pink0' : i === 0 ? 'pink2' : 'blue1',
                       fontSize: 24,
                       fontFamily: 'Sixtyfour',
                     }}>
@@ -2056,7 +1831,7 @@ export default function Game() {
             ) : (
               <>
                 {leaderboard.length === 0 && (
-                  <div style={{ color: '#445566', textAlign: 'center', fontSize: 14 }}>
+                  <div style={{ color: 'blue2', textAlign: 'center', fontSize: 14 }}>
                     NO RECORDS YET
                   </div>
                 )}
@@ -2068,8 +1843,8 @@ export default function Game() {
                       gridTemplateColumns: '80px auto auto',
                       padding: '7px 0px',
                       background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
-                      borderLeft: isPlayer ? '2px solid #00ffcc' : '2px solid transparent',
-                      color: isPlayer ? '#00ffcc' : i === 0 ? '#ffee44' : '#7799aa',
+                      borderLeft: isPlayer ? '2px solid pink0' : '2px solid transparent',
+                      color: isPlayer ? 'pink0' : i === 0 ? 'pink2' : 'blue1',
                       fontSize: 24,
                       fontFamily: 'Sixtyfour',
                     }}>
@@ -2089,7 +1864,7 @@ export default function Game() {
               PLAY
             </button>
             <button
-              style={{ ...STYLES.btn, background: 'transparent', color: '#00ffff', border: '1px solid #00ffff55' }}
+              style={{ ...STYLES.btn, background: 'black', color: pink1, border: '1px solid blue0' }}
               onClick={() => setScreen('title')}>
               TITLE SCREEN
             </button>

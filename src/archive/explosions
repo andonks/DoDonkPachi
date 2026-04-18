@@ -1,0 +1,96 @@
+// 4 points
+  push(0, 0, 130, 48, '#ffffff');
+  push(0, 0,  95, 40, blue0,  7);
+  push(0, 0,  60, 30, blue2, 14);
+  push(0, 0,  30, 20, '#ffffff', 20);
+  push(10, 10, 50, 48, '#ffffff', 7);
+  push(10, 10,  35, 40, blue0, 14);
+  push(10, 10,  30, 30, blue2, 21);
+  push(10, 10,  20, 20, '#ffffff', 28);
+  push(-10, -10, 50, 48, '#ffffff', 14);
+  push(-10, -10,  35, 40, blue0,  21);
+  push(-10, -10,  30, 30, blue2, 28);
+  push(-10, -10,  20, 20, '#ffffff', 35);
+  push(-10, 10, 50, 48, '#ffffff', 21);
+  push(-10, 10,  35, 40, blue0,  28);
+  push(-10, 10,  30, 30, blue2, 35);
+  push(-10, 10,  20, 20, '#ffffff', 42);
+  push(10, -10, 50, 48, '#ffffff', 21);
+  push(10, -10,  35, 40, blue0,  28);
+  push(10, -10,  30, 30, blue2, 35);
+  push(10, -10,  20, 20, '#ffffff', 42);
+
+// expanding X
+  push(0, 0, 130, 8, 'white');
+  push(15, 15, 95, 40, blue0, 7);
+  push(15, 15, 60, 30, blue2, 14);
+  push(15, 15,  30, 20, '#ffffff', 20);
+  push(25, 25, 50, 23, blue0, 10);
+  push(25, 25, 40, 30, blue2, 17);
+  push(25, 25,  20, 20, '#ffffff', 23);
+  push(30, 30, 36, 20, blue0, 17);
+  push(30, 30, 24, 30, blue2, 21);
+  push(30, 30,  12, 20, '#ffffff', 26);
+  push(33, 33, 29, 18, blue0, 23);
+  push(33, 33, 19, 30, blue2, 14);
+  push(33, 33,  9, 20, '#ffffff', 29);
+
+  push(-15, -15, 95, 40, blue0, 7);
+  push(-15, -15, 60, 30, blue2, 14);
+  push(-15, -15,  30, 20, '#ffffff', 20);
+  push(-25, -25, 50, 23, blue0, 10);
+  push(-25, -25, 40, 30, blue2, 17);
+  push(-25, -25,  20, 20, '#ffffff', 23);
+  push(-30, -30, 36, 20, blue0, 17);
+  push(-30, -30, 24, 30, blue2, 21);
+  push(-30, -30,  12, 20, '#ffffff', 26);
+  push(-33, -33, 29, 18, blue0, 23);
+  push(-33, -33, 19, 30, blue2, 14);
+  push(-33, -33,  9, 20, '#ffffff', 29);
+
+  push(-15, 15, 95, 40, blue0, 7);
+  push(-15, 15, 60, 30, blue2, 14);
+  push(-15, 15,  30, 20, '#ffffff', 20);
+  push(-25, 25, 50, 23, blue0, 10);
+  push(-25, 25, 40, 30, blue2, 17);
+  push(-25, 25,  20, 20, '#ffffff', 23);
+  push(-30, 30, 36, 20, blue0, 17);
+  push(-30, 30, 24, 30, blue2, 21);
+  push(-30, 30,  12, 20, '#ffffff', 26);
+  push(-33, 33, 29, 18, blue0, 23);
+  push(-33, 33, 19, 30, blue2, 14);
+  push(-33, 33,  9, 20, '#ffffff', 29);
+
+  push(15, -15, 95, 40, blue0, 7);
+  push(15, -15, 60, 30, blue2, 14);
+  push(15, -15,  30, 20, '#ffffff', 20);
+  push(25, -25, 50, 23, blue0, 10);
+  push(25, -25, 40, 30, blue2, 17);
+  push(25, -25,  20, 20, '#ffffff', 23);
+  push(30, -30, 36, 20, blue0, 17);
+  push(30, -30, 24, 30, blue2, 21);
+  push(30, -30,  12, 20, '#ffffff', 26);
+  push(33, -33, 29, 18, blue0, 23);
+  push(33, -33, 19, 30, blue2, 14);
+  push(33, -33,  9, 20, '#ffffff', 29);
+
+  } else if (type === 'jet') {
+  //  push(0, 0, 130, 8, 'white');
+    const colors = ['#ffffff', blue0, blue2];
+    const dx = 0;
+    const dy = 0;
+    for (let i = 0; i < 4; i++) {
+      push(dx*1, dy*1, 30 + 65 / i, 40 - i * 10, colors[i], i * 7);
+      push(dx*1, dy*-1, 30 + 65 / i, 40 - i * 10, colors[i], i * 7);
+      push(dx*-1, dy*1, 30 + 65 / i, 40 - i * 10, colors[i], i * 7);
+      push(dx*-1, dy*-1, 30 + 65 / i, 40 - i * 10, colors[i], i * 7);
+      dx += 15;
+      dy += 15;
+    }
+
+    const colors = ['#ff4400', '#ff8800', '#ffcc00', '#ffffff', '#ff2200'];
+    for (let i = 0; i < 5; i++) {
+      const dx = (Math.random() - 0.5) * 60;
+      const dy = (Math.random() - 0.5) * 40;
+      push(dx, dy, 165 - i * 18, 50, colors[i], i * 7);
+    }

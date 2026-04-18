@@ -10,8 +10,159 @@ In main JS file, import {name of function} from ./file
 // "Popcorn strings" with big enemies in between
 
 WAVES:
+// 0: Opener — 24 jets, right side first then left side
+[
+  { at:  30, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+  { at:  30, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at:  55, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at:  55, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
 
-// ---------------- SPRITE SHEET -----------------
+  { at:  85, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+  { at:  85, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 110, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 110, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+
+  { at: 140, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+  { at: 140, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at: 165, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at: 165, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
+
+  { at: 300, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+  { at: 300, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 325, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 325, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+
+  { at: 355, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
+  { at: 355, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at: 380, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at: 380, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
+
+  { at: 410, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+  { at: 410, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 435, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 435, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+],
+// 1: 4 moths + 12 jets (sides), right side first then left
+[
+  { at:   0, type:'moth', x:100, pat:'curve_r',  vy:1.2 },
+
+  { at:  30, type:'jet', x: 495, sy:  35, pat:'side_r', vy:3.2 },
+  { at:  30, type:'jet', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+  { at:  55, type:'jet', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+  { at:  55, type:'jet', x: 495, sy: 155, pat:'side_r', vy:3.2 },
+
+  { at:  85, type:'jet', x: 495, sy:  35, pat:'side_r', vy:3.2 },
+  { at:  85, type:'jet', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+  { at: 110, type:'jet', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+  { at: 110, type:'jet', x: 495, sy: 155, pat:'side_r', vy:3.2 },
+
+  { at: 120, type:'moth', x:380, pat:'curve_l',  vy:1.2 },
+
+  { at: 200, type:'moth', x:100, pat:'curve_r',  vy:1.2 },
+
+  { at: 300, type:'moth', x:380, pat:'curve_l',  vy:1.2 },
+
+  { at: 355, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+  { at: 355, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 380, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 380, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+
+  { at: 410, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+  { at: 410, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 435, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 435, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+],
+// 2: 2 beetles + 16 jets (hover_mid)
+[
+  { at:   0, type:'jet',   x:30, pat:'hover_mid', vy:2.2 },
+  { at:   0, type:'jet',  x:450, pat:'hover_mid', vy:2.2 },
+  { at:  30, type:'jet',   x:80, pat:'hover_mid', vy:2.2 },
+  { at:  30, type:'jet',  x:400, pat:'hover_mid', vy:2.2 },
+  { at:  60, type:'jet',  x:130, pat:'hover_mid', vy:2.2 },
+  { at:  60, type:'jet',  x:350, pat:'hover_mid', vy:2.2 },
+  { at:  90, type:'jet',  x:180, pat:'hover_mid', vy:2.2 },
+  { at:  90, type:'jet',  x:300, pat:'hover_mid', vy:2.2 },
+
+  { at: 100, type:'beetle', x:160, pat:'hover_l',   vy:0.9 },
+
+  { at: 220, type:'beetle', x:320, pat:'hover_r',   vy:0.9 },
+
+  { at: 225, type:'jet',   x:30, pat:'hover_mid', vy:2.2 },
+  { at: 225, type:'jet',  x:450, pat:'hover_mid', vy:2.2 },
+  { at: 255, type:'jet',   x:80, pat:'hover_mid', vy:2.2 },
+  { at: 255, type:'jet',  x:400, pat:'hover_mid', vy:2.2 },
+  { at: 285, type:'jet',  x:130, pat:'hover_mid', vy:2.2 },
+  { at: 285, type:'jet',  x:350, pat:'hover_mid', vy:2.2 },
+  { at: 315, type:'jet',  x:180, pat:'hover_mid', vy:2.2 },
+  { at: 315, type:'jet',  x:300, pat:'hover_mid', vy:2.2 },
+],
+// 3: 8 moths + 12 jets (hover_mid) + left & right entry
+[
+  { at:   0, type:'moth', x:100, pat:'zigzag',    vy:1.5 },
+  { at:   0, type:'moth', x:380, pat:'zigzag',    vy:1.5 },
+
+  { at:  65, type:'jet',   x:120, pat:'hover_mid', vy:2.5 },
+  { at:  65, type:'jet',   x:360, pat:'hover_mid', vy:2.5 },
+
+  { at: 135, type:'moth', x:100, pat:'curve_r',   vy:1.3 },
+  { at: 135, type:'moth', x:380, pat:'curve_l',   vy:1.3 },
+
+  { at: 165, type:'jet',   x: 80, pat:'hover_mid', vy:2.5 },
+  { at: 165, type:'jet',   x:400, pat:'hover_mid', vy:2.5 },
+
+  { at: 230, type:'moth', x:100, pat:'zigzag',    vy:1.5 },
+  { at: 230, type:'moth', x:380, pat:'zigzag',    vy:1.5 },
+
+  { at: 255, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
+  { at: 255, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 280, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 280, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+
+  { at: 300, type:'jet', x: 495, sy:  35, pat:'side_r', vy:3.2 },
+  { at: 300, type:'jet', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+  { at: 325, type:'jet', x: 495, sy:  95, pat:'side_r', vy:3.2 },
+  { at: 325, type:'jet', x: 495, sy: 155, pat:'side_r', vy:3.2 },
+
+  { at: 360, type:'moth', x:100, pat:'curve_r',  vy:1.3 },
+  { at: 360, type:'moth', x:380, pat:'curve_l',  vy:1.3 },
+],
+// 4: 4 beetles + 12 jets (hover_mid) + crisscross
+[
+  { at:   0, type:'beetle', x:130, pat:'hover_l',   vy:1.0 },
+
+  { at:  50, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at:  50, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at:  90, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at:  90, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+
+  { at: 120, type:'beetle', x:350, pat:'hover_r',   vy:1.0 },
+
+  { at: 120, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 120, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+  { at: 150, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
+  { at: 150, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
+
+  { at: 165, type:'beetle', x:130, pat:'hover_l',   vy:1.0 },
+
+  { at: 165, type:'jet',  x: 80, pat:'hover_mid', vy:2.5 },
+  { at: 165, type:'jet',  x:400, pat:'hover_mid', vy:2.5 },
+  { at: 215, type:'jet',  x: 80, pat:'hover_mid', vy:2.5 },
+  { at: 215, type:'jet',  x:400, pat:'hover_mid', vy:2.5 },
+
+  { at: 200, type:'beetle', x:350, pat:'hover_r',   vy:1.0 },
+],
+
+
+
+// ---------------- SPRITE SHEET v2-----------------
+[
+{ at: 0, type:'jetSprite', x: 40, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'mothSprite', x: 120, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'beetleSprite', x: 230, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'xwingSprite', x: 380, sy: 320, pat:'straight', vy: 0 },
+],
+
+// ---------------- SPRITE SHEET v1 -----------------
 [
 { at: 0, type:'beetle', x: 240, sy: 190, pat:'straight', vy: 0 },
 { at: 0, type:'daitank', x: 340, sy: 320, pat:'straight', vy: 0 },

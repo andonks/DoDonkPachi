@@ -1345,8 +1345,8 @@ export function drawCollectable(ctx, c, frame) {
 
   // Outer glow
   const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.2);
-  glow.addColorStop(0, pink1);
-  glow.addColorStop(1, 'rgba(255, 179, 250, 0)');
+  glow.addColorStop(0, blue1);
+  glow.addColorStop(1, 'rgba(93, 203, 237, 0)');
   ctx.fillStyle = glow;
   ctx.beginPath(); ctx.arc(0, 0, r * 2.2, 0, Math.PI * 2); ctx.fill();
 
@@ -1359,9 +1359,9 @@ export function drawCollectable(ctx, c, frame) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = pink0;
+  ctx.fillStyle = blue0;
   ctx.fill();
-  ctx.strokeStyle = pink1;
+  ctx.strokeStyle = blue1;
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
@@ -1374,7 +1374,7 @@ export function drawCollectable(ctx, c, frame) {
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = pink0;
+  ctx.fillStyle = blue0;
   ctx.fill();
 
   ctx.restore();

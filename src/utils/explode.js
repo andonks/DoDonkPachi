@@ -63,7 +63,7 @@ export function spawnExplosionRings(s, x, y, type) {
       const dy = (Math.random() - 0.5) * 80;
       push(dx, dy, 160 - i * 8, 60, colors[i], 0);
     }
-  } else if (type === 'jet') {
+  } else if (type === 'jet' || type === 'heli') {
     const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 5; i++) {
       const dx = (Math.random() - 0.5) * 60;

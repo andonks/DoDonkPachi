@@ -15,6 +15,7 @@ const EDEFS = {
   beetle:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
   daitank: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
   jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 140, bspd: 2 },
+  heli:    { w: 72, h: 60, maxHp: 50, score: 2000, fireRate: 140, bspd: 2 },   
   moth:    { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
   xwing:   { w: 170,  h: 150, maxHp: 100000, score: 1, fireRate: 1, bspd: 1 },
   boss:    { w: 240, h: 180, maxHp: 2.000, score: 200000, fireRate: 36, bspd: 1.75 },
@@ -24,9 +25,10 @@ const EDEFS = {
   //sprites
   beetleSprite:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
   daitankSprite: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
+  heliSprite:    { w: 72, h: 60, maxHp: 50, score: 2000, fireRate: 140, bspd: 2 },
   jetSprite:     { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
-  mothSprite:    { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
-  xwingSprite:   { w: 170,  h: 150, maxHp: 100000, score: 1, fireRate: 1, bspd: 1 },
+  mothSprite:    { w: 72, h: 60, maxHp: 80, score: 2000, fireRate: 140, bspd: 2 },
+  xwingSprite:   { w: 170,  h: 150, maxHp: 240, score: 1, fireRate: 1, bspd: 1 },
 };
 
 export function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {

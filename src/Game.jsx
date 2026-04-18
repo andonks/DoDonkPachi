@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { drawPlayer, drawEnemy, getTheta, drawCollectable } from './utils/draw.js';
 import { createEnemy, updateEnemy, mkBullet } from './utils/enemy.js';
 import { drawExplosion, spawnExplosionRings, explode } from './utils/explode.js';
-import * as Audio from './audio.js';
+import { WAVES } from './utils/waves.js';
+import * as Audio from './utils/audio.js';
 import './index.css';
 
 const W = 480;
@@ -104,8 +105,6 @@ function drawParticle(ctx, p) {
   ctx.restore();
 }
 
-
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 let _cid = 0;
@@ -113,14 +112,14 @@ function mkCollectable(x, y) {
   return {
     x: x + (Math.random()) * 20,
     y: y + (Math.random()) * 10,
-    vy: 1.2,
+    vy: 1.4,
     vx: (Math.random() - 0.5) * 0.8,
     age: 0,
     id: _cid++,
   };
 }
 
-const DROP_COUNT = { jet: 1, moth: 2, beetle: 5, xwing: 10 };
+const DROP_COUNT = { jet: 1, heli: 1, moth: 2, beetle: 5, xwing: 10 };
 const COLLECT_PTS = 300;
 
 function spawnParticles(arr, x, y, n, colors, spdRange, rRange) {
@@ -137,55 +136,6 @@ function spawnParticles(arr, x, y, n, colors, spdRange, rRange) {
     });
   }
 }
-
-// ─── Wave scripts ─────────────────────────────────────────────────────────────
-// Each entry: { at: frameOffset, type, x, pattern, vy }
-// Lanes at x = 120, 180, 240, 300, 360
-// full screen W = 480 (-15 => 495), H = 640 (-15 => 655)
-
-const WAVES = [
-
-  // 0: Opener — 24 jets, right side first then left side
-  [
-    { at:  30, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    { at:  30, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at:  55, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at:  55, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
-
-    { at:  85, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at:  85, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 110, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 110, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-
-    { at: 125, type:'moth', x: 120, pat:'curve_r',  vy:1.2 },
-
-    { at: 140, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    { at: 140, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 165, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 165, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
-
-    { at: 300, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 300, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 325, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 325, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-
-    { at: 340, type:'moth', x: 360, pat:'curve_r',  vy:1.2 },
-
-    { at: 355, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
-    { at: 355, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 380, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
-    { at: 380, type:'jet', x: 495, sy: 135, pat:'side_r', vy:3.2 },
-
-    { at: 410, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 410, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
-  ],
-  // 5: BOSS
-  [
-    { at:  0, type:'boss', x:240, pat:'boss', vy:0.55 },
-  ],
-];
 
 // ─── Collision ────────────────────────────────────────────────────────────────
 
@@ -599,7 +549,7 @@ export default function Game() {
           if (next < WAVES.length) {
             if (next === WAVES.length - 1) {
               // Final wave done — boss warning before the boss appears
-              s.bossWarning = 210;
+              s.bossWarning = 140;
               Audio.sfxAssWarning();
             } else {
               // Normal transition — near-instant gap
@@ -1163,8 +1113,12 @@ export default function Game() {
 
       // Boss warning overlay
       if (s.bossWarning > 0) {
-        const blink   = Math.floor(s.frame / 5) % 2 === 0;
-        const pulse   = 1 + Math.sin(s.frame * 0.28) * 0.055;
+        const blink   = Math.floor(s.frame / 20) % 2 === 0;
+        const t = (s.frame % 50) / 50;
+        const pulse =
+          1 +
+          Math.max(0, 1 - Math.abs(t - 0.15) * 10) * 0.10 +
+          Math.max(0, 1 - Math.abs(t - 0.35) * 10) * 0.06;
         const fadeIn  = Math.min(1, (210 - s.bossWarning) / 18);  // quick fade in
         ctx.save();
         ctx.textAlign = 'center';
@@ -1172,7 +1126,7 @@ export default function Game() {
         // Pink glow behind text
         ctx.globalAlpha = fadeIn * (blink ? 0.95 : 0.22);
         ctx.shadowColor = pink2;
-        ctx.shadowBlur  = 40;
+        ctx.shadowBlur = 20 + pulse * 30;
         ctx.font = `bold ${Math.round(46 * pulse)}px monospace`;
         ctx.fillStyle = pink2;
         ctx.fillText('///WARNING///', W / 2, H / 2 - 14);
@@ -1183,10 +1137,10 @@ export default function Game() {
         ctx.fillText('///WARNING///', W / 2, H / 2 - 14);
 
         ctx.shadowBlur  = 0;
-        ctx.globalAlpha = fadeIn * (blink ? 0.88 : 0.18);
+        //ctx.globalAlpha = fadeIn * (blink ? 0.88 : 0.18);
         ctx.font = '15px monospace';
-        ctx.fillStyle = pink1;
-        ctx.fillText('BOSS  APPROACHING', W / 2, H / 2 + 22);
+        ctx.fillStyle = blue1;
+        ctx.fillText('BOSS APPROACHING', W / 2, H / 2 + 22);
 
         ctx.restore();
       }

@@ -1,6 +1,6 @@
 // Synthesized audio engine — Web Audio API, no external files needed
-import mainStageTheme from './music/Interstellar.wav';
-import bossBattleTheme from './music/Horsehead_Nebula.wav';
+import mainStageTheme from '../music/Interstellar.wav';
+import bossBattleTheme from '../music/Horsehead_Nebula.wav';
 
 let ac = null;
 let master = null;

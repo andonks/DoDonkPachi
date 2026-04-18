@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { drawPlayer, drawEnemy, getTheta, drawCollectable } from './utils/draw.js';
 import { createEnemy, updateEnemy, mkBullet } from './utils/enemy.js';
+import { drawExplosion, spawnExplosionRings, explode } from './utils/explode.js';
 import * as Audio from './audio.js';
 import './index.css';
 
@@ -103,92 +104,7 @@ function drawParticle(ctx, p) {
   ctx.restore();
 }
 
-function drawExplosion(ctx, ex) {
-  if (ex.delay > 0) return;
-  const t = ex.life / ex.maxLife;   // 1 → 0
-  const r = ex.maxR * (1 - t);      // expands 0 → maxR
 
-  ctx.save();
-
-  // Inner fireball glow (only in first ~60% of life)
-  if (t > 0.4) {
-    const ft = (t - 0.4) / 0.6;
-    const gr = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, r * 75 + 6);
-    gr.addColorStop(0,   `rgba(255,255,255,${ft * 0.9})`);
-    gr.addColorStop(0.3, `rgba(255,210,80,${ft * 0.65})`);
-    gr.addColorStop(1,   'rgba(255,60,0,0)');
-    ctx.fillStyle = gr;
-    ctx.beginPath();
-    ctx.arc(ex.x, ex.y, r * 0.75 + 6, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Primary shockwave ring — thick at birth, thins as it expands
-  ctx.globalAlpha = t * 0.9;
-  ctx.strokeStyle = ex.color;
-  ctx.lineWidth = Math.max(0.5, 6 * t * t);
-  ctx.beginPath();
-  ctx.arc(ex.x, ex.y, Math.max(1, r), 0, Math.PI * 2);
-  ctx.stroke();
-
-  // Faint secondary ring slightly ahead
-  ctx.globalAlpha = t * 0.35;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(ex.x, ex.y, Math.max(1, r * 1.18), 0, Math.PI * 2);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-// Spawn one or more explosion rings appropriate for the given type
-// push variables: x, y, max radius, life, color, delay
-function spawnExplosionRings(s, x, y, type) {
-  const arr = s.explosions;
-  const push = (dx, dy, maxR, life, color, delay = 0) =>
-    arr.push({ x: x + dx, y: y + dy, maxR, life, maxLife: life, color, delay });
-
-  if (type === 'moth') {
-    push(0, 0, 72, 28, '#ffaa00');
-    push(0, 0, 58, 18, '#ffffff', 4);
-  } else if (type === 'bomber') {
-    push(0, 0, 80, 38, '#ff5500');
-    push(0, 0, 50, 28, '#ffcc00', 6);
-    push(0, 0, 26, 18, '#ffffff', 12);
-  } else if (type === 'daitank') {
-    push(0, 0, 120, 40, '#ff5500');
-    push(0, 0, 105, 35, '#ffcc00', 6);
-    push(0, 0, 90, 30, '#ffffff', 12);
-
-  } else if (type === 'jet') {
-    const colors = [pink2, pink1, pink0, 'white', pink2];
-    for (let i = 0; i < 5; i++) {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
-      push(dx, dy, 140 - i * 18, 60, colors[i], 0);
-    }
-  } else if (type === 'player') {
-    const colors = [pink2, pink1, pink0, 'white', pink2];
-    for (let i = 0; i < 5; i++) {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
-      push(dx, dy, 165 - i * 18, 60, colors[i], 0);
-    }
-  } else if (type === 'boss') {
-    const colors = [pink2, pink1, pink0, 'white', pink2];
-    for (let i = 0; i < 5; i++) {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
-      push(dx, dy, 65 + i * 18, 42 + i * 7, colors[i], i * 7);
-    }
-  }
-  else { // default explosion pattern
-    push(0, 0, 260, 8, 'white');
-    push(0, 0, 190, 40, blue0, 7);
-    push(0, 0, 120, 30, blue2, 14);
-    push(0, 0,  90, 20, '#ffffff', 20);
-  }
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -222,47 +138,13 @@ function spawnParticles(arr, x, y, n, colors, spdRange, rRange) {
   }
 }
 
-function explode(s, x, y, sz = 1) {
-  s.shake = Math.max(s.shake, 7 * sz);
-  const { particles: p } = s;
-
-  // spark ring
-  const n = Math.round(14 * sz);
-  for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2 + Math.random() * 0.4;
-    const spd = 2 + Math.random() * 5 * sz;
-    const life = 18 + Math.random() * 22;
-    p.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
-      r: 2 + Math.random() * 2, life, maxLife: life,
-      color: ['pink1','#ff8800','#ff4400'][Math.floor(Math.random() * 3)] });
-  }
-  // debris
-  for (let i = 0; i < Math.round(10 * sz); i++) {
-    const a = Math.random() * Math.PI * 2;
-    const spd = Math.random() * 4 * sz;
-    const life = 35 + Math.random() * 40;
-    p.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
-      r: 1.5 + Math.random() * 3, life, maxLife: life,
-      color: ['#ffffff','#ffddaa','#ff6600'][Math.floor(Math.random() * 3)] });
-  }
-  // smoke
-  for (let i = 0; i < Math.round(6 * sz); i++) {
-    const a = Math.random() * Math.PI * 2;
-    const spd = Math.random() * 1.5;
-    const life = 28 + Math.random() * 30;
-    p.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 0.6,
-      r: 5 + Math.random() * 7 * sz, life, maxLife: life, color: '#2a2a2a' });
-  }
-}
-
-
-
 // ─── Wave scripts ─────────────────────────────────────────────────────────────
 // Each entry: { at: frameOffset, type, x, pattern, vy }
 // Lanes at x = 120, 180, 240, 300, 360
 // full screen W = 480 (-15 => 495), H = 640 (-15 => 655)
 
 const WAVES = [
+
   // 0: Opener — 24 jets, right side first then left side
   [
     { at:  30, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
@@ -287,7 +169,7 @@ const WAVES = [
     { at: 325, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
     { at: 325, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
 
-    { at: 340, type:'moth', x: 360, pat:'curve_l',  vy:1.2 },
+    { at: 340, type:'moth', x: 360, pat:'curve_r',  vy:1.2 },
 
     { at: 355, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
     { at: 355, type:'jet', x: 495, sy:  75, pat:'side_r', vy:3.2 },
@@ -742,7 +624,7 @@ export default function Game() {
           const oy = (Math.random() - 0.5) * en.h * 0.4;
           spawnExplosionRings(s, en.x + ox, en.y + oy, 'beetle');
           explode(s, en.x + ox, en.y + oy, 1.6);
-          Audio.sfxEnemyDie();
+          Audio.sfxHeavyExplosion();
         }
         if (en.transitionTimer <= 80 && en.transitionTimer > 30) {
           s.shake = Math.max(s.shake, 7); // rumble during charge
@@ -794,7 +676,7 @@ export default function Game() {
                   spawnExplosionRings(s, en.x + ox, en.y + oy, 'beetle');
                   explode(s, en.x + ox, en.y + oy, 1.8);
                 }
-                Audio.sfxBigExplosion();
+                Audio.sfxHeavyExplosion();
               }
             }
             if (en.hp <= 0) {
@@ -808,11 +690,11 @@ export default function Game() {
               const sz = en.type === 'boss' ? 3 : en.type === 'beetle' ? 2.2 : en.type === 'moth' ? 1.5 : 1;
               explode(s, en.x, en.y, sz);
               spawnExplosionRings(s, en.x, en.y, en.type);
-              if (en.type === 'boss' || en.type === 'beetle') {
-                Audio.sfxBigExplosion();
-              } else {
-                Audio.sfxEnemyDie();
-              }
+              //if (en.type === 'boss' || en.type === 'beetle') {
+              //  Audio.sfxBigExplosion();
+              //} else {
+                Audio.sfxHeavyExplosion();
+              //}
               const drops = DROP_COUNT[en.type] ?? 1;
               for (let d = 0; d < drops; d++) s.collectables.push(mkCollectable(en.x, en.y));
               if (en.type === 'boss') {
@@ -868,7 +750,7 @@ export default function Game() {
                 //s.score += EDEFS[e.type].score;
                 spawnExplosionRings(s, e.x, e.y, e.type);
                 explode(s, e.x, e.y, e.type === 'moth' ? 1.2 : 0.9);
-                Audio.sfxEnemyDie();
+                Audio.sfxHeavyExplosion();
                 const drops = DROP_COUNT[e.type] ?? 1;
                 for (let d = 0; d < drops; d++) s.collectables.push(mkCollectable(e.x, e.y));
               }
@@ -907,7 +789,7 @@ export default function Game() {
               color: ['#ffffff','#ddeeff'][Math.floor(Math.random() * 2)] });
           }
 
-          Audio.sfxPlayerHit();
+          Audio.sfxHeavyExplosion();
           s.flashTimer = 14;
           s.enemyBullets = [];
           s.chain = 0;
@@ -959,7 +841,7 @@ export default function Game() {
           spawnExplosionRings(s, s.bossDeathX + ox, s.bossDeathY + oy, 'beetle');
           explode(s, s.bossDeathX + ox, s.bossDeathY + oy, 1.8);
         }
-        if (s.frame % 20 === 0) Audio.sfxBigExplosion();
+        if (s.frame % 20 === 0) Audio.sfxHeavyExplosion();
       }
 
       // ── Win condition ─────────────────────────────────────────────────────
@@ -1534,7 +1416,7 @@ export default function Game() {
         setInitialsDisplay(next);
       } else if (/^[a-zA-Z]$/.test(e.key) && cur.length < 3) {
         const next = cur + e.key.toUpperCase();
-        Audio.sfxBigExplosion();
+        Audio.sfxHeavyExplosion();
         initialsRef.current = next;
         setInitialsDisplay(next);
       } else if (e.key === 'Enter' && cur.length === 3) {
@@ -1578,8 +1460,7 @@ export default function Game() {
     keysRef.current = {};
     setNewInitials('');
     Audio.initAudio();
-  // music disabled for SFX testing
-  //  Audio.startMusic(selectedTrackRef.current);
+    Audio.startMusic(selectedTrackRef.current);
     setScreen('playing');
   };
 

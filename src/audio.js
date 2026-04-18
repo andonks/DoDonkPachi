@@ -27,11 +27,11 @@ export function initAudio() {
   master.connect(ac.destination);
 
   sfxOut = ac.createGain();
-  sfxOut.gain.value = 0.85;
+  sfxOut.gain.value = 0.95;
   sfxOut.connect(master);
 
   musicOut = ac.createGain();
-  musicOut.gain.value = 0.25;
+  musicOut.gain.value = 0.55;
   musicOut.connect(master);
 }
 
@@ -79,13 +79,43 @@ function noise(gainVal, dur, hpHz, lpHz, dest, t = ac.currentTime) {
 
 export function sfxShoot() {
   if (!ac) return;
-  synth('square',   540, 0.21, 0.06, sfxOut);
-  synth('square',   430, 0.17, 0.05, sfxOut);
+  const t = ac.currentTime;
+
+  synth('sawtooth', f => {
+    f.setValueAtTime(100, t);
+    f.exponentialRampToValueAtTime(10, t + 0.04);
+  }, 0.25, 0.1, sfxOut, t);
+
+  synth('sawtooth', f => {
+    f.setValueAtTime(110, t);          // 10 Hz detuned from primary
+    f.exponentialRampToValueAtTime(14, t + 0.04);
+  }, 0.15, 0.1, sfxOut, t);
+
+  noise(0.18, 0.04, 4000, null, sfxOut, t);
+
+  //OG SFX
+  //synth('square',   540, 0.21, 0.06, sfxOut);
+  //synth('square',   430, 0.17, 0.05, sfxOut);
 }
 
 export function sfxFocusShoot() {
   if (!ac) return;
-  synth('square', 420, 0.27, 0.055, sfxOut);
+  const t = ac.currentTime;
+
+  synth('sawtooth', f => {
+    f.setValueAtTime(300, t);
+    f.exponentialRampToValueAtTime(40, t + 0.08);
+  }, 0.25, 0.1, sfxOut, t);
+
+  synth('sawtooth', f => {
+    f.setValueAtTime(310, t);          // 10 Hz detuned from primary
+    f.exponentialRampToValueAtTime(44, t + 0.08);
+  }, 0.15, 0.1, sfxOut, t);
+
+  noise(0.18, 0.04, 4000, null, sfxOut, t);
+
+  //OG SFX
+  //synth('square', 420, 0.27, 0.055, sfxOut);
 }
 
 export function sfxEnemyDie() {
@@ -108,6 +138,22 @@ export function sfxBigExplosion() {
     f.setValueAtTime(55, t);
     f.exponentialRampToValueAtTime(28, t + 0.9);
   }, 0.45, 1.0, sfxOut, t);
+}
+
+export function sfxHeavyExplosion() {
+  if (!ac) return;
+  const t = ac.currentTime;
+  synth('sine', 30, 0.55, 0.7, sfxOut, t);
+  synth('sine', f => {
+    f.setValueAtTime(55, t);
+    f.exponentialRampToValueAtTime(28, t + 0.9);
+  }, 0.4, 1.0, sfxOut, t);
+  noise(0.85, 0.9, 40, 400, sfxOut, t);
+  synth('sine', f => {
+    f.setValueAtTime(80, t);
+    f.exponentialRampToValueAtTime(40, t + 0.35);
+  }, 0.9, 0.35, sfxOut, t);
+  noise(0.5, 0.25, 60, 300, sfxOut, t);
 }
 
 export function sfxPlayerHit() {
@@ -499,17 +545,26 @@ function tick() {
 }
 
 let wavAudio = null;
+let wavSource = null;  // track the MediaElementSourceNode
 
 export function startMusic(trackIndex = 0) {
   if (wavAudio) { wavAudio.pause(); wavAudio = null; }
+  if (wavSource) { wavSource.disconnect(); wavSource = null; }
+
   const src = trackIndex === BOSS_TRACK_IDX ? bossBattleTheme : mainStageTheme;
   wavAudio = new Audio(src);
   wavAudio.loop = true;
+
+  // Connect into the Web Audio graph so musicOut/master gain nodes work
+  wavSource = ac.createMediaElementSource(wavAudio);
+  wavSource.connect(musicOut);
+
   wavAudio.play().catch(() => {});
 }
 
 export function stopMusic() {
   if (wavAudio) { wavAudio.pause(); wavAudio = null; }
+  if (wavSource) { wavSource.disconnect(); wavSource = null; }
 }
 
 // Stop the current track and immediately start another (e.g. boss music)

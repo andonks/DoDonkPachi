@@ -6,13 +6,13 @@
 export const WAVES = [
   // ---------------- SPRITE SHEET v2-----------------
   [
-
-
-    { at: 410, type:'jet', x: -15, sy:  15, pat:'side_l', vy:3.2 },
-    { at: 410, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'jet', x: -15, sy:  75, pat:'side_l', vy:3.2 },
-    { at: 435, type:'jet', x: -15, sy: 135, pat:'side_l', vy:3.2 },
+  { at: 0, type:'heliSprite', x: 40, sy: 280, pat:'straight', vy: 0 },
+  { at: 0, type:'jetSprite', x: 40, sy: 360, pat:'straight', vy: 0 },
+  { at: 0, type:'mothSprite', x: 120, sy: 320, pat:'straight', vy: 0 },
+  { at: 0, type:'beetleSprite', x: 230, sy: 320, pat:'straight', vy: 0 },
+  { at: 0, type:'xwingSprite', x: 380, sy: 320, pat:'straight', vy: 0 },
   ],
+
   // 5: BOSS
   [
     { at:  0, type:'boss', x:240, pat:'boss', vy:0.55 },

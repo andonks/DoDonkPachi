@@ -1290,6 +1290,123 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(-12, 5);
     ctx.closePath(); ctx.fill(); ctx.stroke();
 
+  } else if (type === 'heli' || type === 'heliSprite') { // ----- Helicopter -----
+    ctx.scale(1.75, 1.75);
+
+    // Wings
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(-3, -9);
+    ctx.lineTo(-5, -7);
+    ctx.lineTo(-5, 3);
+    ctx.lineTo(-7, 2);
+    ctx.lineTo(-7, 5);
+    ctx.lineTo(-3, 7);
+    ctx.lineTo(3, 7);
+    ctx.lineTo(7, 5);
+    ctx.lineTo(7, 2);
+    ctx.lineTo(5, 3);
+    ctx.lineTo(5, -7);
+    ctx.lineTo(3, -9);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink0;
+    ctx.beginPath();
+    ctx.moveTo(-7, -3);
+    ctx.lineTo(-7, 2);
+    ctx.lineTo(-5, 3);
+    ctx.lineTo(-5, -2);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(7, -3);
+    ctx.lineTo(7, 2);
+    ctx.lineTo(5, 3);
+    ctx.lineTo(5, -2);
+    ctx.closePath(); ctx.fill();
+
+    // Engines
+    ctx.fillStyle = blue2;
+    ctx.beginPath(); ctx.arc(-11, -5, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(11, -5, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(-15, -3);
+    ctx.lineTo(-15, 5);
+    ctx.lineTo(-7, 5);
+    ctx.lineTo(-7, -3);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(15, -3);
+    ctx.lineTo(15, 5);
+    ctx.lineTo(7, 5);
+    ctx.lineTo(7, -3);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue1;
+    ctx.beginPath(); ctx.arc(-11, -3, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(11, -3, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = blue2;
+    ctx.beginPath(); ctx.arc(-11, 6, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(11, 6, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = blue0;
+    ctx.beginPath(); ctx.arc(-11, 6.5, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(11, 6.5, 2, 0, Math.PI * 2); ctx.fill();
+
+    // tail
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(-5, -16);
+    ctx.lineTo(-5, -9);
+    ctx.lineTo(5, -9);
+    ctx.lineTo(5, -16);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.moveTo(-1, -13);
+    ctx.lineTo(-3, -11);
+    ctx.lineTo(-3, -7);
+    ctx.lineTo(3, -7);
+    ctx.lineTo(3, -11);
+    ctx.lineTo(1, -13);
+    ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = blue0;
+    ctx.beginPath();
+    ctx.moveTo(-1, -17);
+    ctx.lineTo(-3, -15);
+    ctx.lineTo(-3, -12);
+    ctx.lineTo(-1, -14);
+    ctx.lineTo(1, -14);
+    ctx.lineTo(3, -12);
+    ctx.lineTo(3, -15);
+    ctx.lineTo(1, -17);
+    ctx.closePath(); ctx.fill();
+
+    // body
+    ctx.fillStyle = blue1; ctx.strokeStyle = blue2; ctx.lineWidth = 0.75;
+    ctx.beginPath();
+    ctx.moveTo(-1, -11);
+    ctx.lineTo(-1, -9);
+    ctx.lineTo(-3, -7);
+    ctx.lineTo(-3, 1);
+    ctx.lineTo(-1, 3);
+    ctx.lineTo(-3, 5);
+    ctx.lineTo(-3, 13);
+    ctx.lineTo(3, 13);
+    ctx.lineTo(3, 5);
+    ctx.lineTo(1, 3);
+    ctx.lineTo(3, 1);
+    ctx.lineTo(3, -7);
+    ctx.lineTo(1, -9);
+    ctx.lineTo(1, -11);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 13, 3, 0, Math.PI * 2); ctx.fill();
+
+    // Cockpit
+    ctx.fillStyle = pink1;
+    ctx.beginPath(); ctx.ellipse(0, 10.5, 1.5, 3, 0, 0, Math.PI * 2); ctx.fill();
+
+
+
   } else if (type === 'boss') {
     // ── Scaled body (2× base size) ─────────────────────────────────────────
     ctx.save();

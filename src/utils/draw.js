@@ -163,7 +163,6 @@ export function drawPlayer(ctx, x, y, frame, focused) {
   ctx.restore();
 }
 
-
 // calculate new angle for turrets
 export function getTheta(a, b) {
   let diff = (b - a) % (2 * Math.PI);
@@ -656,8 +655,9 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(-12, 13.5);
     ctx.closePath(); ctx.fill();
 
-  } else if (type === 'moth' || type === 'mothSprite' ) { // ---- don't u wanna be a MOTH -----
-    ctx.scale(2.5,2.5);
+  } else if (type === 'moth' || type === 'mothSprite' ) {
+    // don't u wanna be a MOTH? 32x31 X: -16 to 16 Y: -16 to 15
+    ctx.scale(3,3);
 
     // bottom wing
     ctx.fillStyle = blue1;

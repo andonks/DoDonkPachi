@@ -1,31 +1,27 @@
+// Enemy stats, movement and firing patterns, and other functions
+
 const W = 480;
 const H = 640;
 
 // ─── Enemy definitions ────────────────────────────────────────────────────────
 
 // Default stats
-// (hitbox w/h, HP, base kill score, firing frequency, bullet speed)
+// (hitbox width/height, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
-  grunt:   { w: 48, h: 40, maxHp: 5, score: 500, fireRate: 20, bspd: 1.75 },
-  fighter: { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
-  bomber:  { w: 108, h: 84, maxHp: 80, score: 6000, fireRate: 76,  bspd: 1.4 },
-  vette:   { w: 40, h: 80, maxHp: 120, score: 12000, fireRate: 76, bspd: 2.5 },
-  tank:    { w: 60, h: 50, maxHp: 15, score: 3000, fireRate: 76, bspd: 1.4 },
-  turret:  { w: 40, h: 40, maxHp: 5, score: 3000, fireRate: 76, bspd: 1.4 , turret1: 0 },
-  beetle:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
+  tank:    { w: 60, h: 50, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
+  turret:  { w: 40, h: 40, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4 , turret1: 0 },
   daitank: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
-  jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 140, bspd: 2 },
-  heli:    { w: 72, h: 60, maxHp: 50, score: 2000, fireRate: 140, bspd: 2 },   
-  moth:    { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
-  xwing:   { w: 170,  h: 150, maxHp: 100000, score: 1, fireRate: 1, bspd: 1 },
-  boss:    { w: 240, h: 180, maxHp: 2.000, score: 200000, fireRate: 36, bspd: 1.75 },
-  dummy1:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
-  dummy2:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
-  dummy3:  { w: 140, h: 80, maxHp: 1, score: 200000, fireRate: 36, bspd: 1.75 },
+
+  jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 3 },
+  heli:    { w: 72, h: 60, maxHp: 20, score: 2000, fireRate: 140, bspd: 3 },
+  moth:    { w: 96, h: 93, maxHp: 45, score: 4500, fireRate: 140, bspd: 4.5 },
+  beetle:  { w: 120, h: 90, maxHp: 90, score: 16000, fireRate: 76,  bspd: 3 },
+  xwing:   { w: 170,  h: 150, maxHp: 200, score: 20000, fireRate: 1, bspd: 4 },
+  boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
   //sprites
   beetleSprite:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
   daitankSprite: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
-  heliSprite:    { w: 72, h: 60, maxHp: 50, score: 2000, fireRate: 140, bspd: 2 },
+  heliSprite:    { w: 72, h: 60, maxHp: 50, score: 2000, fireRate: 140, bspd: 4 },
   jetSprite:     { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
   mothSprite:    { w: 72, h: 60, maxHp: 80, score: 2000, fireRate: 140, bspd: 2 },
   xwingSprite:   { w: 170,  h: 150, maxHp: 240, score: 1, fireRate: 1, bspd: 1 },
@@ -63,6 +59,14 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     case 'straight':
       e.y += e.vy;
       break;
+    case 'drift_r':
+      e.y += e.vy;
+      e.x += e.vy / 4 + Math.sin(e.timer * 0.025) * 1.2;
+      break;
+    case 'drift_l':
+      e.y += e.vy;
+      e.x -= e.vy / 8 + Math.sin(e.timer * 0.025);
+      break;
     case 'curve_r':
       e.y += e.vy;
       e.x += Math.sin(e.timer * 0.025) * 1.2;
@@ -85,6 +89,10 @@ export function updateEnemy(ctx, e, px, py, bullets) {
       e.y += e.vy;
       e.x -= e.vy / 3;
       break;
+    case 'cross_r': // fast-flying ships jet across the screen
+      e.y += e.vy / 4;
+      e.x -= e.vy;
+      break;
     case 'zigzag':
       e.y += e.vy;
       e.x += Math.sin(e.timer * 0.055) * 3;
@@ -102,21 +110,33 @@ export function updateEnemy(ctx, e, px, py, bullets) {
       e.x = W * 0.73 + Math.sin(e.timer * 0.018) * (W * 0.14);
       break;
     case 'side_l':   // enter from left edge, fly diagonally right-downward
+      const FLATTEN_START_Xl = W * 0.5;       // x position where easing begins
+      const FLATTEN_END_Xl   = W * 0.85;      // x position where vy reaches 0
+
       e.x += 2.6;
-      e.y += e.vy;
+
+      if (e.x < FLATTEN_START_Xl) {
+        // still in entry arc — use full vy
+        e.y += e.vy;
+      } else if (e.x < FLATTEN_END_Xl) {
+        // easing zone — linearly interpolate vy down to 0
+        const t = (e.x - FLATTEN_END_Xl) / (FLATTEN_START_Xl - FLATTEN_END_Xl); // 1→0
+        e.y += e.vy * t;
+      }
+      // if e.x <= FLATTEN_END_X: add nothing to y → perfectly flat
       break;
     case 'side_r':   // enter from right edge, fly diagonally left-downward
-      const FLATTEN_START_X = W * 0.6;       // x position where easing begins
-      const FLATTEN_END_X   = W * 0.15;      // x position where vy reaches 0
+      const FLATTEN_START_Xr = W * 0.5;       // x position where easing begins
+      const FLATTEN_END_Xr   = W * 0.15;      // x position where vy reaches 0
 
       e.x -= 2.6;
 
-      if (e.x > FLATTEN_START_X) {
+      if (e.x > FLATTEN_START_Xr) {
         // still in entry arc — use full vy
         e.y += e.vy;
-      } else if (e.x > FLATTEN_END_X) {
+      } else if (e.x > FLATTEN_END_Xr) {
         // easing zone — linearly interpolate vy down to 0
-        const t = (e.x - FLATTEN_END_X) / (FLATTEN_START_X - FLATTEN_END_X); // 1→0
+        const t = (e.x - FLATTEN_END_Xr) / (FLATTEN_START_Xr - FLATTEN_END_Xr); // 1→0
         e.y += e.vy * t;
       }
       // if e.x <= FLATTEN_END_X: add nothing to y → perfectly flat
@@ -126,13 +146,25 @@ export function updateEnemy(ctx, e, px, py, bullets) {
         e.y += e.vy;
         if (e.y >= H * 0.43) { e.phase = 1; e.timer = 0; }
       } else if (e.phase === 1) {
-        e.x += Math.sin(e.timer * 0.05) * 1.6;
+        e.x -= Math.sin(e.timer * 0.05) * 0.6;
         e.x = Math.max(30, Math.min(W - 30, e.x));
         if (e.timer > 160) e.phase = 2;
       } else {
         e.y -= e.vy * 1.5;
       }
       break;
+      case 'hover_high':  // descend to upper-screen, hover & fire, then retreat up
+        if (e.phase === 0) {
+          e.y += e.vy;
+          if (e.y >= H * 0.36) { e.phase = 1; e.timer = 0; }
+        } else if (e.phase === 1) {
+          e.x -= Math.sin(e.timer * 0.05) * 0.6;
+          e.x = Math.max(30, Math.min(W - 30, e.x));
+          if (e.timer > 160) e.phase = 2;
+        } else {
+          e.y -= e.vy * 1.5;
+        }
+        break;
     case 'boss': {
       if (e.transitionTimer > 0) {
         if (e.transitionTimer > 80) {
@@ -164,7 +196,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
-  // *--- SHOOTING —--*
+// *--- *--- *--- *--- SHOOTING —--* —--* —--* —--*
   // only fire while in the top 95% of the screen & visible
   if (e.y > H * 0.95) return;
   if (e.x > 470) return;
@@ -195,8 +227,85 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
+  // HELI - rapid aimed bursts
+  if (e.type === 'heli' && e.y > H * 0.4) {
+    const cycle = e.timer % 60;
+
+    if (cycle >= 35 && cycle < 60 && e.timer % 10 === 0) {
+      const v = aim(e.x, e.y, px, py, e.bspd);
+      bullets.push(mkBullet(e.x, e.y, v.vx, v.vy));
+    }
+  }
+
+  // MOTH: Aimed spread that starts wide and tigthens; starts 10% down from top
+  if (e.type === 'moth' && e.y > H * 0.1) {
+    const cycle = e.timer % 120;
+
+    if (cycle >= 15 && cycle < 27 && e.timer % 3 === 0) {
+      if (cycle === 15) {
+        e.xTarget = px;
+        e.yTarget = py;
+      }
+    const ca = Math.atan2(e.yTarget - e.y, e.xTarget - e.x);
+    spread(e.x, e.y, 2, ca, 0.6, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+    }
+    if (cycle >= 30 && cycle < 42 && e.timer % 3 === 0) {
+      if (cycle === 30) {
+        e.xTarget = px;
+        e.yTarget = py;
+      }
+    const ca = Math.atan2(e.yTarget - e.y, e.xTarget - e.x);
+    spread(e.x, e.y, 2, ca, 0.3, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+    }
+    if (cycle >= 45 && cycle < 57 && e.timer % 3 === 0) {
+      if (cycle === 45) {
+        e.xTarget = px;
+        e.yTarget = py;
+      }
+    const ca = Math.atan2(e.yTarget - e.y, e.xTarget - e.x);
+    spread(e.x, e.y, 2, ca, 0.0, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+    }
+  }
+
+  // BEETLE BLAST: Fat bullet spread followed by 2 aimed bursts
+  if (e.type === 'beetle' && e.y > H * 0.1) {
+    const cycle = e.timer % 120;
+    const ca = Math.atan2(py - e.y, px - e.x);
+    if (cycle >= 10 && cycle <= 20 && e.timer % 10 === 0) {
+      spread(e.x, e.y - 10, 7, ca, 0.6, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+    }
+
+    if (cycle >= 30 && cycle <= 42 && e.timer % 3 === 0) {
+      if (cycle === 30) {
+      e.vLeft = aim(e.x - 30, e.y - 16, px, py + 10, e.bspd);
+      e.vRight = aim(e.x + 30, e.y - 16, px, py + 10, e.bspd);
+      }
+      bullets.push(mkBullet(e.x - 30, e.y - 16, e.vLeft.vx, e.vLeft.vy));
+      bullets.push(mkBullet(e.x + 30, e.y - 16, e.vRight.vx, e.vRight.vy));
+    }
+  }
+
+  // X-WING: Fat bullet lane followed by single aimed burst
+  if (e.type === 'xwing' && e.y > H * 0.1) {
+    const cycle = e.timer % 120;
+    if (cycle >= 10 && cycle <= 50 && e.timer % 10 === 0) {
+      if (cycle === 10) {
+      e.vLeft = aim(e.x, e.y, px, py, e.bspd);
+      e.vRight = aim(e.x, e.y, px, py, e.bspd);
+      }
+      bullets.push(mkBullet(e.x - 30, e.y + 22, e.vLeft.vx, e.vLeft.vy));
+      bullets.push(mkBullet(e.x + 30, e.y + 22, e.vRight.vx, e.vRight.vy));
+    }
+    if (cycle >= 45 && cycle <= 60 && e.timer % 5 === 0) {
+      if (cycle === 45) {
+      e.aim = aim(e.x, e.y - 25, px, py, e.bspd);
+      }
+      bullets.push(mkBullet(e.x, e.y - 25, e.aim.vx, e.aim.vy));
+    }
+  }
+
   // "Seeking" burst fire (adjusts to player movement)
-  if (e.type === 'bomber' && e.y < H * 0.95) {
+  if (e.type === 'seeker' && e.y < H * 0.95) {
 
     const cycle = e.timer % 120;
     const ca = Math.atan2(py - e.y, px - e.x);
@@ -207,13 +316,14 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   }
 
   // Stationary burst fire (aim once, fire continuously at the same point)
+  // NOT WORKING
   if (e.type === 'control' && e.y < H * 0.95) {
 
     const cycle = e.timer % 120;
     if (cycle === 25) {
-          const xTarget = structuredClone(px);
-          const yTarget = structuredClone(py);
-        }
+      const xTarget = structuredClone(px);
+      const yTarget = structuredClone(py);
+    }
 
     if (cycle >= 25 && cycle < 90 && e.timer % 10 === 0) {
     const ca = Math.atan2(yTarget - e.y, xTarget - e.x);
@@ -247,40 +357,38 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     bullets.push(b);
   }
 
-    // Shotgun cluster - accelerating bullets aimed at a single point
-    if (e.type === 'moth' && e.y < H * 0.95) {
-      const cycle = e.timer % 120;
-      if (cycle === 11) {
-        e.bspd = 6;
-        const xTarget = structuredClone(px);
-        const yTarget = structuredClone(py);
-    //    const v = aim(e.x, e.y, xTarget, yTarget, e.bspd);
-      }
-
-      if (cycle >= 112 && cycle <= 116 && cycle % 4 === 0) {
-      const ca = Math.atan2(py - e.y, px - e.x);
-
-      [-45, 40].forEach(dx => {
-          spread(e.x + dx, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-          spread(e.x + dx + 11, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-          spread(e.x + dx + 6, e.y + 30 + 9,  3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-        });
-      e.bspd += 0.5;
-      }
-
-      if (cycle === 114) {
-      const ca = Math.atan2(py - e.y, px - e.x);
-
-      [-45, 40].forEach(dx => {
-          spread(e.x + dx, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-          spread(e.x + dx + 11, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-          spread(e.x + dx + 6, e.y + 30 + 9, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-        });
-      e.bspd += 0.5;
-      }
-
-      //break; ???
+  // Shotgun cluster - accelerating bullets aimed at a single point
+  if (e.type === 'nononono' && e.y < H * 0.95) {
+    const cycle = e.timer % 120;
+    if (cycle === 11) {
+      e.bspd = 6;
+      const xTarget = structuredClone(px);
+      const yTarget = structuredClone(py);
+  //    const v = aim(e.x, e.y, xTarget, yTarget, e.bspd);
     }
+
+    if (cycle >= 112 && cycle <= 116 && cycle % 4 === 0) {
+    const ca = Math.atan2(py - e.y, px - e.x);
+
+    [-45, 40].forEach(dx => {
+        spread(e.x + dx, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+        spread(e.x + dx + 11, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+        spread(e.x + dx + 6, e.y + 30 + 9,  3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      });
+    e.bspd += 0.5;
+    }
+
+    if (cycle === 114) {
+    const ca = Math.atan2(py - e.y, px - e.x);
+
+    [-45, 40].forEach(dx => {
+        spread(e.x + dx, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+        spread(e.x + dx + 11, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+        spread(e.x + dx + 6, e.y + 30 + 9, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      });
+    e.bspd += 0.5;
+    }
+  }
 
   // --- default periodic firing patterns ---
   if (e.fireTimer < e.fireRate) return;

@@ -695,7 +695,7 @@ export default function Game() {
             if (overlaps(pl.x, pl.y, pl.w * 0.2, pl.h * 0.2, e.x, e.y, e.w * 0.6, e.h * 0.6)) {
               playerHit = true;
               // small ships get rammed apart; beetles/boss shrug it off
-              if (e.type === 'jet' || e.type === 'moth') {
+              if (e.type === 'jet' || e.type === 'heli' || e.type === 'moth') {
                 e.dead = true;
                 //s.score += EDEFS[e.type].score;
                 spawnExplosionRings(s, e.x, e.y, e.type);

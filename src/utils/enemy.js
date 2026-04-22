@@ -10,13 +10,17 @@ const H = 640;
 const EDEFS = {
   tank:    { w: 60, h: 50, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
   turret:  { w: 40, h: 40, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4 , turret1: 0 },
-  daitank: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
+
+  dummy1:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 2.5 },
+
+
 
   jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 3 },
   heli:    { w: 72, h: 60, maxHp: 20, score: 2000, fireRate: 140, bspd: 3 },
   moth:    { w: 96, h: 93, maxHp: 45, score: 4500, fireRate: 140, bspd: 4.5 },
-  beetle:  { w: 120, h: 90, maxHp: 90, score: 16000, fireRate: 76,  bspd: 3 },
+  beetle:  { w: 120, h: 90, maxHp: 90, score: 9000, fireRate: 76,  bspd: 3 },
   xwing:   { w: 170,  h: 150, maxHp: 200, score: 20000, fireRate: 1, bspd: 4 },
+  daitank: { w: 120, h: 120, maxHp: 140, score: 14000, fireRate: 76,  bspd: 1 },
   boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
   //sprites
   beetleSprite:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
@@ -165,7 +169,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
           e.y -= e.vy * 1.5;
         }
         break;
-    case 'boss': {
+    case 'boss': { // boss movement is jerky, try to fix that
       if (e.transitionTimer > 0) {
         if (e.transitionTimer > 80) {
           // Stage 1: hold position — explosions spawned by main loop
@@ -272,7 +276,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     const cycle = e.timer % 120;
     const ca = Math.atan2(py - e.y, px - e.x);
     if (cycle >= 10 && cycle <= 20 && e.timer % 10 === 0) {
-      spread(e.x, e.y - 10, 7, ca, 0.6, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      spread(e.x, e.y - 10, 8, ca, 0.9, e.bspd, '#ffee00').forEach(b => bullets.push(b));
     }
 
     if (cycle >= 30 && cycle <= 42 && e.timer % 3 === 0) {
@@ -285,7 +289,16 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
-  // X-WING: Fat bullet lane followed by single aimed burst
+  // DAITANK: Spinning circle -- the spiral of death
+  if (e.type === 'daitank' && e.y > H * 0.1) {
+    const cycle = e.timer % 120;
+    if (cycle >= 20 && cycle <= 90 && e.timer % 10 === 0) {
+      circle(e.x, e.y, 10, e.bspd, e.angle).forEach(b => bullets.push(b));
+      e.angle += 0.1
+    }
+  }
+
+  // X-WING: Fat bullet lane, single aimed burst, fast circle
   if (e.type === 'xwing' && e.y > H * 0.1) {
     const cycle = e.timer % 120;
     if (cycle >= 10 && cycle <= 50 && e.timer % 10 === 0) {
@@ -298,9 +311,13 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     }
     if (cycle >= 45 && cycle <= 60 && e.timer % 5 === 0) {
       if (cycle === 45) {
-      e.aim = aim(e.x, e.y - 25, px, py, e.bspd);
+      e.aim = aim(e.x, e.y - 25, px, py, e.bspd * 2);
       }
       bullets.push(mkBullet(e.x, e.y - 25, e.aim.vx, e.aim.vy));
+    }
+    if (cycle >= 60 && cycle <= 90 && e.timer % 5 === 0) {
+      const ca = Math.atan2(py - e.y, px - e.x);
+      spread(e.x, e.y, 3, ca, 0.38, e.bspd * 1.3, '#ffee00').forEach(b => bullets.push(b));
     }
   }
 
@@ -390,11 +407,91 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
+  // New boss counter-spiral
+  if (e.type === 'boss' && e.transitionTimer > 0 && e.hp > 0) {
+    const ratio = e.hp / e.maxHp;
+    const cycle = e.timer % 120;
+  //  if (ratio <= 0.66) {
+
+    if (cycle >= 20 && cycle <= 90 && e.timer % 5 === 0) {
+      circle(e.x, e.y, 10, e.bspd / 2, e.angle).forEach(b => bullets.push(b));
+      e.angle += 0.1
+    }
+  }
+
+  // warped ring -- shoots radially outward
+  if (e.type === 'dummy1') {
+    const cycle = e.timer % 120;
+      if (cycle === 119) {
+
+      const count = 18; // # of bullets
+      const radius = 30; // width of circle from origin
+
+      const base = aim(e.x, e.y, px, py, e.bspd);
+
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+
+        // Circle offsets (formation shape)
+        const dx = Math.cos(angle) * radius;
+        const dy = Math.sin(angle) * radius;
+
+        // Speed varies by vertical position in the circle
+        // final number is speed variation
+        // high: "fast" distortion and slow bullets linger longer
+        // low: more consistent speed, so less distortion
+        const speedScale = 1 - (dy / radius) * 0.65;
+
+        bullets.push(mkBullet(e.x + dx, e.y + dy, base.vx * speedScale, base.vy * speedScale));
+      }
+    }
+  }
+
+  // Hoop calculated as points on a circle: distorts into a line
+  if (e.type === 'dummy2') {
+    const cycle = e.timer % 120;
+    if (cycle === 119) {
+
+      const count = 18;
+      const radius = 30;
+
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+
+        // Equidistant points on a circle
+        const dx = Math.cos(angle) * radius;
+        const dy = Math.sin(angle) * radius;
+
+        // Scale speed based on y-position:
+        // top bullets (negative dy) = faster
+        // bottom bullets (positive dy) = slower
+        const speedScale = 1 - (dy / radius) * 0.3;
+
+        const v = aim(
+          e.x + dx,
+          e.y + dy,
+          px,
+          py,
+          e.bspd * speedScale
+        );
+
+      bullets.push(
+        mkBullet(
+          e.x + dx,
+          e.y + dy,
+          v.vx,
+          v.vy
+        )
+      );
+    }
+  }
+}
+
   // --- default periodic firing patterns ---
   if (e.fireTimer < e.fireRate) return;
 
   e.fireTimer = 0;
-  if (e.type === 'boss' && e.transitionTimer > 0) return; // no fire during transition
+  //if (e.type === 'boss' && e.transitionTimer > 0) return; // no fire during transition
 
   switch (e.type) {
     case 'jet': {
@@ -417,7 +514,8 @@ export function updateEnemy(ctx, e, px, py, bullets) {
       break;
     }
     case 'boss': {
-      if (e.timer % 120 >= 60) break;  // burst window active — suppress normal fire
+      // IF
+      if (e.timer % 120 >= 60 || e.transitionTimer > 0 ) break;  // burst window active — suppress normal fire
       const ratio = e.hp / e.maxHp;
       if (ratio > 0.66) {
         circle(e.x, e.y, 18, e.bspd, e.angle).forEach(b => bullets.push(b));
@@ -464,7 +562,7 @@ function aim(sx, sy, tx, ty, spd) {
   return { vx: (tx - sx) / d * spd, vy: (ty - sy) / d * spd };
 }
 
-function circle(x, y, n, spd, off = 0) {
+export function circle(x, y, n, spd, off = 0) {
   return Array.from({ length: n }, (_, i) => {
     const a = (i / n) * Math.PI * 2 + off;
     return mkBullet(x, y, Math.cos(a) * spd, Math.sin(a) * spd);

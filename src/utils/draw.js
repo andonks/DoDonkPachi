@@ -203,7 +203,7 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.scale(4,4);
 
     //wings
-    ctx.fillStyle = '#00634A';
+    ctx.fillStyle = blue1;
     ctx.beginPath();
     ctx.moveTo(-6, -9);
     ctx.lineTo(-14, -12);
@@ -250,7 +250,7 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.closePath(); ctx.fill();
 
     //metal
-    ctx.strokeStyle = 'grey';
+    ctx.strokeStyle = blue0;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(-2, -10);
@@ -261,7 +261,7 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(5, -7);
     ctx.closePath(); ctx.stroke();
 
-    ctx.fillStyle = 'grey';
+    ctx.fillStyle = blue0;
     ctx.beginPath();
     ctx.moveTo(-9, 5);
     ctx.lineTo(-12, 2);
@@ -281,7 +281,7 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(9, 5);
     ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = 'orange';
+    ctx.fillStyle = pink1;
     ctx.beginPath();
     ctx.moveTo(-12, 0);
     ctx.lineTo(-12, 2);
@@ -295,10 +295,9 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(9, 3);
     ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = 'grey';
+    ctx.fillStyle = blue0;
     ctx.beginPath();
     ctx.arc(-2, -12, 1, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'grey';
     ctx.beginPath();
     ctx.arc(2, -12, 1, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
@@ -309,19 +308,19 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.ellipse(10, 8, 0.5, 2, 0, 0, 2 * Math.PI);
     ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = '#73C6AD';
+    ctx.fillStyle = pink1;
     ctx.beginPath();
     ctx.moveTo(0, -11);
     ctx.lineTo(1, -7);
     ctx.lineTo(-1, -7);
     ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = 'orange';
+    ctx.fillStyle = pink1;
     ctx.beginPath();
     ctx.arc(0, -7, 1, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
     //body
-    ctx.fillStyle = '#003118';
+    ctx.fillStyle = blue2;
     ctx.beginPath();
     ctx.moveTo(0, -5);
     ctx.lineTo(-2, -7);
@@ -339,14 +338,14 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.fill();
 
     //balls
-    ctx.fillStyle = '#73C6AD';
+    ctx.fillStyle = pink0;
     ctx.beginPath();
     ctx.arc(-7, -6, 3, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
     ctx.beginPath();
     ctx.arc(7, -6, 3, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
     //center
-    ctx.fillStyle = '#00634A';
+    ctx.fillStyle = blue1;
     ctx.beginPath();
     ctx.moveTo(-6, 0);
     ctx.lineTo(-6, 8);
@@ -358,7 +357,7 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(0, -4);
     ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = '#003118';
+    ctx.fillStyle = blue2;
     ctx.beginPath();
     ctx.moveTo(-5, 0);
     ctx.lineTo(-5, 5);
@@ -368,15 +367,15 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(5, 0);
     ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = '#00634A';
+    ctx.fillStyle = blue1;
     ctx.beginPath();
     ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = '#73C6AD';
+    ctx.fillStyle = pink0;
     ctx.beginPath();
     ctx.arc(0, -1, 4, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
-    ctx.fillStyle = 'grey';
+    ctx.fillStyle = blue0;
     ctx.beginPath();
     ctx.arc(0, 10, 2, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
@@ -1461,11 +1460,11 @@ export function drawCollectable(ctx, c, frame) {
 //  ctx.rotate(frame * 0.025 + c.id * 0.8);
 
   // Outer glow
-  const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 2.2);
+  const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.6);
   glow.addColorStop(0, blue1);
   glow.addColorStop(1, 'rgba(93, 203, 237, 0)');
   ctx.fillStyle = glow;
-  ctx.beginPath(); ctx.arc(0, 0, r * 2.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, 0, r * 1.6, 0, Math.PI * 2); ctx.fill();
 
   // Hexagon body
   ctx.beginPath();

@@ -613,13 +613,17 @@ export default function Game() {
             // Boss phase transition trigger
             if (en.type === 'boss' && en.transitionTimer === 0 && en.hp > 0) {
               const ratio = en.hp / en.maxHp;
+
               if ((en.phase === 0 && ratio <= 0.66) || (en.phase === 1 && ratio <= 0.33)) {
                 en.transitionTimer = 120;
-                en.chargeX = pl.x;
-                en.chargeY = pl.y;
+                // boss 'charge' after transition change -- disabled
+                //en.chargeX = pl.x;
+                //en.chargeY = pl.y;
+                en.chargeX = en.x;
+                en.chargeY = en.y;
                 en.returnX = en.x;
                 en.returnY = en.y;
-                s.enemyBullets = [];
+                //s.enemyBullets = [];
                 for (let i = 0; i < 6; i++) {
                   const ox = (Math.random() - 0.5) * en.w * 0.55;
                   const oy = (Math.random() - 0.5) * en.h * 0.4;

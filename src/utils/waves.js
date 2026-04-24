@@ -5,8 +5,8 @@
 
 export const WAVES = [
   [
-    { at: 0, type:'dummy1', x: 180, sy: 150, pat:'straight', vy: 0 },
-    { at: 0, type:'dummy1', x: 300, sy: 150, pat:'straight', vy: 0 },    
+    //{ at: 0, type:'turret', x: 240, sy: 150, pat:'straight', vy: 0 },
+     { at: 0, type:'dummy1', x: 300, sy: 150, pat:'straight', vy: 0 },
   ],
 
 

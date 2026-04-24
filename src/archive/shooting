@@ -1,0 +1,204 @@
+if (e.type === 'double overlapping spreads') {
+  const cycle = e.timer % 120;
+
+  if (cycle === 1) {
+    if (e.lap == null) {
+      e.lap = 0;
+      e.cwAngle = -Math.PI;
+      e.ccwAngle = Math.PI;
+    }
+    else e.lap = 1 - e.lap; // toggle 0 ↔ 1
+  }
+
+  if (cycle > 1 && e.lap === 0 && e.timer % 2 === 0) {
+    e.cwAngle += 0.1;
+    e.ccwAngle -= 0.1 ;
+    if (cycle > 18 && cycle < 30) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 38 && cycle < 50) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 58  && cycle < 70 ) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 78 && cycle < 90) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 98 && cycle < 110) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle === 120) {
+      e.lap = 1;
+    }
+  }
+  if (cycle > 1 && e.lap === 1 && e.timer % 2 === 0) {
+    e.cwAngle -= 0.1;
+    e.ccwAngle += 0.1 ;
+    if (cycle > 1 && cycle < 11) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 21 && cycle < 31) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 41  && cycle < 51 ) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 61 && cycle < 71) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 81 && cycle < 91) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle > 101 && cycle < 111) {
+    bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+    bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+    }
+    if (cycle === 120) {
+      e.lap = 0;
+    }
+  }
+}
+
+// Stationary burst fire (aim once, fire continuously at the same point)
+// NOT WORKING
+if (e.type === 'control' && e.y < H * 0.95) {
+
+  const cycle = e.timer % 120;
+  if (cycle === 25) {
+    const xTarget = structuredClone(px);
+    const yTarget = structuredClone(py);
+  }
+
+  if (cycle >= 25 && cycle < 90 && e.timer % 10 === 0) {
+  const ca = Math.atan2(yTarget - e.y, xTarget - e.x);
+
+  spread(e.x, e.y, 3, ca, 0.38, e.bspd * 3.5, '#ffee00').forEach(b => bullets.push(b));
+  }
+}
+
+// "Seeking" burst fire (adjusts to player movement)
+if (e.type === 'seeker' && e.y < H * 0.95) {
+
+  const cycle = e.timer % 120;
+  const ca = Math.atan2(py - e.y, px - e.x);
+
+  if (cycle >= 25 && cycle < 45 && e.timer % 3 === 0) {
+    spread(e.x, e.y, 5, ca, 0.38, e.bspd *3.5, '#ffee00').forEach(b => bullets.push(b));
+  }
+}
+
+// warped ring -- shoots radially outward
+if (e.type === 'dummy2') {
+  const cycle = e.timer % 120;
+    if (cycle === 119) {
+
+    const count = 18; // # of bullets
+    const radius = 30; // width of circle from origin
+
+    const base = aim(e.x, e.y, px, py, e.bspd);
+
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count;
+
+      // Circle offsets (formation shape)
+      const dx = Math.cos(angle) * radius;
+      const dy = Math.sin(angle) * radius;
+
+      // Speed varies by vertical position in the circle
+      // final number is speed variation
+      // high: "fast" distortion and slow bullets linger longer
+      // low: more consistent speed, so less distortion
+      const speedScale = 1 - (dy / radius) * 0.65;
+
+      bullets.push(mkBullet(e.x + dx, e.y + dy, base.vx * speedScale, base.vy * speedScale));
+    }
+  }
+}
+
+// Hoop calculated as points on a circle: distorts into a line
+if (e.type === 'dummy2') {
+  const cycle = e.timer % 120;
+  if (cycle === 119) {
+
+    const count = 18;
+    const radius = 30;
+
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count;
+
+      // Equidistant points on a circle
+      const dx = Math.cos(angle) * radius;
+      const dy = Math.sin(angle) * radius;
+
+      // Scale speed based on y-position:
+      // top bullets (negative dy) = faster
+      // bottom bullets (positive dy) = slower
+      const speedScale = 1 - (dy / radius) * 0.3;
+
+      const v = aim(e.x + dx, e.y + dy, px, py, e.bspd * speedScale);
+
+    bullets.push(
+      mkBullet(e.x + dx, e.y + dy, v.vx, v.vy));
+    }
+  }
+}
+
+// Shotgun cluster - accelerating bullets aimed at a single point
+if (e.type === 'DDP_tank' && e.y < H * 0.95) {
+  const cycle = e.timer % 120;
+  if (cycle === 11) {
+    e.bspd = 6;
+    const xTarget = structuredClone(px);
+    const yTarget = structuredClone(py);
+  }
+
+  if (cycle >= 112 && cycle <= 116 && cycle % 4 === 0) {
+  const ca = Math.atan2(py - e.y, px - e.x);
+
+  [-45, 40].forEach(dx => {
+      spread(e.x + dx, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      spread(e.x + dx + 11, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      spread(e.x + dx + 6, e.y + 30 + 9,  3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+    });
+  e.bspd += 0.5;
+  }
+
+  if (cycle === 114) {
+  const ca = Math.atan2(py - e.y, px - e.x);
+
+  [-45, 40].forEach(dx => {
+      spread(e.x + dx, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      spread(e.x + dx + 11, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+      spread(e.x + dx + 6, e.y + 30 + 9, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
+    });
+  e.bspd += 0.5;
+  }
+}
+
+//if (e.type === 'boss' && e.transitionTimer > 0) return; // no fire during transition
+
+case 'fighter': {
+  const ca = Math.atan2(py - e.y, px - e.x);
+  spread(e.x, e.y, 5, ca, 0.38, e.bspd * 3, '#ffee00').forEach(b => bullets.push(b));
+  break;
+}
+case 'bomber': {
+  // 3×3 cluster, all fired straight down
+  [-16, 0, 16].forEach(dx => {
+    [0, 10, 20].forEach(dy => {
+      bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#ffaa00'));
+    });
+  });
+  break;
+}

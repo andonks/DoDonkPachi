@@ -9,11 +9,8 @@ const H = 640;
 // (hitbox width/height, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
   tank:    { w: 60, h: 50, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
-  turret:  { w: 40, h: 40, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4 , turret1: 0 },
-
+  turret:  { w: 40, h: 40, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4},
   dummy1:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 2.5 },
-
-
 
   jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 3 },
   heli:    { w: 72, h: 60, maxHp: 20, score: 2000, fireRate: 140, bspd: 3 },
@@ -21,7 +18,8 @@ const EDEFS = {
   beetle:  { w: 120, h: 90, maxHp: 90, score: 9000, fireRate: 76,  bspd: 3 },
   xwing:   { w: 170,  h: 150, maxHp: 200, score: 20000, fireRate: 1, bspd: 4 },
   daitank: { w: 120, h: 120, maxHp: 140, score: 14000, fireRate: 76,  bspd: 1 },
-  boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 1.75 },
+  boss:    { w: 240, h: 180, maxHp: 2000, score: 200000, fireRate: 36, bspd: 2.5 },
+
   //sprites
   beetleSprite:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
   daitankSprite: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
@@ -170,23 +168,6 @@ export function updateEnemy(ctx, e, px, py, bullets) {
         }
         break;
     case 'boss': { // boss movement is jerky, try to fix that
-      if (e.transitionTimer > 0) {
-        if (e.transitionTimer > 80) {
-          // Stage 1: hold position — explosions spawned by main loop
-        } else if (e.transitionTimer > 30) {
-          // Stage 2: charge toward player position saved at transition start (half speed)
-          e.x += (e.chargeX - e.x) * 0.05;
-          e.y += (e.chargeY - e.y) * 0.05;
-        } else {
-          // Stage 3: pull back to origin
-          e.x += (e.returnX - e.x) * 0.15;
-          e.y += (e.returnY - e.y) * 0.15;
-        }
-        e.transitionTimer--;
-        if (e.transitionTimer === 0) e.phase++;
-        break;
-      }
-      // Normal movement
       if (e.y < H * 0.22) {
         e.y += e.vy;
       } else {
@@ -206,30 +187,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   if (e.x > 470) return;
   if (e.x < 10) return;
 
-  // Special firing patterns
-
-  // Boss timed burst: last 60 frames of every 120-frame cycle.
-  // Fire only during the first 20 of those 60 frames (cycle 60–79).
-  // Skip firing (but still suppress normal fire) on the first burst
-  // window of each HP phase.
-  if (e.type === 'boss' && e.transitionTimer === 0 && e.y < H * 0.95) {
-    const ratio = e.hp / e.maxHp;
-    const hpPhase = ratio > 0.66 ? 1 : ratio > 0.33 ? 2 : 3;
-    if (e.lastHpPhase === undefined) { e.lastHpPhase = hpPhase; e.burstPhaseArmed = false; }
-    if (hpPhase !== e.lastHpPhase)   { e.lastHpPhase = hpPhase; e.burstPhaseArmed = false; }
-
-    const cycle = e.timer % 120;
-    // Arm once the first window's fire-zone has safely passed
-    if (!e.burstPhaseArmed && cycle >= 80) e.burstPhaseArmed = true;
-
-    if (cycle >= 60 && cycle < 80 && e.burstPhaseArmed && e.timer % 3 === 0) {
-      [-84, 84].forEach(ox => {
-        const b = mkBullet(e.x + ox, e.y + 40, 0, e.bspd * 3.5, 'enemy', '#8800ff');
-        b.burst = true;
-        bullets.push(b);
-      });
-    }
-  }
+  // ------------------------ Special firing patterns --------------------------
 
   // HELI - rapid aimed bursts
   if (e.type === 'heli' && e.y > H * 0.4) {
@@ -321,34 +279,6 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     }
   }
 
-  // "Seeking" burst fire (adjusts to player movement)
-  if (e.type === 'seeker' && e.y < H * 0.95) {
-
-    const cycle = e.timer % 120;
-    const ca = Math.atan2(py - e.y, px - e.x);
-
-    if (cycle >= 25 && cycle < 45 && e.timer % 3 === 0) {
-      spread(e.x, e.y, 5, ca, 0.38, e.bspd *3.5, '#ffee00').forEach(b => bullets.push(b));
-    }
-  }
-
-  // Stationary burst fire (aim once, fire continuously at the same point)
-  // NOT WORKING
-  if (e.type === 'control' && e.y < H * 0.95) {
-
-    const cycle = e.timer % 120;
-    if (cycle === 25) {
-      const xTarget = structuredClone(px);
-      const yTarget = structuredClone(py);
-    }
-
-    if (cycle >= 25 && cycle < 90 && e.timer % 10 === 0) {
-    const ca = Math.atan2(yTarget - e.y, xTarget - e.x);
-
-    spread(e.x, e.y, 3, ca, 0.38, e.bspd * 3.5, '#ffee00').forEach(b => bullets.push(b));
-    }
-  }
-
   // Turret fire - big single projectiles
   if (e.type === 'turret1' && e.y < H * 0.95) {
     const cycle = e.timer % 120;
@@ -374,184 +304,57 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     bullets.push(b);
   }
 
-  // Shotgun cluster - accelerating bullets aimed at a single point
-  if (e.type === 'nononono' && e.y < H * 0.95) {
+  // BOSS rebuilding
+  if (e.type === 'dummy1' && e.transitionTimer <= 0) {
     const cycle = e.timer % 120;
-    if (cycle === 11) {
-      e.bspd = 6;
-      const xTarget = structuredClone(px);
-      const yTarget = structuredClone(py);
-  //    const v = aim(e.x, e.y, xTarget, yTarget, e.bspd);
+
+    if (cycle === 1) {
+      if (e.lap == null) {
+        e.lap = 0;
+        e.cwAngle = -Math.PI / 2;
+        e.ccwAngle = Math.PI / 2;
+      }
+      else {
+      e.lap += 1;
+      console.log(e.lap);
+      }
     }
 
-    if (cycle >= 112 && cycle <= 116 && cycle % 4 === 0) {
-    const ca = Math.atan2(py - e.y, px - e.x);
-
-    [-45, 40].forEach(dx => {
-        spread(e.x + dx, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-        spread(e.x + dx + 11, e.y + 30, 3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-        spread(e.x + dx + 6, e.y + 30 + 9,  3, ca, 0.1, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-      });
-    e.bspd += 0.5;
-    }
-
-    if (cycle === 114) {
-    const ca = Math.atan2(py - e.y, px - e.x);
-
-    [-45, 40].forEach(dx => {
-        spread(e.x + dx, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-        spread(e.x + dx + 11, e.y + 30, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-        spread(e.x + dx + 6, e.y + 30 + 9, 4, ca, 0.2, e.bspd, '#ffee00').forEach(b => bullets.push(b));
-      });
-    e.bspd += 0.5;
-    }
-  }
-
-  // New boss counter-spiral
-  if (e.type === 'boss' && e.transitionTimer > 0 && e.hp > 0) {
-    const ratio = e.hp / e.maxHp;
-    const cycle = e.timer % 120;
-  //  if (ratio <= 0.66) {
-
-    if (cycle >= 20 && cycle <= 90 && e.timer % 5 === 0) {
-      circle(e.x, e.y, 10, e.bspd / 2, e.angle).forEach(b => bullets.push(b));
-      e.angle += 0.1
-    }
-  }
-
-  // warped ring -- shoots radially outward
-  if (e.type === 'dummy1') {
-    const cycle = e.timer % 120;
-      if (cycle === 119) {
-
-      const count = 18; // # of bullets
-      const radius = 30; // width of circle from origin
-
-      const base = aim(e.x, e.y, px, py, e.bspd);
-
-      for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 * i) / count;
-
-        // Circle offsets (formation shape)
-        const dx = Math.cos(angle) * radius;
-        const dy = Math.sin(angle) * radius;
-
-        // Speed varies by vertical position in the circle
-        // final number is speed variation
-        // high: "fast" distortion and slow bullets linger longer
-        // low: more consistent speed, so less distortion
-        const speedScale = 1 - (dy / radius) * 0.65;
-
-        bullets.push(mkBullet(e.x + dx, e.y + dy, base.vx * speedScale, base.vy * speedScale));
+    if (cycle > 1 && e.timer % 2 === 0) {
+      if (
+        (cycle > 1 && cycle < 11) ||
+        (cycle > 21 && cycle < 31) ||
+        (cycle > 41 && cycle < 51) ||
+        (cycle > 61 && cycle < 71) ||
+        (cycle > 81 && cycle < 91) ||
+        (cycle > 101 && cycle < 111)
+      ) {
+        bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+        bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+      }
+      console.log(e.lap);
+      if (e.lap % 2 === 0) {
+        e.cwAngle += 0.05;
+        e.ccwAngle -= 0.05;
+        console.log(e.cwAngle)
+      }
+      if (e.lap % 2 != 0) {
+        e.cwAngle -= 0.05;
+        e.ccwAngle += 0.05;
+        console.log(e.cwAngle)
       }
     }
   }
 
-  // Hoop calculated as points on a circle: distorts into a line
-  if (e.type === 'dummy2') {
-    const cycle = e.timer % 120;
-    if (cycle === 119) {
-
-      const count = 18;
-      const radius = 30;
-
-      for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 * i) / count;
-
-        // Equidistant points on a circle
-        const dx = Math.cos(angle) * radius;
-        const dy = Math.sin(angle) * radius;
-
-        // Scale speed based on y-position:
-        // top bullets (negative dy) = faster
-        // bottom bullets (positive dy) = slower
-        const speedScale = 1 - (dy / radius) * 0.3;
-
-        const v = aim(
-          e.x + dx,
-          e.y + dy,
-          px,
-          py,
-          e.bspd * speedScale
-        );
-
-      bullets.push(
-        mkBullet(
-          e.x + dx,
-          e.y + dy,
-          v.vx,
-          v.vy
-        )
-      );
-    }
-  }
-}
-
-  // --- default periodic firing patterns ---
+  // ------------------- default periodic firing patterns --------------------
   if (e.fireTimer < e.fireRate) return;
 
   e.fireTimer = 0;
-  //if (e.type === 'boss' && e.transitionTimer > 0) return; // no fire during transition
 
   switch (e.type) {
     case 'jet': {
       const v = aim(e.x, e.y, px, py, e.bspd);
       bullets.push(mkBullet(e.x, e.y, v.vx, v.vy));
-      break;
-    }
-    case 'fighter': {
-      const ca = Math.atan2(py - e.y, px - e.x);
-      spread(e.x, e.y, 5, ca, 0.38, e.bspd * 3, '#ffee00').forEach(b => bullets.push(b));
-      break;
-    }
-    case 'bomber': {
-      // 3×3 cluster, all fired straight down
-      [-16, 0, 16].forEach(dx => {
-        [0, 10, 20].forEach(dy => {
-          bullets.push(mkBullet(e.x + dx, e.y + 22 + dy, 0, e.bspd * 2.2, 'enemy', '#ffaa00'));
-        });
-      });
-      break;
-    }
-    case 'boss': {
-      // IF
-      if (e.timer % 120 >= 60 || e.transitionTimer > 0 ) break;  // burst window active — suppress normal fire
-      const ratio = e.hp / e.maxHp;
-      if (ratio > 0.66) {
-        circle(e.x, e.y, 18, e.bspd, e.angle).forEach(b => bullets.push(b));
-        e.angle += 0.18;
-      } else if (ratio > 0.33) {
-        circle(e.x, e.y, 18, e.bspd, e.angle).forEach(b => bullets.push(b));
-        circle(e.x, e.y, 18, e.bspd * 0.65, -e.angle * 0.8).forEach(b => bullets.push(b));
-        e.angle += 0.22;
-        // aimed burst from pods
-        if (e.timer % 40 === 0) {
-          [-84, 84].forEach(ox => {
-            const v = aim(e.x + ox, e.y + 40, px, py, e.bspd * 1.2);
-            for (let i = 0; i < 4; i++) {
-              bullets.push(mkBullet(e.x + ox, e.y + 40,
-                v.vx + (Math.random() - 0.5) * 0.6, v.vy + (Math.random() - 0.5) * 0.6,
-                'enemy', '#ffee00'));
-            }
-          });
-        }
-      } else {
-        circle(e.x, e.y, 24, e.bspd, e.angle).forEach(b => bullets.push(b));
-        circle(e.x, e.y, 16, e.bspd * 1.5, -e.angle * 1.3).forEach(b => bullets.push(b));
-        e.angle += 0.3;
-        if (e.timer % 28 === 0) {
-          [-84, 84].forEach(ox => {
-            const v = aim(e.x + ox, e.y + 40, px, py, e.bspd * 1.4);
-            for (let i = 0; i < 5; i++) {
-              bullets.push(mkBullet(e.x + ox, e.y + 40,
-                v.vx + (Math.random() - 0.5) * 0.8, v.vy + (Math.random() - 0.5) * 0.8,
-                'enemy', '#ffee00'));
-            }
-          });
-        }
-        const v = aim(e.x, e.y, px, py, e.bspd * 1.6);
-        spread(e.x, e.y, 5, Math.atan2(py - e.y, px - e.x), 0.6, e.bspd * 1.6, '#ffaaff').forEach(b => bullets.push(b));
-      }
       break;
     }
   }

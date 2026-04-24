@@ -62,33 +62,36 @@ function drawBullet(ctx, b, frame) {
     g.addColorStop(0, '#ffffcc'); g.addColorStop(0.4, pink1); g.addColorStop(1, 'rgba(255,180,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 5 : 3, b.pw ? 24 : 20, angle, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = 'white';
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 2 : 1.5, b.pw ? 14 : 12, angle, 0, Math.PI * 2); ctx.fill();
   } else if (b.burst) {
     // Elongated neon purple/blue — boss pod stream bullets
+    //console.log(b.vx, b.vy);
+    const angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
     const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 14);
-    g.addColorStop(0, '#ffffff'); g.addColorStop(0.3, '#8800ff'); g.addColorStop(1, 'rgba(80,0,255,0)');
+    g.addColorStop(0, 'white'); g.addColorStop(0.3, '#8800ff'); g.addColorStop(1, 'rgba(80,0,255,0)');
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, 4, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, 4, 20, angle, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#cc88ff';
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, 2, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, 2, 12, angle, 0, Math.PI * 2); ctx.fill();
   } else if (b.chonk) {
     // Turret projectiles - big and chonky!
-    const p = 0.8 + Math.sin(frame * 0.1 + b.id * 1.1) * 0.1;
-    const g = ctx.createRadialGradient(b.x, b.y, 6, b.x, b.y, 36 * p);
-      g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, '#ff00cc'); g.addColorStop(1, 'rgba(255,0,180,0)');
+    const g = ctx.createRadialGradient(b.x, b.y, 6, b.x, b.y, 36);
+      g.addColorStop(0, 'white'); g.addColorStop(0.25, pink1); g.addColorStop(1, 'rgba(255,0,180,0)');
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(b.x, b.y, 36 * p, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(b.x, b.y, 36, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#lightblue';
-    ctx.beginPath(); ctx.arc(b.x, b.y, 18 * p, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(b.x, b.y, 18, 0, Math.PI * 2); ctx.fill();
   } else {
-    // default enemy bullets?
+    // default enemy bullets -- inner pulse, consistent outer diameter
     const p = 0.8 + Math.sin(frame * 0.22 + b.id * 1.7) * 0.2;
-    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 16 * p);
-    g.addColorStop(0, '#ffffff'); g.addColorStop(0.25, '#ff00cc'); g.addColorStop(1, 'rgba(255,0,180,0)');
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 7);
+    g.addColorStop(0, 'white'); g.addColorStop(.5, pink1); g.addColorStop(1, pink2);
+    const gIn = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 6);
+    gIn.addColorStop(0, 'white'); gIn.addColorStop(1, pink1);
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(b.x, b.y, 14 * p, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ff88ee';
+    ctx.beginPath(); ctx.arc(b.x, b.y, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = gIn;
     ctx.beginPath(); ctx.arc(b.x, b.y, 6 * p, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
@@ -423,7 +426,7 @@ export default function Game() {
             x: W/2, y: H/2,
             vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
             r: 2 + Math.random() * 4, life, maxLife: life,
-            color: [pink1,'#ffffff',blue0][Math.floor(Math.random() * 3)],
+            color: [pink1,'white',blue0][Math.floor(Math.random() * 3)],
           });
         }
       }
@@ -598,7 +601,7 @@ export default function Game() {
               b.hit = true;
               const dmg = b.pw ? 3 : 1;
               en.hp -= dmg;
-              spawnParticles(s.particles, b.x, b.y, 3, ['pink1','#ffffff','#ffaa00'], [1,5],[1,3]);
+              spawnParticles(s.particles, b.x, b.y, 3, ['pink1','white','#ffaa00'], [1,5],[1,3]);
               // Boss chain — refresh display on any hit; increment once per 2 s
               if (en.type === 'boss' && en.hp > 0) {
                 s.chainBossHitThisSecond = true;
@@ -731,7 +734,7 @@ export default function Game() {
             pp.push({ x: pl.x, y: pl.y,
               vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
               r: 2 + Math.random() * 2.5, life, maxLife: life,
-              color: ['#ffffff','#aaddff','#0099ff','#cceeff'][Math.floor(Math.random() * 4)] });
+              color: ['white','#aaddff','#0099ff','#cceeff'][Math.floor(Math.random() * 4)] });
           }
           for (let i = 0; i < 14; i++) {
             const a = Math.random() * Math.PI * 2;
@@ -740,7 +743,7 @@ export default function Game() {
             pp.push({ x: pl.x, y: pl.y,
               vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
               r: 1.5 + Math.random() * 3, life, maxLife: life,
-              color: ['#ffffff','#ddeeff'][Math.floor(Math.random() * 2)] });
+              color: ['white','#ddeeff'][Math.floor(Math.random() * 2)] });
           }
 
           Audio.sfxHeavyExplosion();
@@ -878,7 +881,7 @@ export default function Game() {
           s.score += COLLECT_PTS;
           s.medalCount++;
           spawnParticles(s.particles, c.x, c.y, 6,
-            [pink1, pink0, '#ffffff'], [1, 4], [1, 3]);
+            [pink1, pink0, 'white'], [1, 4], [1, 3]);
           return false;
         }
         return c.y < H + 20;
@@ -987,7 +990,7 @@ export default function Game() {
       if (s.flashTimer > 0) {
         ctx.save();
         ctx.globalAlpha = (s.flashTimer / 8) * 0.85;
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, W, H);
         ctx.restore();
       }

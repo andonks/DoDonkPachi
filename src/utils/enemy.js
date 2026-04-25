@@ -305,7 +305,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   }
 
   // BOSS rebuilding
-  if (e.type === 'dummy1' && e.transitionTimer <= 0) {
+  if (e.type === 'boss' && e.transitionTimer <= 0) {
     const cycle = e.timer % 120;
 
     if (cycle === 1) {
@@ -342,6 +342,18 @@ export function updateEnemy(ctx, e, px, py, bullets) {
         e.cwAngle -= 0.05;
         e.ccwAngle += 0.05;
         console.log(e.cwAngle)
+      }
+    }
+    if (cycle > 1 && e.timer % 10 === 0) {
+      if (
+        (cycle > 20 && cycle < 60) ||
+        (cycle > 80 && cycle < 120)
+      ) {
+        const v = aim(e.x, e.y, px, py, e.bspd * 1.4);
+
+        const b = mkBullet(e.x, e.y, v.vx, v.vy, 'enemy');
+        b.burst = true;
+        bullets.push(b);
       }
     }
   }

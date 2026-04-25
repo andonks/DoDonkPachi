@@ -59,28 +59,25 @@ function drawBullet(ctx, b, frame) {
     // Rotate ellipse to align with bullet velocity direction
     const angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
     const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 14);
-    g.addColorStop(0, '#ffffcc'); g.addColorStop(0.4, pink1); g.addColorStop(1, 'rgba(255,180,0,0)');
+    g.addColorStop(0, 'white'); g.addColorStop(0.4, pink1); g.addColorStop(1, pink2);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 5 : 3, b.pw ? 24 : 20, angle, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = 'white';
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.pw ? 2 : 1.5, b.pw ? 14 : 12, angle, 0, Math.PI * 2); ctx.fill();
   } else if (b.burst) {
-    // Elongated neon purple/blue — boss pod stream bullets
-    //console.log(b.vx, b.vy);
+    // Elongated neon blue — boss pod stream bullets
     const angle = Math.atan2(b.vy, b.vx) + Math.PI / 2;
     const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 14);
-    g.addColorStop(0, 'white'); g.addColorStop(0.3, '#8800ff'); g.addColorStop(1, 'rgba(80,0,255,0)');
+    g.addColorStop(0, 'white'); g.addColorStop(0.5, blue1); g.addColorStop(1, blue2);
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, 4, 20, angle, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cc88ff';
-    ctx.beginPath(); ctx.ellipse(b.x, b.y, 2, 12, angle, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(b.x, b.y, 4, 18, angle, 0, Math.PI * 2); ctx.fill();
   } else if (b.chonk) {
-    // Turret projectiles - big and chonky!
+    // Turret projectiles - big and chonky! NEED FIXED; too big & glowy
     const g = ctx.createRadialGradient(b.x, b.y, 6, b.x, b.y, 36);
-      g.addColorStop(0, 'white'); g.addColorStop(0.25, pink1); g.addColorStop(1, 'rgba(255,0,180,0)');
+      g.addColorStop(0, 'white'); g.addColorStop(0.25, pink1); g.addColorStop(1, pink2);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(b.x, b.y, 36, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#lightblue';
+    ctx.fillStyle = blue0;
     ctx.beginPath(); ctx.arc(b.x, b.y, 18, 0, Math.PI * 2); ctx.fill();
   } else {
     // default enemy bullets -- inner pulse, consistent outer diameter
@@ -151,24 +148,6 @@ function overlaps(ax, ay, aw, ah, bx, by, bw, bh) {
   );
 }
 
-// ─── Scrolling background buildings ──────────────────────────────────────────
-
-function makeBuildings() {
-  const b = [];
-  for (let i = 0; i < 30; i++) {
-    b.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      w: 20 + Math.random() * 50,
-      h: 30 + Math.random() * 80,
-      spd: 0.4 + Math.random() * 0.6,
-      hue: Math.random() < 0.5 ? 210 : (Math.random() < 0.5 ? 270 : 180),
-      alpha: 0.05 + Math.random() * 0.1,
-    });
-  }
-  return b;
-}
-
 // ─── Game init ────────────────────────────────────────────────────────────────
 
 function initState() {
@@ -195,7 +174,6 @@ function initState() {
       alpha: 0.2 + Math.random() * 0.8,
       hue: Math.random() < 0.12 ? 50 : (Math.random() < 0.18 ? 200 : 0),
     })),
-    buildings: makeBuildings(),
     score: 0,
     lives: 3,
     waveIdx: 0,
@@ -322,8 +300,8 @@ const STYLES = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'rgba(0,0,0,0.78)',
-    color: '#fff',
+    background: 'black',
+    color: 'white',
     fontFamily: 'PixelifySans',
     textAlign: 'center',
     gap: 18,
@@ -331,13 +309,13 @@ const STYLES = {
   title: { fontSize: 50, color: pink1, textShadow: '0 0 20px pink0, 0 0 40px blue2', letterSpacing: 4 },
   sub: { fontSize: 24, color: blue1, letterSpacing: 2 },
   controls: { fontFamily: 'monospace', fontSize: 16, color: blue0, lineHeight: 1.8 },
-  score: { fontFamily: 'Sixtyfour', fontSize: 54, color: 'pink1' },
+  score: { fontFamily: 'Sixtyfour', fontSize: 54, color: 'white' },
   btn: {
     padding: '8px 20px',
     fontSize: 20,
     fontFamily: 'PixelifySans',
     background: pink1,
-    color: '#000',
+    color: 'black',
     border: 'none',
     cursor: 'pointer',
     letterSpacing: 2,
@@ -448,7 +426,7 @@ export default function Game() {
       if (paused) {
         // Draw pause overlay over last frame and wait
         ctx.save();
-        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
         ctx.fillRect(0, 0, W, H);
         ctx.textAlign = 'center';
         ctx.fillStyle = pink1;
@@ -601,7 +579,7 @@ export default function Game() {
               b.hit = true;
               const dmg = b.pw ? 3 : 1;
               en.hp -= dmg;
-              spawnParticles(s.particles, b.x, b.y, 3, ['pink1','white','#ffaa00'], [1,5],[1,3]);
+              spawnParticles(s.particles, b.x, b.y, 3, ['pink1','white','pink2'], [1,5],[1,3]);
               // Boss chain — refresh display on any hit; increment once per 2 s
               if (en.type === 'boss' && en.hp > 0) {
                 s.chainBossHitThisSecond = true;
@@ -734,7 +712,7 @@ export default function Game() {
             pp.push({ x: pl.x, y: pl.y,
               vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
               r: 2 + Math.random() * 2.5, life, maxLife: life,
-              color: ['white','#aaddff','#0099ff','#cceeff'][Math.floor(Math.random() * 4)] });
+              color: ['white',blue1,blue2,blue0][Math.floor(Math.random() * 4)] });
           }
           for (let i = 0; i < 14; i++) {
             const a = Math.random() * Math.PI * 2;
@@ -743,7 +721,7 @@ export default function Game() {
             pp.push({ x: pl.x, y: pl.y,
               vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
               r: 1.5 + Math.random() * 3, life, maxLife: life,
-              color: ['white','#ddeeff'][Math.floor(Math.random() * 2)] });
+              color: ['white',blue0][Math.floor(Math.random() * 2)] });
           }
 
           Audio.sfxHeavyExplosion();
@@ -863,12 +841,6 @@ export default function Game() {
         if (st.y > H + 2) { st.y = -2; st.x = Math.random() * W; }
       });
 
-      // ── Buildings ─────────────────────────────────────────────────────────
-      s.buildings.forEach(b => {
-        b.y += b.spd;
-        if (b.y > H + b.h) b.y = -b.h;
-      });
-
       // ── Collectables ──────────────────────────────────────────────────────
       s.collectables = s.collectables.filter(c => {
 //  acceleration
@@ -902,42 +874,14 @@ export default function Game() {
       if (s.shake) ctx.translate(s.shakeX, s.shakeY);
 
       // Background
-      ctx.fillStyle = '#00000e';
+      ctx.fillStyle = 'black';
       ctx.fillRect(-10, -10, W + 20, H + 20);
-
-      // City silhouette (scrolling buildings)
-      s.buildings.forEach(b => {
-        ctx.fillStyle = `hsla(${b.hue},60%,20%,${b.alpha})`;
-        ctx.fillRect(b.x - b.w / 2, b.y - b.h, b.w, b.h);
-        // windows
-        ctx.fillStyle = `hsla(${b.hue},80%,70%,${b.alpha * 2.5})`;
-        for (let wy = b.y - b.h + 6; wy < b.y - 4; wy += 10) {
-          for (let wx = b.x - b.w / 2 + 4; wx < b.x + b.w / 2 - 4; wx += 8) {
-            if (Math.random() < 0.4) ctx.fillRect(wx, wy, 4, 5);
-          }
-        }
-      });
-
-      // Grid scanlines
-      ctx.strokeStyle = 'rgba(0,60,120,0.25)';
-      ctx.lineWidth = 1;
-      const gs = 44;
-      const off = s.frame % gs;
-      for (let y = -gs + off; y < H; y += gs) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-      }
-      // Perspective diagonals
-      ctx.strokeStyle = 'rgba(0,40,80,0.15)';
-      const doff = (s.frame * 0.3) % 80;
-      for (let x = -W + doff; x < W * 2; x += 80) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 110, H); ctx.stroke();
-      }
 
       // Stars
       s.stars.forEach(st => {
-        const col = st.hue === 0 ? `rgba(255,255,255,${st.alpha})`
-          : st.hue === 50 ? `rgba(255,220,100,${st.alpha})`
-          : `rgba(100,190,255,${st.alpha})`;
+        const col = st.hue === 0 ? `rgba(255,255,255,${st.alpha})` // white
+          : st.hue === 50 ? `rgba(238,91,229,${st.alpha})` // pink
+          : `rgba(93,203,237,${st.alpha})`; // blue
         ctx.fillStyle = col;
         ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2); ctx.fill();
       });
@@ -997,11 +941,9 @@ export default function Game() {
 
       // ─ HUD ──────────────────────────────────────────────────────────────
       // Top bar
-      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, W, 34);
-      ctx.strokeStyle = 'rgba(0,255,255,0.3)';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(0, 34); ctx.lineTo(W, 34); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, 34); ctx.lineTo(W, 34);
 
       // Player current score (top left)
       ctx.font = '18px "Sixtyfour", monospace';
@@ -1012,7 +954,7 @@ export default function Game() {
       // Hi-score (top center)
       const hi = hiScoreRef.current;
       ctx.textAlign = 'center';
-      ctx.fillStyle = s.score >= hi && hi > 0 ? pink1 : 'rgba(238,91,229,100)';
+      ctx.fillStyle = s.score >= hi && hi > 0 ? pink1 : pink1;
       ctx.fillText(`${String(Math.max(hi, s.score)).padStart(1,'0')}`, W / 2, 22);
 
       ctx.textAlign = 'right';
@@ -1099,19 +1041,19 @@ export default function Game() {
           // Track + clipped HP fill
           ctx.save();
           ctx.globalAlpha = alpha;
-          ctx.fillStyle = 'rgba(40,0,40,0.85)';
+          ctx.fillStyle = 'black';
           ctx.fillRect(animX, by, animW, barH);
           ctx.beginPath();
           ctx.rect(animX, by, animW, barH);
           ctx.clip();
-          ctx.fillStyle = `hsl(${t * 120},90%,50%)`;
+          ctx.fillStyle = pink2;
           ctx.fillRect(cx - barW / 2, by, barW * t, barH);
           ctx.restore();
 
           // Border
           ctx.save();
           ctx.globalAlpha = alpha;
-          ctx.strokeStyle = '#cc00cc';
+          ctx.strokeStyle = pink2;
           ctx.lineWidth = 1;
           ctx.strokeRect(animX, by, animW, barH);
           ctx.restore();
@@ -1145,9 +1087,11 @@ export default function Game() {
 
         ctx.shadowBlur  = 0;
         //ctx.globalAlpha = fadeIn * (blink ? 0.88 : 0.18);
-        ctx.font = '15px monospace';
+        ctx.font = '14px monospace';
         ctx.fillStyle = blue1;
-        ctx.fillText('BOSS APPROACHING', W / 2, H / 2 + 22);
+        ctx.fillText('PROTOTYPE BATTLESHIP APPROACHING', W / 2, H / 2 + 22);
+        ctx.fillText('DO NOT HESITATE. SHOOT THE CORE!', W / 2, H / 2 + 44);
+
 
         ctx.restore();
       }
@@ -1163,7 +1107,7 @@ export default function Game() {
       if (debugMode) {
         ctx.font = 'bold 11px monospace';
         ctx.textAlign = 'right';
-        ctx.fillStyle = '#ff4444';
+        ctx.fillStyle = 'pink2';
         ctx.fillText('DEBUG MODE', W - 8, H - 8);
       }
 
@@ -1282,67 +1226,6 @@ export default function Game() {
     };
   }, [screen]);
 
-  // Title screen canvas background animation
-  useEffect(() => {
-    if (screen !== 'title') return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    const stars = Array.from({ length: 180 }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      vy: 0.35 + Math.random() * 2.8, r: Math.random() * 1.6 + 0.3,
-      alpha: 0.2 + Math.random() * 0.8,
-      hue: Math.random() < 0.12 ? 50 : (Math.random() < 0.18 ? 200 : 0),
-    }));
-    const buildings = makeBuildings();
-    let frame = 0;
-    let running = true;
-
-    function drawTitle() {
-      if (!running) return;
-
-      ctx.fillStyle = blue2;
-      ctx.fillRect(0, 0, W, H);
-
-      buildings.forEach(b => {
-        b.y += b.spd;
-        if (b.y > H + b.h) b.y = -b.h;
-        ctx.fillStyle = `hsla(${b.hue},60%,20%,${b.alpha})`;
-        ctx.fillRect(b.x - b.w / 2, b.y - b.h, b.w, b.h);
-      });
-
-      ctx.strokeStyle = 'rgba(0,60,120,0.25)';
-      ctx.lineWidth = 1;
-      const gs = 44;
-      const off = frame % gs;
-      for (let y = -gs + off; y < H; y += gs) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-      }
-
-      ctx.strokeStyle = 'rgba(0,40,80,0.15)';
-      const doff = (frame * 0.3) % 80;
-      for (let x = -W + doff; x < W * 2; x += 80) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 110, H); ctx.stroke();
-      }
-
-      stars.forEach(st => {
-        st.y += st.vy;
-        if (st.y > H + 2) { st.y = -2; st.x = Math.random() * W; }
-        const col = st.hue === 0 ? `rgba(255,255,255,${st.alpha})`
-          : st.hue === 50  ? `rgba(255,220,100,${st.alpha})`
-          : `rgba(100,190,255,${st.alpha})`;
-        ctx.fillStyle = col;
-        ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2); ctx.fill();
-      });
-
-      frame++;
-      rafRef.current = requestAnimationFrame(drawTitle);
-    }
-
-    rafRef.current = requestAnimationFrame(drawTitle);
-    return () => { running = false; cancelAnimationFrame(rafRef.current); };
-  }, [screen]);
-
   // Keep canvas hi-score ref in sync with leaderboard state
   useEffect(() => {
     hiScoreRef.current = leaderboard[0]?.score ?? 0;
@@ -1452,8 +1335,7 @@ export default function Game() {
             <button style={STYLES.btn} onClick={startGame}>
               PLAY
             </button>
-            <button
-              style={{ ...STYLES.btn, background: 'black', color: pink1, border: '1px solid pink1' }}
+            <button style={{ ...STYLES.btn, background: 'black', color: pink1, border: '1px solid pink1' }}
               onClick={() => {
                 setIsWin(null);
                 setLeaderboardTab('global');
@@ -1531,11 +1413,7 @@ export default function Game() {
 
       {screen === 'enter_initials' && (
         <div style={STYLES.overlay}>
-          <div style={{
-            ...STYLES.title,
-            color: isWin ? 'pink1' : 'pink2',
-            textShadow: isWin ? '0 0 20px pink1' : '0 0 20px pink1',
-          }}>
+          <div style={{ ...STYLES.title, color: pink1, textShadow: '0 0 20px pink0, 0 0 50px pink0' }}>
             {isWin ? 'ALL CLEAR!' : 'GAME OVER'}
           </div>
           <div style={STYLES.score}>{String(finalScore).padStart(1, '0')}</div>
@@ -1549,9 +1427,9 @@ export default function Game() {
                   width: 48, height: 60,
                   border: `2px solid ${active ? pink1 : blue2}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 34, fontFamily: 'Sixtyfour', color: '#fff', fontWeight: 'bold',
-                  background: active ? 'rgba(0,255,255,0.08)' : 'rgba(0,0,0,0.3)',
-                  boxShadow: active ? '0 0 12px rgba(0,255,255,0.4)' : 'none',
+                  fontSize: 34, fontFamily: 'Sixtyfour', color: 'white', fontWeight: 'bold',
+                  background: active ? 'rgba(93,203,237,0.08)' : 'rgba(0,0,0,0.3)',
+                  boxShadow: active ? '0 0 12px rgba(93,203,237,0.4)' : 'none',
                 }}>
                   {initialsDisplay[i] ?? (active ? '▮' : '')}
                 </div>
@@ -1570,8 +1448,8 @@ export default function Game() {
           {/* Header */}
           <div style={{
             ...STYLES.title, fontSize: 28,
-            color: isWin === null ? pink1 : isWin ? 'pink1' : '#ff4444',
-            textShadow: isWin === null ? '0 0 16px #00ffff' : isWin ? '0 0 16px #ffaa00' : '0 0 16px #ff0000',
+            color: isWin === null ? pink1 : isWin ? pink1 : pink2,
+            textShadow: isWin === null ? '0 0 16px blue0' : isWin ? '0 0 16px pink2' : '0 0 16px pink2',
           }}>
             {isWin === null ? '— LEADERBOARD —' : isWin ? '★ ALL CLEAR! ★' : 'GAME OVER'}
           </div>
@@ -1588,7 +1466,7 @@ export default function Game() {
                   padding: '5px 20px',
                   letterSpacing: 3,
                   background: leaderboardTab === tab ? 'white' : 'transparent',
-                  color: leaderboardTab === tab ? '#000' : 'white',
+                  color: leaderboardTab === tab ? 'black' : 'white',
                   border: '1px solid white',
                   borderRadius: tab === 'global' ? '4px 0 0 4px' : '0 4px 4px 0',
                 }}
@@ -1614,7 +1492,7 @@ export default function Game() {
                   LOADING...
                 </div>
               ) : globalError ? (
-                <div style={{ color: '#ff4444', textAlign: 'center', fontSize: 13, padding: '12px 0', lineHeight: 1.8 }}>
+                <div style={{ color: pink2, textAlign: 'center', fontSize: 13, padding: '12px 0', lineHeight: 1.8 }}>
                   SERVER UNAVAILABLE<br/>
                   <span style={{ fontSize: 11, opacity: 0.7 }}>Render may be waking up.</span><br/>
                   <button
@@ -1629,8 +1507,8 @@ export default function Game() {
                     style={{
                       marginTop: 8, padding: '4px 14px', fontSize: 12,
                       fontFamily: 'PixelifySans', letterSpacing: 2,
-                      background: 'transparent', color: '#ff4444',
-                      border: '1px solid #ff444488', cursor: 'pointer',
+                      background: 'transparent', color: pink2,
+                      border: '1px solid pink2', cursor: 'pointer',
                     }}
                   >
                     RETRY
@@ -1656,9 +1534,9 @@ export default function Game() {
                       display: 'grid',
                       gridTemplateColumns: '80px auto auto',
                       padding: '7px 0px',
-                      background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
+                      background: isPlayer ? pink2 : 'transparent',
                       borderLeft: isPlayer ? '2px solid pink0' : '2px solid transparent',
-                      color: isPlayer ? 'pink0' : i === 0 ? 'pink2' : 'blue1',
+                      color: isPlayer ? pink0 : i === 0 ? pink2 : blue1,
                       fontSize: 24,
                       fontFamily: 'Sixtyfour',
                     }}>
@@ -1684,9 +1562,9 @@ export default function Game() {
                       display: 'grid',
                       gridTemplateColumns: '80px auto auto',
                       padding: '7px 0px',
-                      background: isPlayer ? 'rgba(0,255,180,0.12)' : 'transparent',
+                      background: isPlayer ? pink2 : 'transparent',
                       borderLeft: isPlayer ? '2px solid pink0' : '2px solid transparent',
-                      color: isPlayer ? 'pink0' : i === 0 ? 'pink2' : 'blue1',
+                      color: isPlayer ? pink0 : i === 0 ? pink2 : blue1,
                       fontSize: 24,
                       fontFamily: 'Sixtyfour',
                     }}>

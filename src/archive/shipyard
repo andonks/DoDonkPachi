@@ -207,60 +207,6 @@ if (type === 'grunt') {
   ctx.lineTo(0, -250);
   ctx.closePath(); ctx.fill();
 
-} else if (type === 'tank') {
-  ctx.scale(.8, .8);
-  ctx.fillStyle = 'orange';
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 48, 9, Math.PI / 6, 0, Math.PI * 2);
-  ctx.closePath(); ctx.fill();
-  ctx.fillStyle = 'orange';
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 48, 9, Math.PI / -6, 0, Math.PI * 2);
-  ctx.closePath(); ctx.fill();
-  ctx.fillStyle = 'hotpink';
-  ctx.beginPath();
-  ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = 'brown';
-  ctx.beginPath();
-  ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
-} else if (type === 'turret') { // TURRET
-  ctx.scale(.8, .8);
-  ctx.fillStyle = 'red';
-  ctx.beginPath();
-  ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
-  // calculate target angle (between turret & player)
-  const dy = playerY - e.y;
-  const dx = playerX - e.x;
-  const turret2 = Math.atan2(dy, dx);
-
-  // calculate new angle (limited by turning radius)
-  getTheta(e.turret1,turret2);
-  e.turret1 = theta;
-
-  ctx.lineWidth = 8;
-  ctx.strokeStyle = 'red';
-  ctx.beginPath();
-  ctx.moveTo(0,0);
-
-  // calculate new x,y position for turret muzzle and draw line
-  const turretX = (60 * Math.cos(e.turret1));
-  const turretY = (60 * Math.sin(e.turret1));
-  ctx.lineTo(turretX, turretY);
-  ctx.closePath();
-  ctx.stroke();
-  ctx.lineWidth = 20;
-  ctx.beginPath();
-  ctx.moveTo(0,0);
-  ctx.lineTo((27 * Math.cos(e.turret1)),(27 * Math.sin(e.turret1)));
-  ctx.closePath();
-  ctx.stroke();
-
-  ctx.fillStyle = 'orange';
-  ctx.beginPath();
-  ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
-
   } else if (type === 'moth--prototype') { // don't you wanna be a MOTH MOTH MOTH
     ctx.scale(4,4);
 

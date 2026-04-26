@@ -72,13 +72,27 @@ function drawBullet(ctx, b, frame) {
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.ellipse(b.x, b.y, 4, 18, angle, 0, Math.PI * 2); ctx.fill();
   } else if (b.chonk) {
-    // Turret projectiles - big and chonky! NEED FIXED; too big & glowy
-    const g = ctx.createRadialGradient(b.x, b.y, 6, b.x, b.y, 36);
-      g.addColorStop(0, 'white'); g.addColorStop(0.25, pink1); g.addColorStop(1, pink2);
+    // Turret projectiles - big and chonky!
+    const p = 0.8 + Math.sin(frame * 0.22 + b.id * 1.7) * 0.2;
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 14);
+    g.addColorStop(0, 'white'); g.addColorStop(.5, pink1); g.addColorStop(1, pink2);
+    const gIn = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 12);
+    gIn.addColorStop(0, 'white'); gIn.addColorStop(1, pink1);
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(b.x, b.y, 36, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = blue0;
-    ctx.beginPath(); ctx.arc(b.x, b.y, 18, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(b.x, b.y, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = gIn;
+    ctx.beginPath(); ctx.arc(b.x, b.y, 12 * p, 0, Math.PI * 2); ctx.fill();
+  } else if (b.blue) {
+    // default size except they're blue
+    const p = 0.8 + Math.sin(frame * 0.22 + b.id * 1.7) * 0.2;
+    const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 7);
+    g.addColorStop(0, 'white'); g.addColorStop(.5, blue1); g.addColorStop(1, blue2);
+    const gIn = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 6);
+    gIn.addColorStop(0, 'white'); gIn.addColorStop(1, blue1);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(b.x, b.y, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = gIn;
+    ctx.beginPath(); ctx.arc(b.x, b.y, 6 * p, 0, Math.PI * 2); ctx.fill();
   } else {
     // default enemy bullets -- inner pulse, consistent outer diameter
     const p = 0.8 + Math.sin(frame * 0.22 + b.id * 1.7) * 0.2;
@@ -662,7 +676,7 @@ export default function Game() {
         // Enemy bullets (player hitbox)
         for (const b of s.enemyBullets) {
           if (b.chonk) {
-            if (overlaps(pl.x, pl.y, pl.w * 0.2, pl.h * 0.2, b.x, b.y, 12, 12)) {
+            if (overlaps(pl.x, pl.y, pl.w * 0.2, pl.h * 0.2, b.x, b.y, 10, 10)) {
               playerHit = true;
               break;
             }
@@ -1078,20 +1092,20 @@ export default function Game() {
         ctx.shadowBlur = 20 + pulse * 30;
         ctx.font = `bold ${Math.round(46 * pulse)}px monospace`;
         ctx.fillStyle = pink2;
-        ctx.fillText('///WARNING///', W / 2, H / 2 - 14);
+        ctx.fillText('/// WARNING ///', W / 2, H / 2 - 14);
 
         // Secondary glow pass for extra intensity
         ctx.shadowBlur = 18;
         ctx.globalAlpha = fadeIn * (blink ? 0.5 : 0.1);
-        ctx.fillText('///WARNING///', W / 2, H / 2 - 14);
+        ctx.fillText('/// WARNING ///', W / 2, H / 2 - 14);
 
         ctx.shadowBlur  = 0;
         //ctx.globalAlpha = fadeIn * (blink ? 0.88 : 0.18);
         ctx.font = '14px monospace';
         ctx.fillStyle = blue1;
         ctx.fillText('PROTOTYPE BATTLESHIP APPROACHING', W / 2, H / 2 + 22);
-        ctx.fillText('DO NOT HESITATE. SHOOT THE CORE!', W / 2, H / 2 + 44);
-
+        ctx.fillText('READY? YOUR MISSION BEGINS NOW!!', W / 2, H / 2 + 44);
+        ctx.fillText('DO NOT HESITATE. SHOOT THE CORE!', W / 2, H / 2 + 66);
 
         ctx.restore();
       }

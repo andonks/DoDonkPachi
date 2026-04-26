@@ -379,7 +379,8 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.beginPath();
     ctx.arc(0, 10, 2, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
-  } else if (type === 'xwing' || type === 'xwingSprite') { // X-WING BUT NOT REALLY
+  //------------------------------ X-WING ------------------------------
+  } else if (type === 'xwing' || type === 'xwingSprite') {
     ctx.scale(4,4);
 
     // missiles
@@ -655,7 +656,7 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.closePath(); ctx.fill();
 
   } else if (type === 'moth' || type === 'mothSprite' ) {
-    // don't u wanna be a MOTH? 32x31 X: -16 to 16 Y: -16 to 15
+    // -------------------------- don't u wanna be a MOTH? --------------------------
     ctx.scale(3,3);
 
     // bottom wing
@@ -876,7 +877,8 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.beginPath();
     ctx.ellipse(-4, 9, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
-  } else if (type === 'jet' || type === 'dummy1' || type === 'dummy2' || type === 'dummy3'  || type === 'jetSprite') { // JET FIGHTER
+// ----------------- FIGHTER JET --------------------
+  } else if (type === 'jet' || type === 'dummy1' || type === 'jetSprite') { // JET FIGHTER
     ctx.scale(4, 4);
 
     // STYLE
@@ -970,7 +972,8 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.beginPath();
     ctx.ellipse(0, 3, 1, 2, 0, 0, Math.PI * 2); ctx.closePath(); ctx.fill(); ctx.stroke();
 
-  } else if (type === 'beetle' || type === 'beetleSprite') { // ----- BEETLE BUM -----
+    // ----- BEETLE ---------- BEETLE ---------- BEETLE ---------- BEETLE -----
+  } else if (type === 'beetle' || type === 'beetleSprite') {
     ctx.scale(3, 3);
 
     //center
@@ -1289,7 +1292,8 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.lineTo(-12, 5);
     ctx.closePath(); ctx.fill(); ctx.stroke();
 
-  } else if (type === 'heli' || type === 'heliSprite') { // ----- Helicopter -----
+ // ----- Helicopter ---------- Helicopter ---------- Helicopter -----
+  } else if (type === 'heli' || type === 'heliSprite') {
     ctx.scale(1.75, 1.75);
 
     // Wings
@@ -1404,45 +1408,248 @@ export function drawEnemy(ctx, e, frame, playerX, playerY) {
     ctx.fillStyle = pink1;
     ctx.beginPath(); ctx.ellipse(0, 10.5, 1.5, 3, 0, 0, Math.PI * 2); ctx.fill();
 
+// --------- TANK --------- TANK --------- TANK --------- TANK ---------
+  } else if (type === 'tank' || type === 'tankSprite') {
+    ctx.scale(.8, .8);
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 48, 9, Math.PI / 6, 0, Math.PI * 2);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = pink1;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 48, 9, Math.PI / -6, 0, Math.PI * 2);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
+// -------- TURRET ---------------- TURRET ---------------- TURRET ----------
+  } else if (type === 'turret' || type === 'turretSprite') {
+    ctx.scale(.8, .8);
+    ctx.fillStyle = blue2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
+
+    // calculate target angle (between turret & player)
+    const dy = playerY - e.y;
+    const dx = playerX - e.x;
+    const turret2 = Math.atan2(dy, dx);
+
+    // calculate new angle (limited by turning radius)
+    getTheta(e.turret1,turret2);
+    e.turret1 = theta;
+
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = blue2;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+
+    // calculate new x,y position for turret muzzle and draw line
+    const turretX = (60 * Math.cos(e.turret1));
+    const turretY = (60 * Math.sin(e.turret1));
+    ctx.lineTo(turretX, turretY);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.lineWidth = 20;
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.lineTo((27 * Math.cos(e.turret1)),(27 * Math.sin(e.turret1)));
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.fillStyle = blue1;
+    ctx.beginPath();
+    ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.closePath(); ctx.fill();
 
   } else if (type === 'boss') {
-    // ── Scaled body (2× base size) ─────────────────────────────────────────
+    // ── BOSS BATTLESHIP ─────────────────────────────────────────
     ctx.save();
-    const pulse = 1 + Math.sin(frame * 0.05) * 0.025;
-    ctx.scale(2 * pulse, 2 * pulse);
+    ctx.scale(4, 4);
 
-    // Wings
-    ctx.fillStyle = '#770077';
+    // Function to draw a glowing polygon
+    function drawGlowingPolygon(points, baseColor, glowColor, glowSteps = 5) {
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.closePath();
+
+      // Draw from largest/softest to smallest/sharpest
+      for (let i = glowSteps; i >= 1; i--) {
+        // Decreasing size for outer layers
+        ctx.lineWidth = i;
+        // Increasing opacity for inner layers
+        ctx.strokeStyle = `rgba(${glowColor}, ${0.1 * i})`;
+        ctx.stroke();
+      }
+      // Finally, draw the solid core
+      ctx.lineWidth = 0.1;
+      ctx.strokeStyle = baseColor;
+      ctx.stroke();
+    }
+
+    // Define shape to apply glowing border
+    const bossBody = [
+          {x: -18, y: -6}, {x: -30, y: -6}, {x: -44, y: -18}, {x: -46, y: -24},
+          {x: -46, y: -10}, {x: -44, y: -12}, {x: -44, y: -14}, {x: -28, y: 4},
+          {x: -26, y: 10}, {x: -30, y: 10}, {x: -30, y: 4}, {x: -32, y: 4},
+          {x: -42, y: 14}, {x: -42, y: 20}, {x: -38, y: 24}, {x: -30, y: 24},
+          {x: -26, y: 20}, {x: -26, y: 14}, {x: -18, y: 14}, {x: -18, y: 18},
+          {x: -16, y: 20}, {x: -14, y: 20}, {x: -12, y: 18}, {x: 12, y: 18},
+          {x: 14, y: 20}, {x: 16, y: 20}, {x: 18, y: 18}, {x: 18, y: 14},
+          {x: 26, y: 14}, {x: 26, y: 20}, {x: 30, y: 24}, {x: 38, y: 24},
+          {x: 42, y: 20}, {x: 42, y: 14}, {x: 32, y: 4}, {x: 30, y: 4},
+          {x: 30, y: 10}, {x: 26, y: 10}, {x: 28, y: 4}, {x: 44, y: -14},
+          {x: 44, y: -12}, {x: 46, y: -10}, {x: 46, y: -24}, {x: 44, y: -18},
+          {x: 30, y: -6}, {x: 18, y: -6}, {x: 18, y: -2}, {x: 16, y: -2},
+          {x: 16, y: -6}, {x: 14, y: -8}, {x: 10, y: -8}, {x: 10, y: -14},
+          {x: 6, y: -20}, {x: 4, y: -20}, {x: 2, y: -22}, {x: -2, y: -22},
+          {x: -4, y: -20}, {x: -6, y: -20}, {x: -10, y: -14}, {x: -10, y: -8},
+          {x: -14, y: -8}, {x: -16, y: -6}, {x: -16, y: -2}, {x: -18, y: -2}
+    ];
+    drawGlowingPolygon(bossBody, '#fff', '188, 9, 176', 4);
+
+    function drawGlowingArc(centerX, centerY, radius, startAngle, endAngle, baseColor, glowColor, glowSteps = 5) {
+      for (let i = glowSteps; i >= 1; i--) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.lineWidth = i;
+        ctx.strokeStyle = `rgba(${glowColor}, ${0.1 * i})`;
+        ctx.stroke();
+      }
+      // Solid core
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+      ctx.lineWidth = 0.1;
+      ctx.strokeStyle = baseColor;
+      ctx.stroke();
+    }
+
+    // Usage: Draw a glowing arc
+    drawGlowingArc(-22, -6, 4, 0, Math.PI * 2, 'white', '188, 9, 176', 4);
+    drawGlowingArc(22, -6, 4, 0, Math.PI * 2, 'white', '188, 9, 176', 4);
+    drawGlowingArc(0, 16, 6, 0, Math.PI * 2, 'white', '188, 9, 176', 4);
+
+    function drawGlowingEllipse(centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle, baseColor, glowColor, glowSteps = 5) {
+      for (let i = glowSteps; i >= 1; i--) {
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle);
+        ctx.lineWidth = i;
+        ctx.strokeStyle = `rgba(${glowColor}, ${0.1 * i})`;
+        ctx.stroke();
+      }
+      // Solid core
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, radiusX, radiusY, rotation, startAngle, endAngle);
+      ctx.lineWidth = 0.1;
+      ctx.strokeStyle = baseColor;
+      ctx.stroke();
+    }
+
+    // Usage: Draw a glowing ellipse
+    drawGlowingEllipse(-22, 14, 3, 8, 0, 0, Math.PI * 2, 'white', '188, 9, 176', 4);
+    drawGlowingEllipse(22, 14, 3, 8, 0, 0, Math.PI * 2, 'white', '188, 9, 176', 4);
+
+    // Left Wing
+    ctx.fillStyle = 'black';
     ctx.beginPath();
-    ctx.moveTo(0, 46); ctx.lineTo(-72, 10); ctx.lineTo(-52, -28);
-    ctx.lineTo(0, -20); ctx.lineTo(52, -28); ctx.lineTo(72, 10);
+    ctx.moveTo(-18, -6);
+    ctx.lineTo(-30, -6);
+    ctx.lineTo(-44, -18);
+    ctx.lineTo(-46, -24);
+    ctx.lineTo(-46, -10);
+    ctx.lineTo(-44, -12);
+    ctx.lineTo(-44, -14);
+    ctx.lineTo(-28, 4);
+    ctx.lineTo(-26, 10);
+    ctx.lineTo(-30, 10);
+    ctx.lineTo(-30, 4);
+    ctx.lineTo(-32, 4);
+    ctx.lineTo(-42, 14);
+    ctx.lineTo(-42, 20);
+    ctx.lineTo(-38, 24);
+    ctx.lineTo(-30, 24);
+    ctx.lineTo(-26, 20);
+    ctx.lineTo(-26, 14);
+    ctx.lineTo(-18, 14);
+
+    // Body Front
+    ctx.lineTo(-18, 18);
+    ctx.lineTo(-16, 20);
+    ctx.lineTo(-14, 20);
+    ctx.lineTo(-12, 18);
+    ctx.lineTo(12, 18);
+    ctx.lineTo(14, 20);
+    ctx.lineTo(16, 20);
+    ctx.lineTo(18, 18);
+
+    // Right Wing
+    ctx.lineTo(18, 14);
+    ctx.lineTo(26, 14);
+    ctx.lineTo(26, 20);
+    ctx.lineTo(30, 24);
+    ctx.lineTo(38, 24);
+    ctx.lineTo(42, 20);
+    ctx.lineTo(42, 14);
+    ctx.lineTo(32, 4);
+    ctx.lineTo(30, 4);
+    ctx.lineTo(30, 10);
+    ctx.lineTo(26, 10);
+    ctx.lineTo(28, 4);
+    ctx.lineTo(44, -14);
+    ctx.lineTo(44, -12);
+    ctx.lineTo(46, -10);
+    ctx.lineTo(46, -24);
+    ctx.lineTo(44, -18);
+    ctx.lineTo(30, -6);
+    ctx.lineTo(18, -6);
+
+    // Body Rear
+    ctx.lineTo(18, -2);
+    ctx.lineTo(16, -2);
+    ctx.lineTo(16, -6);
+    ctx.lineTo(14, -8);
+    ctx.lineTo(10, -8);
+    ctx.lineTo(10, -14);
+    ctx.lineTo(6, -20);
+    ctx.lineTo(4, -20);
+    ctx.lineTo(2, -22);
+    ctx.lineTo(-2, -22);
+    ctx.lineTo(-4, -20);
+    ctx.lineTo(-6, -20);
+    ctx.lineTo(-10, -14);
+    ctx.lineTo(-10, -8);
+    ctx.lineTo(-14, -8);
+    ctx.lineTo(-16, -6);
+    ctx.lineTo(-16, -2);
+    ctx.lineTo(-18, -2);
     ctx.closePath(); ctx.fill();
 
-    // Body
-    ctx.fillStyle = '#550055';
-    ctx.beginPath(); ctx.ellipse(0, 0, 56, 38, 0, 0, Math.PI * 2); ctx.fill();
+    // rear engines
+    ctx.beginPath(); ctx.arc(-22, -6, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(22, -6, 4, 0, Math.PI * 2); ctx.fill();
 
-    // Core glow
-    const cg = ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
-    cg.addColorStop(0, '#ff00ff');
-    cg.addColorStop(0.5, '#880088');
-    cg.addColorStop(1, 'rgba(100,0,100,0)');
-    ctx.fillStyle = cg;
-    ctx.beginPath(); ctx.ellipse(0, 0, 30, 30, 0, 0, Math.PI * 2); ctx.fill();
+    // missiles
+    ctx.beginPath(); ctx.ellipse(-22, 14, 3, 8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(22, 14, 3, 8, 0, 0, Math.PI * 2); ctx.fill();
 
-    ctx.fillStyle = '#ffaaff';
-    ctx.beginPath(); ctx.ellipse(0, 0, 11, 11, 0, 0, Math.PI * 2); ctx.fill();
+    // front jet
+    ctx.beginPath(); ctx.arc(0, 16, 6, 0, Math.PI * 2); ctx.fill();
 
-    // Weapon pods
-    [-42, 42].forEach(ox => {
-      ctx.fillStyle = '#550055';
-      ctx.beginPath(); ctx.ellipse(ox, 14, 11, 15, 0, 0, Math.PI * 2); ctx.fill();
-      const pg = ctx.createRadialGradient(ox, 20, 0, ox, 20, 7);
-      pg.addColorStop(0, '#ff00ff'); pg.addColorStop(1, 'transparent');
-      ctx.fillStyle = pg;
-      ctx.beginPath(); ctx.arc(ox, 20, 7, 0, Math.PI * 2); ctx.fill();
-    });
+    // Core glow + ADD PULSE EFFECT
+    const p = 0.8 + Math.sin(frame * 0.22 ) * 0.2;
+
+    const gIn = ctx.createRadialGradient(0, -6, 0, 0, -6, 7);
+    gIn.addColorStop(0, 'white'); gIn.addColorStop(1, pink2);
+    ctx.fillStyle = pink2;
+    ctx.beginPath(); ctx.arc(0, -6, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = gIn;
+    ctx.beginPath(); ctx.arc(0, -6, 6 * p, 0, Math.PI * 2); ctx.fill();
+
     ctx.restore();
   }
 

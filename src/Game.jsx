@@ -123,17 +123,31 @@ function drawParticle(ctx, p) {
 
 let _cid = 0;
 function mkCollectable(x, y) {
-  return {
-    x: x + (Math.random()) * 20,
-    y: y + (Math.random()) * 10,
-    vy: 1.4,
-    vx: (Math.random() - 0.5) * 0.8,
-    age: 0,
-    id: _cid++,
-  };
+  const coinFlip = (Math.random());
+  if (coinFlip > 0.5) {
+    return {
+      x: x + (Math.random()) * 50,
+      y: y - (Math.random()) * 50,
+      vy: 1.4,
+      vx: (Math.random() - 0.5) * 0.8,
+      age: 0,
+      id: _cid++,
+    };
+  }
+  else {
+    return {
+      x: x - (Math.random()) * 50,
+      y: y - (Math.random()) * 50,
+      vy: 1.4,
+      vx: (Math.random() - 0.5) * 0.8,
+      age: 0,
+      id: _cid++,
+    };
+  }
+
 }
 
-const DROP_COUNT = { jet: 1, heli: 1, moth: 2, beetle: 5, xwing: 10 };
+const DROP_COUNT = { jet: 0, heli: 1, moth: 2, beetle: 3, xwing: 5 };
 const COLLECT_PTS = 300;
 
 function spawnParticles(arr, x, y, n, colors, spdRange, rRange) {
@@ -383,7 +397,7 @@ export default function Game() {
         // }
         // return;
       }
-      //if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
+      if (e.code === 'KeyQ') { debugMode = !debugMode; return; }
       keysRef.current[e.code] = true;
       // Bomb on Shift press
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -533,6 +547,7 @@ export default function Game() {
         s.waveDelay--;
       } else {
         s.waveTimer++;
+        console.log(s.waveTimer);
         while (s.waveQueue.length > 0 && s.waveQueue[0].at <= s.waveTimer) {
           const ev = s.waveQueue.shift();
           s.enemies.push(createEnemy(ev.type, ev.x, ev.pat, ev.vy, ev.sy));
@@ -1506,7 +1521,7 @@ export default function Game() {
                   LOADING...
                 </div>
               ) : globalError ? (
-                <div style={{ color: pink2, textAlign: 'center', fontSize: 13, padding: '12px 0', lineHeight: 1.8 }}>
+                <div style={{ color: pink1, textAlign: 'center', fontSize: 13, padding: '12px 0', lineHeight: 1.8 }}>
                   SERVER UNAVAILABLE<br/>
                   <span style={{ fontSize: 11, opacity: 0.7 }}>Render may be waking up.</span><br/>
                   <button

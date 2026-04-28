@@ -8,21 +8,21 @@ const H = 640;
 // Default stats
 // (hitbox width/height, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
-  tank:    { w: 30, h: 30, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
-  turret:  { w: 60, h: 60, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4},
-  dummy1:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 2.5 },
+  tank:    { w: 50, h: 50, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
+  turret:  { w: 60, h: 100, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4},
+  dummy1:  { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 2.5 },
 
   jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 3 },
   heli:    { w: 72, h: 60, maxHp: 20, score: 2000, fireRate: 140, bspd: 3 },
   moth:    { w: 96, h: 93, maxHp: 45, score: 4500, fireRate: 140, bspd: 4.5 },
   beetle:  { w: 120, h: 90, maxHp: 90, score: 9000, fireRate: 76,  bspd: 3 },
-  xwing:   { w: 170,  h: 150, maxHp: 200, score: 20000, fireRate: 1, bspd: 4 },
+  xwing:   { w: 170,  h: 150, maxHp: 200, score: 16000, fireRate: 1, bspd: 4 },
   daitank: { w: 120, h: 120, maxHp: 140, score: 14000, fireRate: 76,  bspd: 1 },
   boss:    { w: 60, h: 30, maxHp: 2000, score: 200000, fireRate: 36, bspd: 2.5 },
 
   //sprites
   tankSprite:    { w: 30, h: 30, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
-  turretSprite:  { w: 60, h: 60, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4},  
+  turretSprite:  { w: 60, h: 60, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4},
   beetleSprite:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
   daitankSprite: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
   heliSprite:    { w: 72, h: 60, maxHp: 50, score: 2000, fireRate: 140, bspd: 4 },
@@ -81,7 +81,6 @@ export function updateEnemy(ctx, e, px, py, bullets) {
       if (e.timer <= 200) {
       e.y += Math.sin(e.timer * 0.02 ) * 1;
       e.x -= e.vy;
-      console.log(e.timer);
       } else {
       e.y += 1;
       }
@@ -191,7 +190,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
 
 // *--- *--- *--- *--- SHOOTING —--* —--* —--* —--*
   // only fire while in the top 95% of the screen & visible
-  if (e.y > H * 0.95) return;
+  if (e.y > H * 0.9) return;
   if (e.x > 470) return;
   if (e.x < 10) return;
 
@@ -245,11 +244,11 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     const cycle = e.timer % 120;
     const ca = Math.atan2(py - e.y, px - e.x);
     if (cycle === 10) {
-      spread(e.x, e.y - 10, 8, ca, 0.9, e.bspd, 'enemy')
+      spread(e.x, e.y - 10, 6, ca, 0.9, e.bspd, 'enemy')
         .forEach(b => { b.chonk = true; bullets.push(b); });
     }
     if (cycle === 25) {
-      spread(e.x, e.y - 10, 8, ca, 0.9, e.bspd, 'enemy')
+      spread(e.x, e.y - 10, 7, ca, 0.9, e.bspd, 'enemy')
         .forEach(b => bullets.push(b));
     }
 
@@ -302,7 +301,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   }
 
   // Turret fire - big single projectiles
-  if (e.type === 'turret' && e.y < H * 0.95) {
+  if (e.type === 'turret1' && e.y < H * 0.95) {
     const cycle = e.timer % 120;
 
     if (cycle >= 25 && cycle < 90 && e.timer % 20 === 0) {
@@ -317,7 +316,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
   }
 
   // Delayed turret fire - wait 300 frames, then fire only once
-  if (e.type === 'turret1' && e.y < H * 0.95 && e.timer === 300) {
+  if (e.type === 'turret' && e.y < H * 0.95 && e.timer === 300) {
     const ca = e.turret1;
     const turretX = e.x + (60 * Math.cos(e.turret1));
     const turretY = e.y + (60 * Math.sin(e.turret1));
@@ -331,17 +330,6 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     const cycle = e.timer % 120;
     const ratio = e.hp / e.maxHp;
 
-    if (cycle === 1) {
-      if (e.lap == null) {
-        e.lap = 0;
-        e.cwAngle = -Math.PI / 2;
-        e.ccwAngle = Math.PI / 2;
-      }
-      else {
-      e.lap += 1;
-      console.log(e.lap);
-      }
-    }
     if (ratio > 0.66) {
       if (cycle === 10 || cycle === 30) {
         circle(e.x, e.y, 25, e.bspd, e.angle).forEach(b => bullets.push(b));
@@ -351,7 +339,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
         const ca = Math.atan2(py - e.y, px - e.x);
         spread(e.x, e.y, 5, ca, 0.28, e.bspd).forEach(b => bullets.push(b));
       }
-    }
+    } // SLOW THESE DOWN MAYBE?
     if (ratio > 0.33 && ratio < 0.66) {
       if (cycle === 29 || cycle === 89) {
         [80].forEach(dx => {
@@ -371,7 +359,52 @@ export function updateEnemy(ctx, e, px, py, bullets) {
           spread(e.x + dx, e.y, 5, Math.PI / 6, 0.15, e.bspd).forEach(b => bullets.push(b));
         });
       }
-      if (ratio < 0.58 && cycle === 100) {
+      if (cycle > 1 && e.timer % 10 === 0) {
+        if (
+          (cycle > 20 && cycle < 60) ||
+          (cycle > 80 && cycle < 120)
+        ) {
+          const v = aim(e.x, e.y, px, py, e.bspd * 1.4);
+
+          const b = mkBullet(e.x, e.y, v.vx, v.vy, 'enemy');
+          b.burst = true;
+          bullets.push(b);
+        }
+      }
+    }
+    if (ratio < 0.33) {
+      if (cycle === 1) {
+        if (e.lap == null) {
+          e.lap = 0;
+          e.cwAngle = -Math.PI / 2;
+          e.ccwAngle = Math.PI / 2;
+        }
+        else {
+        e.lap += 1;
+        }
+      }
+      if (cycle > 1 && e.timer % 2 === 0 && ratio < 0.33) {
+        if (
+          (cycle > 1 && cycle < 11) ||
+          (cycle > 21 && cycle < 31) ||
+          (cycle > 41 && cycle < 51) ||
+          (cycle > 61 && cycle < 71) ||
+          (cycle > 81 && cycle < 91) ||
+          (cycle > 101 && cycle < 111)
+        ) {
+          bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
+          bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
+        }
+        if (e.lap % 2 === 0) {
+          e.cwAngle += 0.05;
+          e.ccwAngle -= 0.05;
+        }
+        if (e.lap % 2 != 0) {
+          e.cwAngle -= 0.05;
+          e.ccwAngle += 0.05;
+        }
+      }
+      if (cycle === 100) {
         const count = 10; // # of bullets
         const radius = 20; // width of circle from origin
         const baseR = aim(e.x + 80, e.y, px, py, e.bspd);
@@ -391,48 +424,9 @@ export function updateEnemy(ctx, e, px, py, bullets) {
         }
       }
     }
-    if (ratio < 0.33) {
-      if (cycle > 1 && e.timer % 2 === 0 && ratio < 0.33) {
-        if (
-          (cycle > 1 && cycle < 11) ||
-          (cycle > 21 && cycle < 31) ||
-          (cycle > 41 && cycle < 51) ||
-          (cycle > 61 && cycle < 71) ||
-          (cycle > 81 && cycle < 91) ||
-          (cycle > 101 && cycle < 111)
-        ) {
-          bullets.push(mkBullet(e.x, e.y, e.cwAngle, e.bspd));
-          bullets.push(mkBullet(e.x, e.y, e.ccwAngle, e.bspd));
-        }
-        console.log(e.lap);
-        if (e.lap % 2 === 0) {
-          e.cwAngle += 0.05;
-          e.ccwAngle -= 0.05;
-          console.log(e.cwAngle)
-        }
-        if (e.lap % 2 != 0) {
-          e.cwAngle -= 0.05;
-          e.ccwAngle += 0.05;
-          console.log(e.cwAngle)
-        }
-      }
-      if (cycle > 1 && e.timer % 10 === 0) {
-        if (
-          (cycle > 20 && cycle < 60) ||
-          (cycle > 80 && cycle < 120)
-        ) {
-          const v = aim(e.x, e.y, px, py, e.bspd * 1.4);
-
-          const b = mkBullet(e.x, e.y, v.vx, v.vy, 'enemy');
-          b.burst = true;
-          bullets.push(b);
-        }
-      }
-    }
   }
   // ------------------- default periodic firing patterns --------------------
   if (e.fireTimer < e.fireRate) return;
-
   e.fireTimer = 0;
 
   switch (e.type) {

@@ -8,27 +8,27 @@ const H = 640;
 // Default stats
 // (hitbox width/height, HP, base kill score, firing frequency, bullet speed)
 const EDEFS = {
-  tank:    { w: 50, h: 50, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
+  tank:    { w: 50, h: 50, maxHp: 15, score: 1500, fireRate: 76, bspd: 1 },
   turret:  { w: 60, h: 100, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4},
-  dummy1:  { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 2.5 },
-
   jet:     { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 3 },
   heli:    { w: 72, h: 60, maxHp: 20, score: 2000, fireRate: 140, bspd: 3 },
-  moth:    { w: 96, h: 93, maxHp: 45, score: 4500, fireRate: 140, bspd: 4.5 },
-  beetle:  { w: 120, h: 90, maxHp: 90, score: 9000, fireRate: 76,  bspd: 3 },
-  xwing:   { w: 170,  h: 150, maxHp: 200, score: 16000, fireRate: 1, bspd: 4 },
+  moth:    { w: 96, h: 93, maxHp: 35, score: 4500, fireRate: 140, bspd: 4.5 },
+  beetle:  { w: 120, h: 90, maxHp: 60, score: 9000, fireRate: 76,  bspd: 3 },
+  xwing:   { w: 170,  h: 150, maxHp: 100, score: 16000, fireRate: 1, bspd: 4 },
   daitank: { w: 120, h: 120, maxHp: 140, score: 14000, fireRate: 76,  bspd: 1 },
   boss:    { w: 60, h: 30, maxHp: 2000, score: 200000, fireRate: 36, bspd: 2.5 },
 
+  dummy1:  { w: 72, h: 60, maxHp: 5, score: 500, fireRate: 100, bspd: 2.5 },
+
   //sprites
-  tankSprite:    { w: 30, h: 30, maxHp: 15, score: 1500, fireRate: 76, bspd: 1.4 },
-  turretSprite:  { w: 60, h: 60, maxHp: 5, score: 500, fireRate: 76, bspd: 1.4},
-  beetleSprite:  { w: 120, h: 90, maxHp: 160, score: 12000, fireRate: 76,  bspd: 0.2 },
-  daitankSprite: { w: 120, h: 120, maxHp: 80, score: 12000, fireRate: 76,  bspd: 0.2 },
-  heliSprite:    { w: 72, h: 60, maxHp: 50, score: 2000, fireRate: 140, bspd: 4 },
-  jetSprite:     { w: 72, h: 60, maxHp: 25, score: 2000, fireRate: 140, bspd: 2 },
-  mothSprite:    { w: 72, h: 60, maxHp: 80, score: 2000, fireRate: 140, bspd: 2 },
-  xwingSprite:   { w: 170,  h: 150, maxHp: 240, score: 1, fireRate: 1, bspd: 1 },
+  tankSprite:    { w: 30, h: 30, maxHp: 1, score: 1500, fireRate: 76, bspd: 1.4 },
+  turretSprite:  { w: 60, h: 60, maxHp: 1, score: 500, fireRate: 76, bspd: 1.4},
+  beetleSprite:  { w: 120, h: 90, maxHp: 1, score: 12000, fireRate: 76,  bspd: 0.2 },
+  daitankSprite: { w: 120, h: 120, maxHp: 1, score: 12000, fireRate: 76,  bspd: 0.2 },
+  heliSprite:    { w: 72, h: 60, maxHp: 1, score: 2000, fireRate: 140, bspd: 4 },
+  jetSprite:     { w: 72, h: 60, maxHp: 1, score: 2000, fireRate: 140, bspd: 2 },
+  mothSprite:    { w: 72, h: 60, maxHp: 1, score: 2000, fireRate: 140, bspd: 2 },
+  xwingSprite:   { w: 170,  h: 150, maxHp: 1, score: 1, fireRate: 1, bspd: 1 },
 };
 
 export function createEnemy(type, x, pattern, vy = 1.5, startY = undefined) {
@@ -325,7 +325,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
     bullets.push(b);
   }
 
-  // BOSS rebuilding
+  // BOSS -- 3 phases
   if (e.type === 'boss' && e.transitionTimer <= 0 && e.y >= H * 0.3) {
     const cycle = e.timer % 120;
     const ratio = e.hp / e.maxHp;
@@ -339,24 +339,24 @@ export function updateEnemy(ctx, e, px, py, bullets) {
         const ca = Math.atan2(py - e.y, px - e.x);
         spread(e.x, e.y, 5, ca, 0.28, e.bspd).forEach(b => bullets.push(b));
       }
-    } // SLOW THESE DOWN MAYBE?
+    }
     if (ratio > 0.33 && ratio < 0.66) {
       if (cycle === 29 || cycle === 89) {
         [80].forEach(dx => {
-          spread(e.x + dx, e.y, 5, 5 * Math.PI / 6, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, 2 * Math.PI / 3, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, Math.PI / 2, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, Math.PI / 3, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, Math.PI / 6, 0.15, e.bspd).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, 5 * Math.PI / 6, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, 2 * Math.PI / 3, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, Math.PI / 2, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, Math.PI / 3, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, Math.PI / 6, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
         });
       }
       if (cycle === 59 || cycle === 119) {
         [-80].forEach(dx => {
-          spread(e.x + dx, e.y, 5, 5 * Math.PI / 6, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, 2 * Math.PI / 3, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, Math.PI / 2, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, Math.PI / 3, 0.15, e.bspd).forEach(b => bullets.push(b));
-          spread(e.x + dx, e.y, 5, Math.PI / 6, 0.15, e.bspd).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, 5 * Math.PI / 6, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, 2 * Math.PI / 3, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, Math.PI / 2, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, Math.PI / 3, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
+          spread(e.x + dx, e.y, 5, Math.PI / 6, 0.15, e.bspd * 0.75).forEach(b => bullets.push(b));
         });
       }
       if (cycle > 1 && e.timer % 10 === 0) {
@@ -372,7 +372,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
         }
       }
     }
-    if (ratio < 0.33) {
+    if (ratio < 0.33 && e.hp > 0) {
       if (cycle === 1) {
         if (e.lap == null) {
           e.lap = 0;
@@ -404,7 +404,7 @@ export function updateEnemy(ctx, e, px, py, bullets) {
           e.ccwAngle += 0.05;
         }
       }
-      if (cycle === 100) {
+      if (cycle === 100) { // rings
         const count = 10; // # of bullets
         const radius = 20; // width of circle from origin
         const baseR = aim(e.x + 80, e.y, px, py, e.bspd);
@@ -415,12 +415,16 @@ export function updateEnemy(ctx, e, px, py, bullets) {
           const dx = Math.cos(angle) * radius;
           const dy = Math.sin(angle) * radius;
           const speedScale = 1 - (dy / radius) * 0.35;
-          let b = mkBullet(e.x + 80 + dx, e.y + dy, baseR.vx * speedScale, baseR.vy * speedScale, 'enemy');
-          b.blue = true;
-          bullets.push(b);
-          b = mkBullet(e.x - 80 + dx, e.y + dy, baseL.vx * speedScale, baseL.vy * speedScale, 'enemy');
-          b.blue = true;
-          bullets.push(b);
+          if (e.lap % 2 === 0) {
+            const b = mkBullet(e.x + 80 + dx, e.y + dy, baseR.vx * speedScale, baseR.vy * speedScale, 'enemy');
+            b.blue = true;
+            bullets.push(b);
+          }
+          if (e.lap % 2 != 0) {
+            const b = mkBullet(e.x - 80 + dx, e.y + dy, baseL.vx * speedScale, baseL.vy * speedScale, 'enemy');
+            b.blue = true;
+            bullets.push(b);
+          }
         }
       }
     }

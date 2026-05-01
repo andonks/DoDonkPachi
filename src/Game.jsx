@@ -579,6 +579,11 @@ export default function Game() {
       // Boss transition — ongoing explosions during freeze stage, shake during charge
       s.enemies.forEach(en => {
         if (en.type !== 'boss' || en.transitionTimer <= 0) return;
+        if (en.transitionTimer === 120) {
+          // Bullet cancel - Convert every enemy bullet on screen into a collectable pickup
+          s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
+          s.enemyBullets = [];
+        }
         if (en.transitionTimer > 80 && s.frame % 9 === 0) {
           const ox = (Math.random() - 0.5) * en.w * 0.55;
           const oy = (Math.random() - 0.5) * en.h * 0.4;
@@ -633,7 +638,10 @@ export default function Game() {
                 en.chargeY = en.y;
                 en.returnX = en.x;
                 en.returnY = en.y;
-                //s.enemyBullets = [];
+                // bullet cancel
+                s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
+                s.enemyBullets = [];
+
                 for (let i = 0; i < 6; i++) {
                   const ox = (Math.random() - 0.5) * en.w * 0.55;
                   const oy = (Math.random() - 0.5) * en.h * 0.4;
@@ -667,9 +675,6 @@ export default function Game() {
                 s.bossDeathY = en.y;
                 s.bossDeathTimer = 180;
                 s.flashTimer = 20;
-                // Bullet cancel - Convert every enemy bullet on screen into a collectable pickup
-                s.enemyBullets.forEach(b => s.collectables.push(mkCollectable(b.x, b.y)));
-                s.enemyBullets = [];
                 // Initial burst: several big explosions scattered around the boss
                 for (let i = 0; i < 8; i++) {
                   const ox = (Math.random() - 0.5) * 130;
@@ -800,8 +805,8 @@ export default function Game() {
       if (s.bossDeathTimer > 0) {
         s.bossDeathTimer--;
         if (s.frame % 7 === 0) {
-          const ox = (Math.random() - 0.5) * 140;
-          const oy = (Math.random() - 0.5) * 90;
+          const ox = (Math.random() - 0.5) * 368;
+          const oy = (Math.random() - 0.5) * 196;
           spawnExplosionRings(s, s.bossDeathX + ox, s.bossDeathY + oy, 'beetle');
           explode(s, s.bossDeathX + ox, s.bossDeathY + oy, 1.8);
         }
@@ -1354,7 +1359,7 @@ export default function Game() {
             CONTROLS
           </div>
           <div style={{ ...STYLES.controls, marginTop: -8, marginBottom: 18 }}>
-            <div>ARROWS / WASD — MOVE</div>
+            <div>ARROWS — MOVE</div>
             <div>Z — SPREAD SHOT</div>
             <div>X — FOCUS SHOT</div>
             <div>SHIFT — BOMB (clears bullets)</div>
@@ -1383,7 +1388,7 @@ export default function Game() {
             <div>&copy; Andy Krueger 2026</div>
             <div>Music by DavidKBD, licenced under CC By 4.0 (https://creativecommons.org/licenses/by/4.0/)</div>
           </div>
-          <div style={{ ...STYLES.controls, fontSize: 10, marginTop: 9, marginBottom: 0 }}>version 0.1.1</div>
+          <div style={{ ...STYLES.controls, fontSize: 10, marginTop: 9, marginBottom: 0 }}>version 0.2.0</div>
         </div>
       )}
 

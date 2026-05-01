@@ -59,43 +59,57 @@ export function spawnExplosionRings(s, x, y, type) {
   if (type === 'moth') {
     const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 8; i++) {
-      const dx = (Math.random() - 0.5) * 120;
-      const dy = (Math.random() - 0.5) * 80;
+      const dx = (Math.random() - 0.5) * 96;
+      const dy = (Math.random() - 0.5) * 93;
       push(dx, dy, 160 - i * 8, 60, colors[i], 0);
     }
   } else if (type === 'jet' || type === 'heli') {
     const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 5; i++) {
+      const dx = (Math.random() - 0.5) * 72;
+      const dy = (Math.random() - 0.5) * 60;
+      push(dx, dy, 120 - i * 8, 60, colors[i], 0);
+    }
+  } else if (type === 'turret') {
+    const colors = [pink2, pink1, pink0, 'white', pink2];
+    for (let i = 0; i < 1; i++) {
+      const dx = (Math.random() - 0.5) * 30;
+      const dy = (Math.random() - 0.5) * 30;
+      push(dx, dy, 120 - i * 8, 60, colors[i], 0);
+    }
+  } else if (type === 'tank') {
+    const colors = [pink2, pink1, pink0, 'white', pink2];
+    for (let i = 0; i < 4; i++) {
       const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
+      const dy = (Math.random() - 0.5) * 60;
       push(dx, dy, 120 - i * 8, 60, colors[i], 0);
     }
   } else if (type === 'beetle') {
     const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 12; i++) {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
+      const dx = (Math.random() - 0.5) * 120;
+      const dy = (Math.random() - 0.5) * 90;
       push(dx, dy, 200 - i * 8, 60, colors[i], 0);
     }
   } else if (type === 'xwing') {
     const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 18; i++) {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
+      const dx = (Math.random() - 0.5) * 170;
+      const dy = (Math.random() - 0.5) * 150;
       push(dx, dy, 240 - i * 8, 60, colors[i], 0);
     }
   } else if (type === 'player') {
     const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 5; i++) {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
+      const dx = (Math.random() - 0.5) * 100;
+      const dy = (Math.random() - 0.5) * 100;
       push(dx, dy, 165 - i * 18, 60, colors[i], 0);
     }
   } else if (type === 'boss') {
     const colors = [pink2, pink1, pink0, 'white', pink2];
     for (let i = 0; i < 5; i++) {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = (Math.random() - 0.5) * 40;
+      const dx = (Math.random() - 0.5) * 368;
+      const dy = (Math.random() - 0.5) * 196;
       push(dx, dy, 65 + i * 8, 42 + i * 7, colors[i], i * 7);
     }
   }

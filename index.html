@@ -8,7 +8,16 @@
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
         background: #000;
+        color: #fff;
+        a:link, a:visited {
+          color: #5DCBED;
+        }
+
+        a:hover, a:active {
+          color: #0A99C5;
+        }
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
@@ -16,8 +25,10 @@
       }
     </style>
   </head>
-  <body style="background-color:midnightblue;">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <div style="padding:20px;">send feedback to: <a href="mailto:andykrueger@gmail.com">andykrueger@gmail.com</a>
+    </div>
   </body>
 </html>

@@ -50,13 +50,9 @@ export const WAVES = [
     { at: 60, type:'moth', x: 290, sy: -15, pat: 'straight', vy:1.6 },
     { at: 90, type:'moth', x: 390, sy: -15, pat: 'straight', vy:1.6 },
 
-// Need time to pick up medals without dropping the chain
-
-    //{ at: 230, type:'heli', x: 140, sy: -15, pat:'hover_high', vy:2 },
     { at: 180, type:'beetle', x: 240, sy: -15, pat: 'straight', vy:1 },
-    //{ at: 280, type:'heli', x: 340, sy: -15, pat:'hover_high', vy:2 },
-
-// LOST CHAIN!
+    { at: 230, type:'heli', x: 140, sy: -15, pat:'hover_high', vy:2 },
+    { at: 280, type:'heli', x: 340, sy: -15, pat:'hover_high', vy:2 },
 
     //{ at: 450, type:'beetle', x: 360, sy: -15, pat: 'straight', vy:0.75 },
     //{ at: 550, type:'beetle', x: 120, sy: -15, pat: 'straight', vy:0.75 },
@@ -79,7 +75,7 @@ export const WAVES = [
     { at: 730, type:'heli', x: 120, sy: -15, pat:'hover_mid', vy:3 },
 
     { at: 750, type:'xwing', x: 360, sy: -15, pat:'straight', vy: 0.75 },
-// LOST CHAIN!
+  // perhaps a few jets here
     { at: 1000, type:'heli', x: 270, sy: -15, pat:'hover_mid', vy:3 },
     { at: 1020, type:'heli', x: 240, sy: -15, pat:'hover_high', vy:3 },
     { at: 1040, type:'heli', x: 210, sy: -15, pat:'hover_mid', vy:3 },
@@ -125,7 +121,7 @@ export const WAVES = [
 
     //{ at: 380, type:'beetle', x: 240, sy: -15, pat: 'straight', vy:1 },
     { at: 420, type:'beetle', x: 180, sy: -15, pat: 'straight', vy:1 },
-    { at: 600, type:'beetle', x: 300, sy: -15, pat: 'straight', vy:1 },
+    { at: 500, type:'beetle', x: 300, sy: -15, pat: 'straight', vy:1 },
 
     //{ at: 600, type:'jet', x: 395,  sy: -15, pat:'curve_l', vy:2 },
     //{ at: 610, type:'jet', x: 445,  sy: -15, pat:'curve_l', vy:2 },
@@ -137,9 +133,18 @@ export const WAVES = [
     //{ at: 650, type:'jet', x: 245,  sy: -15, pat:'curve_l', vy:2 },
     //{ at: 660, type:'jet', x: 295,  sy: -15, pat:'curve_l', vy:2 },
 
-// LOST CHAIN!
+    { at:  600, type:'jet', x: 95,  sy: -15, pat:'drift_r', vy:2 },
+    { at:  610, type:'jet', x: 45,  sy: -15, pat:'drift_r', vy:2 },
+    { at:  620, type:'jet', x: -5,  sy: -15, pat:'drift_r', vy:2 },
+    { at:  620, type:'jet', x: 195, sy: -15, pat:'drift_r', vy:2 },
+    { at:  630, type:'jet', x: 145, sy: -15, pat:'drift_r', vy:2 },
+    { at:  640, type:'jet', x:  95, sy: -15, pat:'drift_r', vy:2 },
+    { at:  640, type:'jet', x: 295, sy: -15, pat:'drift_r', vy:2 },
+    { at:  650, type:'jet', x: 245, sy: -15, pat:'drift_r', vy:2 },
+    { at:  660, type:'jet', x: 195, sy: -15, pat:'drift_r', vy:2 },
 
     { at: 775, type:'xwing', x: 240, sy: -15, pat:'straight', vy: 0.75 },
+
     { at: 1000, type:'moth', x: 120, sy: -15, pat: 'straight', vy:1.2 },
     { at: 1000, type:'moth', x: 360, sy: -15, pat: 'straight', vy:1.2 },
   ],

@@ -5,6 +5,16 @@
 // "Popcorn strings" with big enemies in between
 
 WAVES:
+
+// ---------------- SPRITE SHEET v2-----------------
+[
+{ at: 0, type:'jetSprite', x: 40, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'mothSprite', x: 120, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'beetleSprite', x: 230, sy: 320, pat:'straight', vy: 0 },
+{ at: 0, type:'xwingSprite', x: 380, sy: 320, pat:'straight', vy: 0 },
+],
+
+
 // 0: Opener — 24 jets, right side first then left side
 [
   { at:  30, type:'jet', x: 495, sy:  15, pat:'side_r', vy:3.2 },
@@ -145,16 +155,6 @@ WAVES:
   { at: 215, type:'jet',  x:400, pat:'hover_mid', vy:2.5 },
 
   { at: 200, type:'beetle', x:350, pat:'hover_r',   vy:1.0 },
-],
-
-
-
-// ---------------- SPRITE SHEET v2-----------------
-[
-{ at: 0, type:'jetSprite', x: 40, sy: 320, pat:'straight', vy: 0 },
-{ at: 0, type:'mothSprite', x: 120, sy: 320, pat:'straight', vy: 0 },
-{ at: 0, type:'beetleSprite', x: 230, sy: 320, pat:'straight', vy: 0 },
-{ at: 0, type:'xwingSprite', x: 380, sy: 320, pat:'straight', vy: 0 },
 ],
 
 // ---------------- SPRITE SHEET v1 -----------------
